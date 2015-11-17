@@ -342,7 +342,7 @@ public class SubServerCreator {
                                     Main.log.warn("This may cause errors in the Build Process");
                                 }
 
-                                Process = Runtime.getRuntime().exec("bash build-subserver.sh " + Version.toString() + " " + Type.toString(), null, Dir);
+                                Process = Runtime.getRuntime().exec("bash build-subserver.sh " + Version.toString() + " " + Type.toString() + " " + System.getProperty("user.home"), null, Dir);
                                 StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Main.config.getNode("Settings", "Server-Creation", "log").getBoolean(), Main.lang.getNode("Lang", "Create-Server", "Log-Prefix").getString() + Name, Main);
                                 read.start();
                                 try {

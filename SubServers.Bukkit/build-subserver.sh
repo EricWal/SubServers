@@ -11,7 +11,7 @@ if [ -z "$2" ]
     exit 1
 fi
 echo ---------- SERVER BUILD START ----------
-if [[ $2 == "bukkit" || $2 == "spigot" ]]
+if [ $2 == bukkit ] || [ $2 == spigot ]
     then
     echo Downloading Buildtools...
     curl -o BuildTools.jar https://hub.spigotmc.org/jenkins/job/BuildTools/lastSuccessfulBuild/artifact/target/BuildTools.jar; retvalb=$?
@@ -24,13 +24,18 @@ if [[ $2 == "bukkit" || $2 == "spigot" ]]
     fi
     if [ -d "Buildtools" ]
     then
-        rm -Rf BuildTools
+        rm -Rf Buildtools
     fi
     mkdir Buildtools
-    cd "BuildTools"
+    cd "Buildtools"
     echo Building CraftBukkit/Spigot Jarfiles...
     export MAVEN_OPTS="-Xmx2G"
-    java -Xmx2G -jar ../BuildTools.jar --rev $1; retvalc=$?
+    if [ -z "$3" ]
+    then
+        java -Xmx2G -jar ../BuildTools.jar --rev $1; retvalc=$?
+    else
+        HOME=$3 java -Xmx2G -jar ../BuildTools.jar --rev $1; retvalc=$?
+    fi
     cd ../
     if [ $retvalc -eq 0 ]; then
         echo CraftBukkit/Spigot Jarfiles Built!
@@ -42,14 +47,14 @@ if [[ $2 == "bukkit" || $2 == "spigot" ]]
         echo Added Jarfiles!
         echo Cleaning Up...
         rm -Rf BuildTools.jar
-        rm -Rf BuildTools
+        rm -Rf Buildtools
         echo ---------- END SERVER BUILD ----------
         rm -Rf build-subserver.sh
         exit 0
     else
-        ERROR: Buildtools exited with an error. Please try again
+        echo ERROR: Buildtools exited with an error. Please try again
         rm -Rf BuildTools.jar
-        rm -Rf BuildTools
+        rm -Rf Buildtools
         rm -Rf build-subserver.sh
         exit 1
     fi
@@ -57,7 +62,7 @@ else
     if [ $2 == "vanilla" ]; then
         if [ -d "Buildtools" ]
         then
-            rm -Rf BuildTools
+            rm -Rf Buildtools
         fi
         mkdir Buildtools
         mkdir Buildtools/Vanilla
@@ -77,25 +82,25 @@ else
                     cp Buildtools/Vanilla/out/$1-bungee.jar Vanilla.jar
                     echo Added Jarfiles!
                     echo Cleaning Up...
-                    rm -Rf BuildTools
+                    rm -Rf Buildtools
                     echo ---------- END SERVER BUILD ----------
                     rm -Rf build-subserver.sh
                     exit 0
                 else
                     echo ERROR: Failed Applying Patch.
-                    rm -Rf BuildTools
+                    rm -Rf Buildtools
                     rm -Rf build-subserver.sh
                     exit 1
                 fi
             else
                 echo ERROR: Failed Downloading Patch. Is ME1312.net down?
-                rm -Rf BuildTools
+                rm -Rf Buildtools
                 rm -Rf build-subserver.sh
                 exit 1
             fi
         else
             echo ERROR: Failed Downloading Jarfile. Is Minecraft.net down?
-            rm -Rf BuildTools
+            rm -Rf Buildtools
             rm -Rf build-subserver.sh
             exit 1
         fi

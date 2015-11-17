@@ -354,7 +354,7 @@ public class SubServerCreator {
                                     Bukkit.getLogger().warning("This may cause errors in the Build Process");
                                 }
 
-                                Process = Runtime.getRuntime().exec("bash build-subserver.sh " + Version.toString() + " " + Type.toString(), null, Dir);
+                                Process = Runtime.getRuntime().exec("bash build-subserver.sh " + Version.toString() + " " + Type.toString() + " " + System.getProperty("user.home"), null, Dir);
                                 StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Main.config.getBoolean("Settings.Server-Creation.log"), Main.lang.getString("Lang.Create-Server.Log-Prefix") + Name, Main);
                                 read.start();
                                 try {

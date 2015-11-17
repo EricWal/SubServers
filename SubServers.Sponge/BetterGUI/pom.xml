@@ -22,13 +22,13 @@
         <dependency>
             <groupId>SubServers</groupId>
             <artifactId>SubServers.Sponge</artifactId>
-            <version>1.8.8o</version>
+            <version>1.8.8q</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.djxy</groupId>
             <artifactId>MinecraftGUI-Plugin</artifactId>
-            <version>v1.1.3</version>
+            <version>b642512a1f</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
