@@ -2,7 +2,9 @@ package net.ME1312.SubServer;
 
 import net.md_5.bungee.api.AbstractReconnectHandler;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
@@ -12,6 +14,8 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
 import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by ME1312 on 9/23/15.
@@ -37,8 +41,10 @@ public class PlayerListener implements Listener {
             }
         }
 
-        if (FakeProxyServer.ServerInfo.keySet().contains("~Lobby")) {
-            ServerInfo kickTo = FakeProxyServer.ServerInfo.get("~Lobby");
+        String server = FakeProxyServer.getConfig().getListeners().toArray(new ListenerInfo[FakeProxyServer.getConfig().getListeners().size()])[0].getFallbackServer();
+
+        if (FakeProxyServer.ServerInfo.keySet().contains(server)) {
+            ServerInfo kickTo = FakeProxyServer.ServerInfo.get(server);
             if (kickedFrom != null && !kickedFrom.equals(kickTo)) {
                 event.getPlayer().setReconnectServer(kickTo);
                 event.setCancelled(true);
@@ -50,39 +56,36 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onMessageSend(ChatEvent event) {
         if (!event.isCancelled() && (event.getSender() instanceof ProxiedPlayer) && !event.getMessage().startsWith("/") && ((SubServerInfo) FakeProxyServer.getServerInfo(((ProxiedPlayer) event.getSender()).getServer().getInfo().getName())).isSharedChat()) {
-            String message = event.getMessage();
             ProxiedPlayer player = (ProxiedPlayer) event.getSender();
 
             for(Iterator<ServerInfo> servers = FakeProxyServer.getServers().values().iterator(); servers.hasNext(); ) {
                 SubServerInfo server = (SubServerInfo)servers.next();
                 if (server.isSharedChat()) {
-                    String item = server.getName();
-                    if (FakeProxyServer.getServers().keySet().contains(item) && player.getServer().getInfo().getAddress() != FakeProxyServer.getServerInfo(item).getAddress()) {
-                        for (Iterator<ProxiedPlayer> players = FakeProxyServer.getServerInfo(item).getPlayers().iterator(); players.hasNext(); ) {
-                            players.next().sendMessage(new TextComponent(FakeProxyServer.lang.get("Lang.Proxy.Chat-Format").replace("$displayname$", player.getDisplayName()).replace("$message$", message).replace("$server$", player.getServer().getInfo().getName())));
-                        }
-                    } if (FakeProxyServer.ServerInfo.keySet().contains(item) && player.getServer().getInfo().getAddress() != FakeProxyServer.ServerInfo.get(item).getAddress()) {
-                        for (Iterator<ProxiedPlayer> players = FakeProxyServer.ServerInfo.get(item).getPlayers().iterator(); players.hasNext(); ) {
-                            players.next().sendMessage(new TextComponent(FakeProxyServer.lang.get("Lang.Proxy.Chat-Format").replace("$displayname$", player.getDisplayName()).replace("$message$", message).replace("$server$", player.getServer().getInfo().getName().replace("~", ""))));
-                        }
-                    } if (FakeProxyServer.PlayerServerInfo.keySet().contains(item) && player.getServer().getInfo().getAddress() != FakeProxyServer.PlayerServerInfo.get(item).getAddress()) {
-                        for (Iterator<ProxiedPlayer> players = FakeProxyServer.PlayerServerInfo.get(item).getPlayers().iterator(); players.hasNext(); ) {
-                            players.next().sendMessage(new TextComponent(FakeProxyServer.lang.get("Lang.Proxy.Chat-Format").replace("$displayname$", player.getDisplayName()).replace("$message$", message).replace("$server$", player.getServer().getInfo().getName())));
+                    if (player.getServer().getInfo().getAddress() != server.getAddress()) {
+                        for (Iterator<ProxiedPlayer> players = server.getPlayers().iterator(); players.hasNext(); ) {
+                            String message = FakeProxyServer.lang.get("Lang.Proxy.Chat-Format").replace("$displayname$", player.getDisplayName()).replace("$message$", ((player.hasPermission("subserver.chat.color"))?ChatColor.translateAlternateColorCodes('&', event.getMessage()):event.getMessage())).replace("$server$", player.getServer().getInfo().getName());
+                            TextComponent text = new TextComponent("");
+
+                            if (player.hasPermission("subserver.chat.url")) {
+                                Matcher regex = Pattern.compile("(.*?)((http|https):\\/\\/([\\w_-]+(?:(?:\\.[\\w_-]+)+))([\\w.,@?^=%&:/~+#-]*[\\w@?^=%&/~+#-])?)").matcher(message);
+                                String end = "";
+                                while (regex.find()) {
+                                    text.addExtra(regex.group(1));
+                                    end = end + regex.group(1);
+                                    TextComponent url = new TextComponent(regex.group(2));
+                                    url.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, regex.group(2)));
+                                    text.addExtra(url);
+                                    end = end + regex.group(2);
+                                }
+                                text.addExtra(message.replace(end, ""));
+                            } else {
+                                text.addExtra(new TextComponent(message));
+                            }
+
+                            players.next().sendMessage(text);
                         }
                     }
                 }
-            }
-        }
-    }
-
-    @EventHandler
-    public void onServerConnect(ServerConnectEvent event) {
-        if (event.getTarget().getName().equalsIgnoreCase("~Lobby") && !event.getTarget().getMotd().equalsIgnoreCase("SubServer-~Lobby")) {
-            event.setCancelled(true);
-            if (FakeProxyServer.ServerInfo.keySet().contains("~Lobby")) {
-                event.getPlayer().connect(FakeProxyServer.ServerInfo.get("~Lobby"));
-            } else {
-                event.getPlayer().disconnect(new TextComponent("Server \"~Lobby\" Unavailable. Please try again later."));
             }
         }
     }

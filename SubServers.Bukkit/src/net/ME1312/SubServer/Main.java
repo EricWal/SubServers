@@ -8,6 +8,8 @@ import java.io.OutputStream;
 import java.util.*;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -20,6 +22,9 @@ import net.ME1312.SubServer.Libraries.Config.ConfigFile;
 import net.ME1312.SubServer.Libraries.Config.ConfigManager;
 import net.ME1312.SubServer.Libraries.Events.SubListener;
 import net.ME1312.SubServer.Libraries.Version.Version;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import javax.annotation.Nullable;
 
 public class Main {
     public HashMap<Integer, SubServer> Servers = new HashMap<Integer, SubServer>();
@@ -36,7 +41,8 @@ public class Main {
     public Version PluginVersion;
     public Version MCVersion;
 
-    private static ConfigManager confmanager;
+    private ConfigManager confmanager;
+    private Main instance;
 
     protected Main(JavaPlugin plugin) throws IllegalArgumentException {
         if (plugin != null && plugin.getDescription().getName().equalsIgnoreCase("SubServers")) {
@@ -44,6 +50,8 @@ public class Main {
         } else {
             throw new IllegalArgumentException("Main Should only be called by SubServers Plugin.");
         }
+
+        instance = this;
     }
 
     protected void EnablePlugin() {
@@ -60,8 +68,7 @@ public class Main {
         try {
             MCVersion = new Version(Bukkit.getServer().getVersion().split("\\(MC\\: ")[1].split("\\)")[0]);
         } catch (ArrayIndexOutOfBoundsException e) {
-            Bukkit.getLogger().warning(lprefix + "Problem grabbing Minecraft Version!");
-            Bukkit.getLogger().warning(lprefix + "Assuming 1.8");
+            Bukkit.getLogger().warning(lprefix + "Problem grabbing Minecraft Version! Assuming 1.8!");
             MCVersion = new Version("1.8");
         }
 
@@ -118,7 +125,8 @@ public class Main {
             i++;
             PIDs.put(item, i);
             Servers.put(i, new SubServer(config.getBoolean("Servers." + item + ".enabled"), item, i, config.getInt("Servers." + item + ".port"), config.getBoolean("Servers." + item + ".log"),
-                    config.getBoolean("Servers." + item + ".use-shared-chat"), new File(config.getRawString("Servers." + item + ".dir")), new Executable(config.getRawString("Servers." + item + ".exec")), config.getDouble("Servers." + item + ".stop-after"), false, this));
+                    config.getBoolean("Servers." + item + ".use-shared-chat"), new File(config.getRawString("Servers." + item + ".dir")), new Executable(config.getRawString("Servers." + item + ".exec")),
+                    config.getDouble("Servers." + item + ".stop-after"), false, this));
             if (config.getBoolean("Servers." + item + ".enabled") && config.getBoolean("Servers." + item + ".run-on-launch")) {
                 Servers.get(i).start();
             }
@@ -176,6 +184,109 @@ public class Main {
             Bukkit.getLogger().warning(lprefix + "Config Not Saved: Preserved config from Invalid Changes.");
             Bukkit.getLogger().warning(lprefix + " Plugin Partially Disabled.");
         }
+    }
+
+    public void ReloadPlugin(@Nullable final Player sender) {
+        if (!Servers.get(0).isRunning()) {
+            Servers.remove(0);
+        } else {
+            SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy resetplugin");
+        }
+
+        int i = 0;
+        List<String> SubServersStore = new ArrayList<String>();
+        SubServersStore.addAll(SubServers);
+
+        for(Iterator<String> str = SubServersStore.iterator(); str.hasNext(); ) {
+            String item = str.next();
+            i++;
+            if (!Servers.get(i).isRunning()) {
+                Servers.remove(i);
+                PIDs.remove(item);
+                SubServers.remove(item);
+            }
+        }
+        config.reloadConfig();
+        lang.reloadConfig();
+
+        if (Servers.get(0) == null) {
+            Servers.put(0, new SubServer(config.getBoolean("Proxy.enabled"), "~Proxy", 0, 25565, config.getBoolean("Proxy.log"), false, new File(config.getRawString("Proxy.dir")),
+                    new Executable(config.getRawString("Proxy.exec")), 0, false, this));
+        }
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                int i = 0;
+                if (SubAPI.getSubServer(0).isRunning()) {
+                    try {
+                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport " + lang.getString("Lang.Commands.Teleport").replace(" ", "%20"));
+                        Thread.sleep(500);
+                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Server-List " + lang.getString("Lang.Commands.Teleport-Server-List").replace(" ", "%20"));
+                        Thread.sleep(500);
+                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Player-Error " + lang.getString("Lang.Commands.Teleport-Player-Error").replace(" ", "%20"));
+                        Thread.sleep(500);
+                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Config-Error " + lang.getString("Lang.Commands.Teleport-Config-Error").replace(" ", "%20"));
+                        Thread.sleep(500);
+                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Permission-Error " + lang.getString("Lang.Commands.Teleport-Permission-Error").replace(" ", "%20"));
+                        Thread.sleep(500);
+                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Offline-Error " + lang.getString("Lang.Commands.Teleport-Offline-Error").replace(" ", "%20"));
+                        Thread.sleep(500);
+                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Console-Error " + lang.getString("Lang.Commands.Teleport-Console-Error").replace(" ", "%20"));
+                        Thread.sleep(500);
+
+                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Proxy.Register-Server " + lang.getString("Lang.Proxy.Register-Server").replace(" ", "%20"));
+                        Thread.sleep(500);
+                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Proxy.Remove-Server " + lang.getString("Lang.Proxy.Remove-Server").replace(" ", "%20"));
+                        Thread.sleep(500);
+                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Proxy.Reset-Storage " + lang.getString("Lang.Proxy.Reset-Storage").replace(" ", "%20"));
+                        Thread.sleep(500);
+                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Proxy.Chat-Format " + lang.getString("Lang.Proxy.Chat-Format").replace(" ", "%20"));
+                        Thread.sleep(500);
+                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Proxy.Teleport " + lang.getString("Lang.Proxy.Teleport").replace(" ", "%20"));
+                        Thread.sleep(500);
+
+                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver ~Lobby " + config.getString("Settings.Server-IP") + " " + config.getString("Settings.Lobby-Port") + " true");
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                for(Iterator<String> str = config.getConfigurationSection("Servers").getKeys(false).iterator(); str.hasNext(); ) {
+                    String item = str.next();
+                    do {
+                        i++;
+                    } while (Servers.keySet().contains(i));
+
+                    if (SubServers.contains(item)) {
+                        i--;
+                    } else {
+                        SubServers.add(item);
+                        PIDs.put(item, i);
+                        Servers.put(i, new SubServer(config.getBoolean("Servers." + item + ".enabled"), item, i, config.getInt("Servers." + item + ".port"),
+                                config.getBoolean("Servers." + item + ".log"), config.getBoolean("Servers." + item + ".use-shared-chat"), new File(config.getRawString("Servers." + item + ".dir")),
+                                new Executable(config.getRawString("Servers." + item + ".exec")), config.getDouble("Servers." + item + ".stop-after"), false, instance));
+                    }
+                }
+
+                for(Iterator<String> str = SubServers.iterator(); str.hasNext(); ) {
+                    String item = str.next();
+                    if (SubAPI.getSubServer(0).isRunning()) {
+                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver " + item + " " + config.getString("Settings.Server-IP") + " " + SubAPI.getSubServer(item).Port + " " + SubAPI.getSubServer(item).SharedChat);
+                        try {
+                            Thread.sleep(500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+
+                if (sender != null) {
+                    (sender).sendMessage(ChatColor.AQUA + lprefix + lang.getString("Lang.Debug.Config-Reload"));
+                }
+                Bukkit.getLogger().info(lprefix + lang.getString("Lang.Debug.Config-Reload"));
+            }
+        }.runTaskAsynchronously(Plugin);
     }
 
     public void copyFromJar(String resource, String destination) {

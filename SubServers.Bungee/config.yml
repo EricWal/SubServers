@@ -11,6 +11,8 @@ permissions:
   - bungeecord.command.end
   - bungeecord.command.ip
   - bungeecord.command.reload
+  - subserver.chat.color
+  - subserver.chat.url
 timeout: 30000
 online_mode: true
 servers:

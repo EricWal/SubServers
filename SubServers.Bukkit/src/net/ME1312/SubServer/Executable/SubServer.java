@@ -31,6 +31,7 @@ public class SubServer implements Serializable {
 	public boolean Temporary;
 	public boolean Enabled;
 	public int Port;
+    public boolean Client;
 	
 	protected Main Main;
 	protected File Dir;
@@ -60,6 +61,7 @@ public class SubServer implements Serializable {
 		this.Name = Name;
 		this.PID = PID;
 		this.Port = Port;
+        this.Client = Client;
 		this.Log = Log;
         this.SharedChat = SharedChat;
 		this.Temporary = Temporary;

@@ -186,7 +186,7 @@ public class SubServersCMD implements CommandExecutor {
 							}
 						}
 					} else if (sender instanceof Player) {
-						((Player) sender).sendMessage(ChatColor.RED + Main.lprefix + Main.lang.getString("Lang.Commands.Server-Stop-Permission-Error"));
+						((Player) sender).sendMessage(ChatColor.RED + Main.lprefix + Main.lang.getString("Lang.Commands.Stop-Permission-Error"));
 					}
 				} else {
 					if (sender instanceof Player) {
@@ -341,110 +341,11 @@ public class SubServersCMD implements CommandExecutor {
 				if (!(sender instanceof Player) || ((Player) sender).hasPermission("SubServer.Command.Reload")) {
 					if (sender instanceof Player) {
 						((Player) sender).sendMessage(ChatColor.GOLD + Main.lprefix + Main.lang.getString("Lang.Debug.Config-Reload-Warn"));
+                        Main.ReloadPlugin((Player) sender);
 					} else {
 						Bukkit.getLogger().info(Main.lprefix + Main.lang.getString("Lang.Debug.Config-Reload-Warn"));
+                        Main.ReloadPlugin(null);
 					}
-					
-					if (!Main.Servers.get(0).isRunning()) {
-						Main.Servers.remove(0);
-					} else {
-						SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy resetplugin");
-					}
-					
-					int i = 0;
-					List<String> SubServersStore = new ArrayList<String>();
-					SubServersStore.addAll(Main.SubServers);
-					
-					for(Iterator<String> str = SubServersStore.iterator(); str.hasNext(); ) {
-					    String item = str.next();
-					    i++;
-					    if (!Main.Servers.get(i).isRunning()) {
-					    	Main.Servers.remove(i);
-					    	Main.PIDs.remove(item);
-					    	Main.SubServers.remove(item);
-					    }
-					}
-					Main.config.reloadConfig();
-					Main.lang.reloadConfig();
-					
-					if (Main.Servers.get(0) == null) {
-						Main.Servers.put(0, new SubServer(Main.config.getBoolean("Proxy.enabled"), "~Proxy", 0, 25565, Main.config.getBoolean("Proxy.log"), false, new File(Main.config.getRawString("Proxy.dir")),
-								new Executable(Main.config.getRawString("Proxy.exec")), 0, false, Main));
-					}
-					
-					new BukkitRunnable() {
-						@Override
-						public void run() {
-							int i = 0;
-							if (SubAPI.getSubServer(0).isRunning()) {
-								try {
-									SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport " + Main.lang.getString("Lang.Commands.Teleport").replace(" ", "%20"));
-									Thread.sleep(500);
-									SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Server-List " + Main.lang.getString("Lang.Commands.Teleport-Server-List").replace(" ", "%20"));
-									Thread.sleep(500);
-									SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Player-Error " + Main.lang.getString("Lang.Commands.Teleport-Player-Error").replace(" ", "%20"));
-									Thread.sleep(500);
-									SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Config-Error " + Main.lang.getString("Lang.Commands.Teleport-Config-Error").replace(" ", "%20"));
-									Thread.sleep(500);
-									SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Permission-Error " + Main.lang.getString("Lang.Commands.Teleport-Permission-Error").replace(" ", "%20"));
-									Thread.sleep(500);
-									SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Offline-Error " + Main.lang.getString("Lang.Commands.Teleport-Offline-Error").replace(" ", "%20"));
-									Thread.sleep(500);
-									SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Console-Error " + Main.lang.getString("Lang.Commands.Teleport-Console-Error").replace(" ", "%20"));
-									Thread.sleep(500);
-								
-									SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Proxy.Register-Server " + Main.lang.getString("Lang.Proxy.Register-Server").replace(" ", "%20"));
-									Thread.sleep(500);
-									SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Proxy.Remove-Server " + Main.lang.getString("Lang.Proxy.Remove-Server").replace(" ", "%20"));
-									Thread.sleep(500);
-									SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Proxy.Reset-Storage " + Main.lang.getString("Lang.Proxy.Reset-Storage").replace(" ", "%20"));
-									Thread.sleep(500);
-                                    SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Proxy.Chat-Format " + Main.lang.getString("Lang.Proxy.Chat-Format").replace(" ", "%20"));
-                                    Thread.sleep(500);
-									SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Proxy.Teleport " + Main.lang.getString("Lang.Proxy.Teleport").replace(" ", "%20"));
-									Thread.sleep(500);
-									
-									SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver ~Lobby " + Main.config.getString("Settings.Server-IP") + " " + Main.config.getString("Settings.Lobby-Port") + " true");
-									Thread.sleep(500);
-								} catch (InterruptedException e) {
-									e.printStackTrace();
-								}
-							}
-							for(Iterator<String> str = Main.config.getConfigurationSection("Servers").getKeys(false).iterator(); str.hasNext(); ) {
-							    String item = str.next();
-							    do {
-							   		i++;
-						    	} while (Main.Servers.keySet().contains(i));
-							    
-							    if (Main.SubServers.contains(item)) {
-							    	i--;
-							    } else {
-							    	Main.SubServers.add(item);
-							    	Main.PIDs.put(item, i);
-							    	Main.Servers.put(i, new SubServer(Main.config.getBoolean("Servers." + item + ".enabled"), item, i, Main.config.getInt("Servers." + item + ".port"), 
-							    			Main.config.getBoolean("Servers." + item + ".log"), Main.config.getBoolean("Servers." + item + ".use-shared-chat"), new File(Main.config.getRawString("Servers." + item + ".dir")),
-							    			new Executable(Main.config.getRawString("Servers." + item + ".exec")), Main.config.getDouble("Servers." + item + ".stop-after"), false, Main));
-							    }
-							}
-
-                            for(Iterator<String> str = Main.SubServers.iterator(); str.hasNext(); ) {
-                                String item = str.next();
-                                if (SubAPI.getSubServer(0).isRunning()) {
-                                    SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver " + item + " " + Main.config.getString("Settings.Server-IP") + " " + SubAPI.getSubServer(item).Port + " " + SubAPI.getSubServer(item).SharedChat);
-                                    try {
-                                        Thread.sleep(500);
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-
-							if (sender instanceof Player) {
-								((Player) sender).sendMessage(ChatColor.AQUA + Main.lprefix + Main.lang.getString("Lang.Debug.Config-Reload"));
-							}
-							Bukkit.getLogger().info(Main.lprefix + Main.lang.getString("Lang.Debug.Config-Reload"));
-						}
-					}.runTaskAsynchronously(Main.Plugin);
 				} else if (sender instanceof Player) {
 					((Player) sender).sendMessage(ChatColor.RED + "You do not have permission to Reload this plugin.");
 				}

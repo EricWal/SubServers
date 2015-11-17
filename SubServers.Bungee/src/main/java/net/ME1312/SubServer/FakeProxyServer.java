@@ -35,7 +35,7 @@ public class FakeProxyServer extends BungeeCord {
         PluginDescription Plugin = new PluginDescription();
         Plugin.setName("SubServers");
         Plugin.setAuthor("ME1312");
-        Plugin.setVersion("1.8.8o");
+        Plugin.setVersion("1.8.8p");
         this.Plugin = Plugin;
 
         EnablePlugin();
@@ -52,7 +52,7 @@ public class FakeProxyServer extends BungeeCord {
             try {
                 configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File("./config.yml"));
             } catch (IOException e) {
-                copyFromJar("config.yml", "./config.yml");
+                copyFromJar("net/ME1312/SubServer/config.yml", "./config.yml");
                 try {
                     configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File("./config.yml"));
                 } catch (IOException e1) {
@@ -60,7 +60,7 @@ public class FakeProxyServer extends BungeeCord {
                 }
             }
 
-            if (!(new File("./modules.yml").exists())) copyFromJar("modules.yml", "./modules.yml");
+            if (!(new File("./modules.yml").exists())) copyFromJar("net/ME1312/SubServer/modules.yml", "./modules.yml");
             if (!(new File("./modules").exists())) new File("./modules").mkdirs();
 
             for (Iterator<String> str = configuration.getSection("servers").getKeys().iterator(); str.hasNext(); ) {
