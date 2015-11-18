@@ -488,8 +488,8 @@ public class SubServerCreator {
                             if (!(new File(Dir, "build-subserver.sh").exists())) {
                                 Bukkit.getLogger().severe(Main.lprefix + "Problem Copying Script!");
                             } else {
-                                Process = Runtime.getRuntime().exec(GitBash + " --login -i -c \"bash build-subserver.sh " + Version.toString() + " " + Type.toString() + "\"", null, Dir);
-                                StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Main.config.getBoolean("Settings.Server-Creation.log"), Main.lang.getString("Lang.Create-Server.Log-Prefix") + Name, Main);
+                                Process = Runtime.getRuntime().exec("\"" + GitBash + "\" --login -i -c \"bash build-subserver.sh " + Version.toString() + " " + Type.toString() + "\"", null, Dir);
+                                StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Main.config.getBoolean("Settings.Server-Creation.log"), new File(Dir, "SubCreator-" + Type.toString() + "-" + Version.toString().replace("::", "@") + ".log"), Main.lang.getString("Lang.Create-Server.Log-Prefix") + Name, Main);
                                 read.start();
                                 try {
                                     Process.waitFor();
@@ -540,7 +540,7 @@ public class SubServerCreator {
                                 }
 
                                 Process = Runtime.getRuntime().exec("bash build-subserver.sh " + Version.toString() + " " + Type.toString() + " " + System.getProperty("user.home"), null, Dir);
-                                StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Main.config.getBoolean("Settings.Server-Creation.log"), Main.lang.getString("Lang.Create-Server.Log-Prefix") + Name, Main);
+                                StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Main.config.getBoolean("Settings.Server-Creation.log"), new File(Dir, "SubCreator-" + Type.toString() + "-" + Version.toString().replace("::", "@") + ".log"), Main.lang.getString("Lang.Create-Server.Log-Prefix") + Name, Main);
                                 read.start();
                                 try {
                                     Process.waitFor();

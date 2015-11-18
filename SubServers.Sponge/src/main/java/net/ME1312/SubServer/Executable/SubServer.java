@@ -82,7 +82,7 @@ public class SubServer implements Serializable {
 							 */
 							Process = Runtime.getRuntime().exec(Exec.toString(), null, Dir); //Whatever you want to execute
 							Main.log.info(StringEscapeUtils.unescapeJava(Main.lang.getNode("Lang", "Debug", "Server-Logging-Start").getString()).replace("$Server$", "The Proxy").replace("$Shell$", Exec.toString()));
-							final StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Log, Name, Main);
+							final StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Log, null, Name, Main);
 							read.start();
 							final BufferedWriter cmd = new BufferedWriter(new OutputStreamWriter(Process.getOutputStream()));
 							Main.game.getScheduler().createTaskBuilder().async().execute(new Runnable() {
@@ -180,7 +180,7 @@ public class SubServer implements Serializable {
 							 */
 							Process = Runtime.getRuntime().exec(Exec.toString(), null, Dir); //Whatever you want to execute
 							Main.log.info(StringEscapeUtils.unescapeJava(Main.lang.getNode("Lang", "Debug", "Server-Logging-Start").getString()).replace("$Server$", Name).replace("$Shell$", Exec.toString()));
-							final StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Log, Name, Main);
+							final StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Log, null, Name, Main);
 							read.start();
 							final BufferedWriter cmd = new BufferedWriter(new OutputStreamWriter(Process.getOutputStream()));
 							Main.game.getScheduler().createTaskBuilder().async().execute(new Runnable() {

@@ -51,7 +51,7 @@ Lang:
         'Server-Port-Invalid': 'Invalid Port Value Inputted. Please try again.'
         'Server-Create-Loading': 'Creating Server... This may take some time...'
         'Server-Create-Done': 'Server $Server$ was Created Successfully!'
-        'Log-Prefix': 'Building '
+        'Log-Prefix': 'SubCreator - '
     GUI:
         'Online': 'Running'
         'Offline': 'Offline'

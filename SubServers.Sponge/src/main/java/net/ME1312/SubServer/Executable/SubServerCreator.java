@@ -476,7 +476,7 @@ public class SubServerCreator {
                                 Main.log.info("Problem Copying Script!");
                             } else {
                                 Process = Runtime.getRuntime().exec(GitBash + " --login -i -c \"bash build-subserver.sh " + Version.toString() + " " + Type.toString() + "\"", null, Dir);
-                                StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Main.config.getNode("Settings", "Server-Creation", "log").getBoolean(), Main.lang.getNode("Lang", "Create-Server", "Log-Prefix").getString() + Name, Main);
+                                StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Main.config.getNode("Settings", "Server-Creation", "log").getBoolean(), new File(Dir, "SubCreator-" + Type.toString() + "-" + Version.toString().replace("::", "@") + ".log"), Main.lang.getNode("Lang", "Create-Server", "Log-Prefix").getString() + Name, Main);
                                 read.start();
                                 try {
                                     Process.waitFor();
@@ -527,7 +527,7 @@ public class SubServerCreator {
                                 }
 
                                 Process = Runtime.getRuntime().exec("bash build-subserver.sh " + Version.toString() + " " + Type.toString() + " " + System.getProperty("user.home"), null, Dir);
-                                StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Main.config.getNode("Settings", "Server-Creation", "log").getBoolean(), Main.lang.getNode("Lang", "Create-Server", "Log-Prefix").getString() + Name, Main);
+                                StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Main.config.getNode("Settings", "Server-Creation", "log").getBoolean(), new File(Dir, "SubCreator-" + Type.toString() + "-" + Version.toString().replace("::", "@") + ".log"), Main.lang.getNode("Lang", "Create-Server", "Log-Prefix").getString() + Name, Main);
                                 read.start();
                                 try {
                                     Process.waitFor();

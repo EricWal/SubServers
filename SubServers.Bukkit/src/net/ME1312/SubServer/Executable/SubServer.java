@@ -31,7 +31,6 @@ public class SubServer implements Serializable {
 	public boolean Temporary;
 	public boolean Enabled;
 	public int Port;
-    public boolean Client;
 	
 	protected Main Main;
 	protected File Dir;
@@ -61,7 +60,6 @@ public class SubServer implements Serializable {
 		this.Name = Name;
 		this.PID = PID;
 		this.Port = Port;
-        this.Client = Client;
 		this.Log = Log;
         this.SharedChat = SharedChat;
 		this.Temporary = Temporary;
@@ -84,7 +82,7 @@ public class SubServer implements Serializable {
 							 */
 							Process = Runtime.getRuntime().exec(Exec.toString(), null, Dir); //Whatever you want to execute
 							Bukkit.getLogger().info(Main.lprefix + Main.lang.getString("Lang.Debug.Server-Logging-Start").replace("$Server$", "The Proxy").replace("$Shell$", Exec.toString()));
-							final StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Log, Name, Main);
+							final StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Log, null, Name, Main);
 							read.start();
 							final BufferedWriter cmd = new BufferedWriter(new OutputStreamWriter(Process.getOutputStream()));
 							new BukkitRunnable() {
@@ -184,7 +182,7 @@ public class SubServer implements Serializable {
 							 */
 							Process = Runtime.getRuntime().exec(Exec.toString(), null, Dir); //Whatever you want to execute
 							Bukkit.getLogger().info(Main.lprefix + Main.lang.getString("Lang.Debug.Server-Logging-Start").replace("$Server$", Name).replace("$Shell$", Exec.toString()));
-							final StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Log, Name, Main);
+							final StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Log, null, Name, Main);
 							read.start();
 							final BufferedWriter cmd = new BufferedWriter(new OutputStreamWriter(Process.getOutputStream()));
 							new BukkitRunnable() {
