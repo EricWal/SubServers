@@ -104,5 +104,45 @@ else
             rm -Rf build-subserver.sh
             exit 1
         fi
+    else
+        if [ $2 == "sponge" ]; then
+            IFS='::' read -r -a version <<< "$1"
+            sversion=$(echo ${version[@]:1} | tr -d ' ')
+            echo Downloading Minecraft Forge
+            curl -o forge-${version[0]}-installer.jar http://files.minecraftforge.net/maven/net/minecraftforge/forge/${version[0]}/forge-${version[0]}-installer.jar; retvalg=$?
+            if [ $retvalg -eq 0 ]; then
+                echo Installing Minecraft Forge Server
+                java -jar ./forge-${version[0]}-installer.jar --installServer; retvalh=$?
+                if [ $retvalh -eq 0 ]; then
+                    mkdir ./mods
+                    echo Downloading SpongeForge
+                    curl -o mods/spongeforge-$sversion.jar http://files.minecraftforge.net/maven/org/spongepowered/spongeforge/$sversion/spongeforge-$sversion.jar; retvali=$?
+                    if [ $retvali -eq 0 ]; then
+                        echo Cleaning Up...
+                        rm -Rf forge-${version[0]}-installer.jar
+                        rm -Rf forge-${version[0]}-installer.jar.log
+                        echo ---------- END SERVER BUILD ----------
+                        rm -Rf build-subserver.sh
+                        exit 0
+                    else
+                        echo ERROR: Failed Downloading Jarfile. Is MinecraftForge.net down?
+                        rm -Rf forge-${version[0]}-installer.jar
+                        rm -Rf forge-${version[0]}-installer.jar.log
+                        rm -Rf build-subserver.sh
+                        exit 1
+                    fi
+                else
+                    echo ERROR: Failed Installing Forge.
+                    rm -Rf forge-${version[0]}-installer.jar
+                    rm -Rf forge-${version[0]}-installer.jar.log
+                    rm -Rf build-subserver.sh
+                    exit 1
+                fi
+            else
+                echo ERROR: Failed Downloading Jarfile. Is MinecraftForge.net down?
+                rm -Rf build-subserver.sh
+                exit 1
+            fi
+        fi
     fi
 fi

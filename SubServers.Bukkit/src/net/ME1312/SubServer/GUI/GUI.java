@@ -577,7 +577,7 @@ public class GUI implements Listener {
 	}
 	
 	protected void openServerTypeSelector(Player player) {
-		inv = Bukkit.createInventory(null, 9, Main.lang.getString("Lang.Create-Server.Server-Type"));
+		inv = Bukkit.createInventory(null, 18, Main.lang.getString("Lang.Create-Server.Server-Type"));
 		block = new ItemStack(Material.WATER_BUCKET);
 		blockMeta = block.getItemMeta();
 		blockMeta.setDisplayName(ChatColor.GRAY + "Spigot");
@@ -601,6 +601,14 @@ public class GUI implements Listener {
 		inv.setItem(6, block);
 		block = null;
 		blockMeta = null;
+
+        block = new ItemStack(Material.SPONGE);
+        blockMeta = block.getItemMeta();
+        blockMeta.setDisplayName(ChatColor.GRAY + "Sponge");
+        block.setItemMeta(blockMeta);
+        inv.setItem(13, block);
+        block = null;
+        blockMeta = null;
 		
 		player.openInventory(inv);
 		inv = null;

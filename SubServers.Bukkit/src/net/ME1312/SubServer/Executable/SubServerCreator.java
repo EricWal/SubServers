@@ -2,6 +2,8 @@ package net.ME1312.SubServer.Executable;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -14,12 +16,21 @@ import org.bukkit.scheduler.BukkitRunnable;
 import net.ME1312.SubServer.Main;
 import net.ME1312.SubServer.Libraries.Events.SubEvent;
 import net.ME1312.SubServer.Libraries.Version.Version;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 public class SubServerCreator {
     public enum ServerTypes {
         spigot,
         bukkit,
         vanilla,
+        sponge,
     }
 
     private String Name;
@@ -79,6 +90,43 @@ public class SubServerCreator {
             } catch (FileNotFoundException | UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
+        } else if (Type == ServerTypes.sponge) {
+            try {
+                Document spongexml = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(readAll(new BufferedReader(new InputStreamReader(new URL("http://files.minecraftforge.net/maven/org/spongepowered/spongeforge/maven-metadata.xml").openStream(), Charset.forName("UTF-8")))))));
+                Document forgexml = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(readAll(new BufferedReader(new InputStreamReader(new URL("http://files.minecraftforge.net/maven/net/minecraftforge/forge/maven-metadata.xml").openStream(), Charset.forName("UTF-8")))))));
+
+                NodeList spnodeList = spongexml.getElementsByTagName("version");
+                Version spversion = null;
+                for (int i = 0; i < spnodeList.getLength(); i++) {
+                    Node node = spnodeList.item(i);
+                    if (node.getNodeType() == Node.ELEMENT_NODE) {
+                        if (node.getTextContent().contains(Version.toString()) && (spversion == null || new Version(node.getTextContent()).compareTo(spversion) >= 0)) {
+                            spversion = new Version(node.getTextContent());
+                        }
+                    }
+                }
+
+                NodeList mcfnodeList = forgexml.getElementsByTagName("version");
+                Version mcfversion = null;
+                for (int i = 0; i < mcfnodeList.getLength(); i++) {
+                    Node node = mcfnodeList.item(i);
+                    if (node.getNodeType() == Node.ELEMENT_NODE) {
+                        if (node.getTextContent().contains(spversion.toString().split("\\-")[1]) && (mcfversion == null || new Version(node.getTextContent()).compareTo(mcfversion) >= 0)) {
+                            mcfversion = new Version(node.getTextContent());
+                        }
+                    }
+                }
+
+                this.Jar = "forge-" + mcfversion.toString() + "-universal.jar";
+                this.Exec = new Executable("java -Xmx" + Memory + "M -jar " + Jar);
+                this.Version = new Version(mcfversion.toString() + "::" + spversion.toString());
+
+                GenerateEULA();
+                GenerateProperties();
+                GenerateSpongeConf();
+            } catch (ParserConfigurationException | IOException | SAXException | NullPointerException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -88,6 +136,7 @@ public class SubServerCreator {
         writer.println("#By changing the setting below to TRUE you are indicating your agreement to our EULA (https://account.mojang.com/documents/minecraft_eula).");
         writer.println("#" + new SimpleDateFormat("EEE MMM d HH:mm:ss z yyyy").format(Calendar.getInstance().getTime()));
         writer.println("eula=true");
+
         writer.close();
     }
 
@@ -130,6 +179,7 @@ public class SubServerCreator {
         writer.println("generate-structures=true");
         writer.println("view-distance=10");
         writer.println("motd=A Generated SubServer");
+
         writer.close();
     }
 
@@ -270,7 +320,142 @@ public class SubServerCreator {
         writer.println("    chunks-per-tick: 650");
         writer.println("    clear-tick-list: false");
         writer.println();
+
         writer.close();
+    }
+
+    private void GenerateSpongeConf() throws FileNotFoundException, UnsupportedEncodingException {
+        new File(Dir, "config" + File.separator + "sponge").mkdirs();
+        PrintWriter writer = new PrintWriter(new File(Dir, "config" + File.separator + "sponge" + File.separator + "global.conf"), "UTF-8");
+        writer.println("# 1.0");
+        writer.println("#");
+        writer.println("# # If you need help with the configuration or have any questions related to Sponge,");
+        writer.println("# # join us at the IRC or drop by our forums and leave a post.");
+        writer.println("#");
+        writer.println("# # IRC: #sponge @ irc.esper.net ( http://webchat.esper.net/?channel=sponge )");
+        writer.println("# # Forums: https://forums.spongepowered.org/");
+        writer.println("#");
+        writer.println();
+        writer.println("sponge {");
+        writer.println("    block-tracking {");
+        writer.println("        # If enabled, adds player tracking support for block positions. Note: This should only be disabled if you do not care who caused a block to change.");
+        writer.println("        enabled=true");
+        writer.println("    }");
+        writer.println("    bungeecord {");
+        writer.println("        # If enabled, allows BungeeCord to forward IP address, UUID, and Game Profile to this server");
+        writer.println("        ip-forwarding=true");
+        writer.println("    }");
+        writer.println("    commands {}");
+        writer.println("    debug {");
+        writer.println("        # Dump chunks in the event of a deadlock");
+        writer.println("        dump-chunks-on-deadlock=false");
+        writer.println("        # Dump the heap in the event of a deadlock");
+        writer.println("        dump-heap-on-deadlock=false");
+        writer.println("        # Dump the server thread on deadlock warning");
+        writer.println("        dump-threads-on-warn=false");
+        writer.println("        # Enable Java's thread contention monitoring for thread dumps");
+        writer.println("        thread-contention-monitoring=false");
+        writer.println("    }");
+        writer.println("    entity {");
+        writer.println("        # Number of colliding entities in one spot before logging a warning. Set to 0 to disable");
+        writer.println("        collision-warn-size=200");
+        writer.println("        # Number of entities in one dimension before logging a warning. Set to 0 to disable");
+        writer.println("        count-warn-size=0");
+        writer.println("        # Number of ticks before a painting is respawned on clients when their art is changed");
+        writer.println("        entity-painting-respawn-delay=2");
+        writer.println("        # Number of ticks before the fake player entry of a human is removed from the tab list (range of 0 to 100 ticks).");
+        writer.println("        human-player-list-remove-delay=10");
+        writer.println("        # Controls the time in ticks for when an item despawns.");
+        writer.println("        item-despawn-rate=6000");
+        writer.println("        # Max size of an entity's bounding box before removing it. Set to 0 to disable");
+        writer.println("        max-bounding-box-size=1000");
+        writer.println("        # Square of the max speed of an entity before removing it. Set to 0 to disable");
+        writer.println("        max-speed=100");
+        writer.println("    }");
+        writer.println("    entity-activation-range {");
+        writer.println("        ambient-activation-range=32");
+        writer.println("        aquatic-activation-range=32");
+        writer.println("        creature-activation-range=32");
+        writer.println("        minecraft {");
+        writer.println("            creature {");
+        writer.println("                entityhorse=true");
+        writer.println("                pig=true");
+        writer.println("                sheep=true");
+        writer.println("            }");
+        writer.println("            enabled=true");
+        writer.println("            misc {");
+        writer.println("                item=true");
+        writer.println("                minecartchest=true");
+        writer.println("            }");
+        writer.println("            monster {");
+        writer.println("                guardian=true");
+        writer.println("            }");
+        writer.println("        }");
+        writer.println("        misc-activation-range=16");
+        writer.println("        monster-activation-range=32");
+        writer.println("    }");
+        writer.println("    general {");
+        writer.println("        # Forces Chunk Loading on provide requests (speedup for mods that don't check if a chunk is loaded)");
+        writer.println("        chunk-load-override=false");
+        writer.println("        # Disable warning messages to server admins");
+        writer.println("        disable-warnings=false");
+        writer.println("    }");
+        writer.println("    logging {");
+        writer.println("        # Log when blocks are broken");
+        writer.println("        block-break=false");
+        writer.println("        # Log when blocks are modified");
+        writer.println("        block-modify=false");
+        writer.println("        # Log when blocks are placed");
+        writer.println("        block-place=false");
+        writer.println("        # Log when blocks are populated in a chunk");
+        writer.println("        block-populate=false");
+        writer.println("        # Log when blocks are placed by players and tracked");
+        writer.println("        block-tracking=false");
+        writer.println("        # Log when chunks are loaded");
+        writer.println("        chunk-load=false");
+        writer.println("        # Log when chunks are unloaded");
+        writer.println("        chunk-unload=false");
+        writer.println("        # Whether to log entity collision/count checks");
+        writer.println("        entity-collision-checks=false");
+        writer.println("        # Log when living entities are destroyed");
+        writer.println("        entity-death=false");
+        writer.println("        # Log when living entities are despawned");
+        writer.println("        entity-despawn=false");
+        writer.println("        # Log when living entities are spawned");
+        writer.println("        entity-spawn=false");
+        writer.println("        # Whether to log entity removals due to speed");
+        writer.println("        entity-speed-removal=false");
+        writer.println("        # Add stack traces to dev logging");
+        writer.println("        log-stacktraces=false");
+        writer.println("    }");
+        writer.println("    modules {");
+        writer.println("        bungeecord=true");
+        writer.println("        entity-activation-range=true");
+        writer.println("        timings=true");
+        writer.println("    }");
+        writer.println("    # Configuration options related to the Sql service, including connection aliases etc");
+        writer.println("    sql {}");
+        writer.println("    timings {");
+        writer.println("        enabled=true");
+        writer.println("        hidden-config-entries=[");
+        writer.println("            \"sponge.sql\"");
+        writer.println("        ]");
+        writer.println("        history-interval=300");
+        writer.println("        history-length=3600");
+        writer.println("        server-name-privacy=false");
+        writer.println("        verbose=false");
+        writer.println("    }");
+        writer.println("    world {");
+        writer.println("        # Lava behaves like vanilla water when source block is removed");
+        writer.println("        flowing-lava-decay=false");
+        writer.println("        # Vanilla water source behavior - is infinite");
+        writer.println("        infinite-water-source=false");
+        writer.println("    }");
+        writer.println("}");
+        writer.println();
+
+        writer.close();
+
     }
 
     public boolean run() {
@@ -403,5 +588,14 @@ public class SubServerCreator {
 
     public boolean isRunning() {
         return Running;
+    }
+
+    private String readAll(Reader rd) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        int cp;
+        while ((cp = rd.read()) != -1) {
+            sb.append((char) cp);
+        }
+        return sb.toString();
     }
 }
