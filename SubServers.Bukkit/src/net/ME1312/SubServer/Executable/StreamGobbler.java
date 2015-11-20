@@ -24,7 +24,7 @@ public class StreamGobbler extends Thread {
         if (file != null)
             try {
                 this.writer = new PrintWriter(file, "UTF-8");
-                this.writer.println("---------- LOG START ----------");
+                this.writer.println("---------- LOG START: " + id + " ----------");
                 this.writer.flush();
             } catch (UnsupportedEncodingException | FileNotFoundException e) {
                 e.printStackTrace();

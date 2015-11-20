@@ -35,8 +35,8 @@ public class SubServer implements Serializable {
 	protected Main Main;
 	protected File Dir;
 	protected Executable Exec;
-	protected double StopAfter;
-	
+
+    private boolean AutoRestart;
 	private Process Process;
 	private String StdIn;
 	private SubServer Server = this;
@@ -52,10 +52,10 @@ public class SubServer implements Serializable {
      * @param SharedChat Toggle Shared Chat
 	 * @param Dir Runtime Directory
 	 * @param Exec Executable File
-	 * @param StopAfter Stop After x Minutes
+	 * @param AutoRestart Restart when Stopped
 	 * @param Temporary Toggle Temporary Server Options
 	 */
-	public SubServer(Boolean Enabled, String Name, int PID, int Port, boolean Log, boolean SharedChat, File Dir, Executable Exec, double StopAfter, boolean Temporary, Main Main) {
+	public SubServer(Boolean Enabled, String Name, int PID, int Port, boolean Log, boolean SharedChat, File Dir, Executable Exec, boolean AutoRestart, boolean Temporary, Main Main) {
 		this.Enabled = Enabled;
 		this.Name = Name;
 		this.PID = PID;
@@ -65,7 +65,7 @@ public class SubServer implements Serializable {
 		this.Temporary = Temporary;
 		this.Dir = Dir;
 		this.Exec = Exec;
-		this.StopAfter = StopAfter;
+		this.AutoRestart = AutoRestart;
 		this.Main = Main;
 	}
 	
@@ -169,7 +169,15 @@ public class SubServer implements Serializable {
 						Bukkit.getLogger().info(Main.lprefix + Main.lang.getString("Lang.Debug.Server-Logging-End").replace("$Server$", "Proxy"));
 						Process = null;
 						StdIn = null;
-					};
+                        if (AutoRestart) {
+                            try {
+                                Thread.sleep(2500);
+                                start(true);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+					}
 				}.runTaskAsynchronously(Main.Plugin);
 			} else if (Enabled) {
 				new BukkitRunnable() {
@@ -205,14 +213,6 @@ public class SubServer implements Serializable {
 									} while (read.isAlive() == true);
 								};
 							}.runTaskAsynchronously(Main.Plugin);
-							if (StopAfter > 0) {
-								new BukkitRunnable() {
-									@Override
-									public void run() {
-										StdIn = "stop";
-									};
-								}.runTaskLater(Main.Plugin, (long) ((StopAfter * 20) * 60));
-							}
 							try {
 								Process.waitFor();
 								SubEvent.RunEvent(Main, SubEvent.Events.SubShellExitEvent, Server);
@@ -231,6 +231,14 @@ public class SubServer implements Serializable {
 						Bukkit.getLogger().info(Main.lprefix + Main.lang.getString("Lang.Debug.Server-Logging-End").replace("$Server$", Name));	
 						Process = null;
 						StdIn = null;
+                        if (AutoRestart) {
+                            try {
+                                Thread.sleep(2500);
+                                start(true);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
 					};
 				}.runTaskAsynchronously(Main.Plugin);
 			}
@@ -346,6 +354,22 @@ public class SubServer implements Serializable {
 				} else {
 					StdIn = "stop";
 				}
+
+                if (AutoRestart) {
+                    AutoRestart = false;
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                waitFor();
+                                Thread.sleep(2500);
+                                AutoRestart = true;
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }.runTaskAsynchronously(Main.Plugin);
+                }
 				return true;
 			} else {
 				return false;
@@ -368,6 +392,22 @@ public class SubServer implements Serializable {
 				} else {
 					StdIn = "stop";
 				}
+
+                if (AutoRestart) {
+                    AutoRestart = false;
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                waitFor();
+                                Thread.sleep(2500);
+                                AutoRestart = true;
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }.runTaskAsynchronously(Main.Plugin);
+                }
 				return true;
 			} else {
 				return false;
@@ -385,6 +425,21 @@ public class SubServer implements Serializable {
 		try {
 			if (SubEvent.RunEvent(Main, SubEvent.Events.SubStopEvent, this, null)) {
 				Process.destroy();
+
+                if (AutoRestart) {
+                    AutoRestart = false;
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Thread.sleep(2500);
+                                AutoRestart = true;
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }.runTaskAsynchronously(Main.Plugin);
+                }
 				return true;
 			} else {
 				return false;
@@ -403,6 +458,21 @@ public class SubServer implements Serializable {
 		try {
 			if (SubEvent.RunEvent(Main, SubEvent.Events.SubStopEvent, this, sender)) {
 				Process.destroy();
+
+                if (AutoRestart) {
+                    AutoRestart = false;
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                Thread.sleep(2500);
+                                AutoRestart = true;
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }.runTaskAsynchronously(Main.Plugin);
+                }
 				return true;
 			} else {
 				return false;

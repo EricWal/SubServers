@@ -24,10 +24,10 @@ public class SubDebugCMD extends Command {
         if (args[0].equalsIgnoreCase("addserver")) {
             if (!args[1].contains("!")) {
                 FakeProxyServer.ServerInfo.put(args[1],
-                        new SubServerInfo((BungeeServerInfo)FakeProxyServer.constructServerInfo(args[1], new InetSocketAddress(args[2], Integer.parseInt(args[3])), "SubServer-" + args[1], false), Boolean.parseBoolean(args[4])));
+                        new SubServerInfo((BungeeServerInfo)FakeProxyServer.constructServerInfo(args[1], new InetSocketAddress(args[2], Integer.parseInt(args[3])), ((FakeProxyServer.ConfigServers.keySet().contains(args[1]))?FakeProxyServer.ConfigServers.get(args[1]).getMotd():"SubServer-" + args[1]), false), Boolean.parseBoolean(args[4])));
             } else if (args[1].contains("!")) {
                 FakeProxyServer.PlayerServerInfo.put(args[1].replace("!", ""),
-                        new SubServerInfo((BungeeServerInfo)FakeProxyServer.constructServerInfo(args[1].replace("!", ""), new InetSocketAddress(args[2], Integer.parseInt(args[3])), "PlayerServer-" + args[1].replace("!", ""), false), Boolean.parseBoolean(args[4])));
+                        new SubServerInfo((BungeeServerInfo)FakeProxyServer.constructServerInfo(args[1].replace("!", ""), new InetSocketAddress(args[2], Integer.parseInt(args[3])), ((FakeProxyServer.ConfigServers.keySet().contains(args[1]))?FakeProxyServer.ConfigServers.get(args[1]).getMotd():"PlayerServer-" + args[1].replace("!", "")), false), Boolean.parseBoolean(args[4])));
             }
 
             FakeProxyServer.SubServers.add(args[1]);

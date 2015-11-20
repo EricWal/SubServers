@@ -10,6 +10,7 @@ import net.ME1312.SubServer.Commands.NavCMD;
 import net.ME1312.SubServer.Commands.SubDebugCMD;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.BungeeServerInfo;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.plugin.PluginDescription;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.config.Configuration;
@@ -35,7 +36,7 @@ public class FakeProxyServer extends BungeeCord {
         PluginDescription Plugin = new PluginDescription();
         Plugin.setName("SubServers");
         Plugin.setAuthor("ME1312");
-        Plugin.setVersion("1.8.8r");
+        Plugin.setVersion("1.8.8s");
         this.Plugin = Plugin;
 
         EnablePlugin();
@@ -66,7 +67,7 @@ public class FakeProxyServer extends BungeeCord {
             for (Iterator<String> str = configuration.getSection("servers").getKeys().iterator(); str.hasNext(); ) {
                 String item = str.next();
                 ConfigServers.put(item, new SubServerInfo((BungeeServerInfo) constructServerInfo(item, new InetSocketAddress(configuration.getString("servers." + item + ".address").split(":")[0],
-                                Integer.parseInt(configuration.getString("servers." + item + ".address").split(":")[1])), configuration.getString("servers." + item + ".motd"),
+                                Integer.parseInt(configuration.getString("servers." + item + ".address").split(":")[1])), ChatColor.translateAlternateColorCodes('&', configuration.getString("servers." + item + ".motd")),
                         configuration.getBoolean("servers." + item + ".restricted")), configuration.getBoolean("servers." + item + ".use-shared-chat")));
             }
 

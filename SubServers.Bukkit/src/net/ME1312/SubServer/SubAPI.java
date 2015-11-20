@@ -26,7 +26,7 @@ import net.ME1312.SubServer.Libraries.Version.Version;
  *   Methods can be Requested<br>
  *
  * @author ME1312
- * @version 1.8.8l+
+ * @version 1.8.8s+
  *
  */
 @SuppressWarnings("static-access")
@@ -122,12 +122,16 @@ public class SubAPI {
      * @param SharedChat Toggle Shared Chat
      * @param Dir Shell Directory
      * @param Exec Executable String or File
-     * @param StopAfter Stop after x minutes
+     * @param AutoRestart AutoRestarts Server
      * @param Temporary Toggles Temporary Server actions
      */
-    public static void addServer(final String Name, int Port, boolean Log, boolean SharedChat, File Dir, Executable Exec, double StopAfter, boolean Temporary) {
+    public static void addServer(final String Name, int Port, boolean Log, boolean SharedChat, File Dir, Executable Exec, boolean AutoRestart, boolean Temporary) {
         final int PID = (Main.SubServers.size() + 1);
-        Main.Servers.put(PID, new SubServer(true, Name, PID, Port, Log, SharedChat, Dir, Exec, StopAfter, Temporary, Main));
+        if (Temporary) {
+            Main.Servers.put(PID, new SubServer(true, Name, PID, Port, Log, SharedChat, Dir, Exec, false, true, Main));
+        } else {
+            Main.Servers.put(PID, new SubServer(true, Name, PID, Port, Log, SharedChat, Dir, Exec, AutoRestart, false, Main));
+        }
         Main.PIDs.put(Name, PID);
         Main.SubServers.add(Name);
         Bukkit.getLogger().info("Servers: " + Main.Servers.toString());
@@ -167,12 +171,16 @@ public class SubAPI {
      * @param SharedChat Toggle Shared Chat
      * @param Dir Shell Directory
      * @param Exec Executable String or File
-     * @param StopAfter Stop after x minutes
+     * @param AutoRestart AutoRestarts Server
      * @param Temporary Toggles Temporary Server actions
      */
-    public static void addServer(Player Sender, final String Name, int Port, boolean Log, boolean SharedChat, File Dir, Executable Exec, double StopAfter, boolean Temporary) {
+    public static void addServer(Player Sender, final String Name, int Port, boolean Log, boolean SharedChat, File Dir, Executable Exec, boolean AutoRestart, boolean Temporary) {
         final int PID = (Main.SubServers.size() + 1);
-        Main.Servers.put(PID, new SubServer(true, Name, PID, Port, Log, SharedChat, Dir, Exec, StopAfter, Temporary, Main));
+        if (Temporary) {
+            Main.Servers.put(PID, new SubServer(true, Name, PID, Port, Log, SharedChat, Dir, Exec, false, true, Main));
+        } else {
+            Main.Servers.put(PID, new SubServer(true, Name, PID, Port, Log, SharedChat, Dir, Exec, AutoRestart, false, Main));
+        }
         Main.PIDs.put(Name, PID);
         Main.SubServers.add(Name);
 

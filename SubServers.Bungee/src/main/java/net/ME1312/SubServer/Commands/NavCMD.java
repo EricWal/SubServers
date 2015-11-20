@@ -1,9 +1,13 @@
 package net.ME1312.SubServer.Commands;
 
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.ChatColor;
 import net.ME1312.SubServer.FakeProxyServer;
+
+import java.util.Iterator;
 
 public class NavCMD extends Command {
 	private FakeProxyServer FakeProxyServer;
@@ -19,19 +23,39 @@ public class NavCMD extends Command {
 		if (FakeProxyServer.getPlayer(sender.getName()) == null && args.length == 1) {
 			FakeProxyServer.getLogger().info(FakeProxyServer.lang.get("Lang.Commands.Teleport-Console-Error"));
 		} else if (args.length < 1) {
-			String String = "";
-			if (FakeProxyServer.ServerInfo.keySet().size() > 0) String = FakeProxyServer.ServerInfo.keySet().toString().replace("[", "").replace("]", "") + ", ";
-			if (FakeProxyServer.ConfigServers.keySet().size() > 0) String = String + (FakeProxyServer.ConfigServers.keySet().toString().replace("[", "").replace("]", "") + ", ").replace("~Lobby, ", "");
-			if (FakeProxyServer.PlayerServerInfo.keySet().size() > 0) String = String +
-					FakeProxyServer.lang.get("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[2].replace("$int$", Integer.toString(FakeProxyServer.PlayerServerInfo.keySet().size()));
+			TextComponent String = new TextComponent("");
+			if (FakeProxyServer.ServerInfo.keySet().size() > 0) {
+                for (Iterator<String> servers = FakeProxyServer.ServerInfo.keySet().iterator(); servers.hasNext(); ) {
+                    String server = servers.next();
+                    TextComponent text = new TextComponent(server);
+                    text.setColor(ChatColor.DARK_AQUA);
+                    text.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/go " + server));
+                    String.addExtra(text);
+                    String.addExtra(ChatColor.DARK_AQUA + ", ");
+                }
+            }
+			if (FakeProxyServer.ConfigServers.keySet().size() > 0) {
+                for (Iterator<String> servers = FakeProxyServer.ConfigServers.keySet().iterator(); servers.hasNext(); ) {
+                    String server = servers.next();
+                    if (!server.equalsIgnoreCase("~Lobby")) {
+                        TextComponent text = new TextComponent(server);
+                        text.setColor(ChatColor.DARK_AQUA);
+                        text.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/go " + server));
+                        String.addExtra(text);
+                        String.addExtra(ChatColor.DARK_AQUA + ", ");
+                    }
+                }
+            }
+			if (FakeProxyServer.PlayerServerInfo.keySet().size() > 0) String.addExtra(FakeProxyServer.lang.get("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[2].replace("$int$", Integer.toString(FakeProxyServer.PlayerServerInfo.keySet().size())));
 
 			if (FakeProxyServer.getPlayer(sender.getName()) != null) {
 				FakeProxyServer.getPlayer(sender.getName()).sendMessages(ChatColor.AQUA + FakeProxyServer.lprefix + FakeProxyServer.lang.get("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[0] +
 						FakeProxyServer.getPlayer(sender.getName()).getServer().getInfo().getName(),
-						"", ChatColor.AQUA + FakeProxyServer.lang.get("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[1], ChatColor.DARK_AQUA + String);
+						"", ChatColor.AQUA + FakeProxyServer.lang.get("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[1]);
+                FakeProxyServer.getPlayer(sender.getName()).sendMessage(String);
 			} else {
 				FakeProxyServer.getLogger().info(FakeProxyServer.lprefix + FakeProxyServer.lang.get("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[1]);
-				FakeProxyServer.getLogger().info(String);
+				FakeProxyServer.getLogger().info(ChatColor.stripColor(String.toLegacyText()));
 			}
 
 		} else if (FakeProxyServer.ConfigServers.keySet().contains(args[0]) && !args[0].equalsIgnoreCase("~Lobby")) {

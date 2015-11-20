@@ -460,7 +460,7 @@ public class SubServerCreator {
 
     public boolean run() {
         try {
-            if (SubEvent.RunEvent(Main, SubEvent.Events.SubCreateEvent, new SubServer(true, Name, -1, Port, true, true, Dir, Exec, 0, false, Main), Player, Type)) {
+            if (SubEvent.RunEvent(Main, SubEvent.Events.SubCreateEvent, new SubServer(true, Name, -1, Port, true, true, Dir, Exec, false, false, Main), Player, Type)) {
                 run(true);
                 return true;
             } else {
@@ -501,7 +501,7 @@ public class SubServerCreator {
                                 if (Process.exitValue() == 0) {
                                     Player.sendMessage(ChatColor.AQUA + Main.lprefix + Main.lang.getString("Lang.Create-Server.Server-Create-Done"));
                                     final int PID = (Main.SubServers.size() + 1);
-                                    Main.Servers.put(PID, new SubServer(true, Name, PID, Port, true, true, Dir, Exec, 0, false, Main));
+                                    Main.Servers.put(PID, new SubServer(true, Name, PID, Port, true, true, Dir, Exec, false, false, Main));
                                     Main.PIDs.put(Name, PID);
                                     Main.SubServers.add(Name);
 
@@ -515,7 +515,7 @@ public class SubServerCreator {
                                     Main.config.set("Servers." + Name + ".use-shared-chat", true);
                                     Main.config.set("Servers." + Name + ".dir", Dir.getPath());
                                     Main.config.set("Servers." + Name + ".exec", Exec.toString());
-                                    Main.config.set("Servers." + Name + ".stop-after", 0);
+                                    Main.config.set("Servers." + Name + ".auto-restart", false);
                                     Main.config.saveConfig();
                                 } else {
                                     Bukkit.getLogger().severe(Main.lprefix + "build-subserver.sh exited with an errors. Please try again.");
@@ -552,7 +552,7 @@ public class SubServerCreator {
                                 if (Process.exitValue() == 0) {
                                     Player.sendMessage(ChatColor.AQUA + Main.lprefix + Main.lang.getString("Lang.Create-Server.Server-Create-Done").replace("$Server$", Name));
                                     final int PID = (Main.SubServers.size() + 1);
-                                    Main.Servers.put(PID, new SubServer(true, Name, PID, Port, true, true, Dir, Exec, 0, false, Main));
+                                    Main.Servers.put(PID, new SubServer(true, Name, PID, Port, true, true, Dir, Exec, false, false, Main));
                                     Main.PIDs.put(Name, PID);
                                     Main.SubServers.add(Name);
 
@@ -566,7 +566,7 @@ public class SubServerCreator {
                                     Main.config.set("Servers." + Name + ".use-shared-chat", true);
                                     Main.config.set("Servers." + Name + ".dir", Dir.getPath());
                                     Main.config.set("Servers." + Name + ".exec", Exec.toString());
-                                    Main.config.set("Servers." + Name + ".stop-after", 0);
+                                    Main.config.set("Servers." + Name + ".auto-restart", false);
                                     Main.config.saveConfig();
                                 } else {
                                     Bukkit.getLogger().severe(Main.lprefix + "build-subserver.sh exited with an errors. Please try again.");
