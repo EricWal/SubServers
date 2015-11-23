@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.ME1312.SubServer.FakeProxyServer;
-import net.ME1312.SubServer.SubServerInfo;
+import net.ME1312.SubServer.Libraries.SubServerInfo;
 import net.md_5.bungee.BungeeServerInfo;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
@@ -53,8 +53,14 @@ public class SubDebugCMD extends Command {
             for(Iterator<String> str = SubServersStore.iterator(); str.hasNext(); ) {
                 String item = str.next();
                 FakeProxyServer.SubServers.remove(item);
-                FakeProxyServer.ServerInfo.remove(item);
-                FakeProxyServer.PlayerServerInfo.remove(item.replace("!", ""));
+                if (FakeProxyServer.ServerInfo.keySet().contains(item)) {
+                    FakeProxyServer.ServerInfo.get(item).destroy();
+                    FakeProxyServer.ServerInfo.remove(item);
+                }
+                if (FakeProxyServer.PlayerServerInfo.keySet().contains(item)) {
+                    FakeProxyServer.PlayerServerInfo.get(item).destroy();
+                    FakeProxyServer.PlayerServerInfo.remove(item.replace("!", ""));
+                }
             }
             String str = FakeProxyServer.lang.get("Lang.Proxy.Reset-Storage");
             FakeProxyServer.lang.clear();

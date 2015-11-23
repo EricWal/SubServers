@@ -158,8 +158,11 @@ public class Main {
             }
 
             if (SubAPI.getSubServer(0).isRunning()) {
-                SubAPI.getSubServer(0).stop();
-                Servers.get(PIDs.get("~Proxy")).waitFor();
+                Servers.get(0).AutoRestart = false;
+                Servers.get(0).stop();
+                Servers.get(0).waitFor();
+                Thread.sleep(1000);
+                Servers.get(0).destroy();
             }
 
             List<String> SubServersStore = new ArrayList<String>();
@@ -168,12 +171,14 @@ public class Main {
             for(Iterator<String> str = SubServersStore.iterator(); str.hasNext(); ) {
                 String item = str.next();
                 if (SubAPI.getSubServer(item).isRunning()) {
+                    SubAPI.getSubServer(item).AutoRestart = false;
                     SubAPI.getSubServer(item).stop();
-                    Servers.get(PIDs.get(item)).waitFor();
-                    if (Servers.get(PIDs.get(item)).Temporary) {
+                    SubAPI.getSubServer(item).waitFor();
+                    if (SubAPI.getSubServer(item).Temporary) {
                         Thread.sleep(500);
                     }
                     Thread.sleep(1000);
+                    SubAPI.getSubServer(item).destroy();
                 }
             }
             Bukkit.getLogger().info(lprefix + " Plugin Disabled.");
@@ -188,6 +193,7 @@ public class Main {
 
     public void ReloadPlugin(@Nullable final Player sender) {
         if (!Servers.get(0).isRunning()) {
+            Servers.get(0).destroy();
             Servers.remove(0);
         } else {
             SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy resetplugin");
@@ -201,6 +207,7 @@ public class Main {
             String item = str.next();
             i++;
             if (!Servers.get(i).isRunning()) {
+                Servers.get(i).destroy();
                 Servers.remove(i);
                 PIDs.remove(item);
                 SubServers.remove(item);

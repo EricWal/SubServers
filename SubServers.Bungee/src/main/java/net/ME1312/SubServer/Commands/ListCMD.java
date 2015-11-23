@@ -1,7 +1,7 @@
 package net.ME1312.SubServer.Commands;
 
 import net.ME1312.SubServer.FakeProxyServer;
-import net.ME1312.SubServer.SubServerInfo;
+import net.ME1312.SubServer.Libraries.SubServerInfo;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;

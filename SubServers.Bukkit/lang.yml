@@ -27,7 +27,7 @@ Lang:
         'Kill-Permission-Error': 'You do not have permission to terminate this subserver.'
         'Kill-Config-Error': 'Error: Invalid Server'
         'Teleport': 'Teleporting...'
-        'Teleport-Server-List': 'You Are at: |||Servers: |||and $int$ PlayerServer(s)'
+        'Teleport-Server-List': 'You Are at: |||There are $online$ Available Servers: |||and $int$ PlayerServer(s)'
         'Teleport-Player-Error': 'Error: Invalid Player'
         'Teleport-Config-Error': 'Error: Invalid Server'
         'Teleport-Permission-Error': 'Error: Invalid Permissions to Teleport '

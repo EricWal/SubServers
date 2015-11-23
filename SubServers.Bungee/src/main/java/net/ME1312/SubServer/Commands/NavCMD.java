@@ -23,38 +23,53 @@ public class NavCMD extends Command {
 		if (FakeProxyServer.getPlayer(sender.getName()) == null && args.length == 1) {
 			FakeProxyServer.getLogger().info(FakeProxyServer.lang.get("Lang.Commands.Teleport-Console-Error"));
 		} else if (args.length < 1) {
+            int online = 0;
 			TextComponent String = new TextComponent("");
 			if (FakeProxyServer.ServerInfo.keySet().size() > 0) {
                 for (Iterator<String> servers = FakeProxyServer.ServerInfo.keySet().iterator(); servers.hasNext(); ) {
                     String server = servers.next();
-                    TextComponent text = new TextComponent(server);
-                    text.setColor(ChatColor.DARK_AQUA);
-                    text.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/go " + server));
-                    String.addExtra(text);
-                    String.addExtra(ChatColor.DARK_AQUA + ", ");
-                }
-            }
-			if (FakeProxyServer.ConfigServers.keySet().size() > 0) {
-                for (Iterator<String> servers = FakeProxyServer.ConfigServers.keySet().iterator(); servers.hasNext(); ) {
-                    String server = servers.next();
-                    if (!server.equalsIgnoreCase("~Lobby")) {
+                    if (FakeProxyServer.ServerInfo.get(server).isOnline()) {
                         TextComponent text = new TextComponent(server);
                         text.setColor(ChatColor.DARK_AQUA);
                         text.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/go " + server));
                         String.addExtra(text);
                         String.addExtra(ChatColor.DARK_AQUA + ", ");
+                        online++;
                     }
                 }
             }
-			if (FakeProxyServer.PlayerServerInfo.keySet().size() > 0) String.addExtra(FakeProxyServer.lang.get("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[2].replace("$int$", Integer.toString(FakeProxyServer.PlayerServerInfo.keySet().size())));
+			if (FakeProxyServer.ConfigServers.keySet().size() > 0) {
+                for (Iterator<String> servers = FakeProxyServer.ConfigServers.keySet().iterator(); servers.hasNext(); ) {
+                    String server = servers.next();
+                    if (!server.equalsIgnoreCase("~Lobby") && FakeProxyServer.ConfigServers.get(server).isOnline()) {
+                        TextComponent text = new TextComponent(server);
+                        text.setColor(ChatColor.DARK_AQUA);
+                        text.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/go " + server));
+                        String.addExtra(text);
+                        String.addExtra(ChatColor.DARK_AQUA + ", ");
+                        online++;
+                    }
+                }
+            }
+			if (FakeProxyServer.PlayerServerInfo.keySet().size() > 0) {
+                int ponline = 0;
+                for (Iterator<String> servers = FakeProxyServer.PlayerServerInfo.keySet().iterator(); servers.hasNext(); ) {
+                    String server = servers.next();
+                    if (FakeProxyServer.PlayerServerInfo.get(server).isOnline()) {
+                        ponline++;
+                        online++;
+                    }
+                }
+                String.addExtra(FakeProxyServer.lang.get("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[2].replace("$int$", Integer.toString(ponline)));
+            }
 
 			if (FakeProxyServer.getPlayer(sender.getName()) != null) {
-				FakeProxyServer.getPlayer(sender.getName()).sendMessages(ChatColor.AQUA + FakeProxyServer.lprefix + FakeProxyServer.lang.get("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[0] +
+				FakeProxyServer.getPlayer(sender.getName()).sendMessages(ChatColor.AQUA + FakeProxyServer.lprefix + FakeProxyServer.lang.get("Lang.Commands.Teleport-Server-List").replace("$online$", Integer.toString(online)).split("\\|\\|\\|")[0] +
 						FakeProxyServer.getPlayer(sender.getName()).getServer().getInfo().getName(),
-						"", ChatColor.AQUA + FakeProxyServer.lang.get("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[1]);
+						"", ChatColor.AQUA + FakeProxyServer.lang.get("Lang.Commands.Teleport-Server-List").replace("$online$", Integer.toString(online)).split("\\|\\|\\|")[1]);
                 FakeProxyServer.getPlayer(sender.getName()).sendMessage(String);
 			} else {
-				FakeProxyServer.getLogger().info(FakeProxyServer.lprefix + FakeProxyServer.lang.get("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[1]);
+				FakeProxyServer.getLogger().info(FakeProxyServer.lprefix + FakeProxyServer.lang.get("Lang.Commands.Teleport-Server-List").replace("$online$", Integer.toString(online)).split("\\|\\|\\|")[1]);
 				FakeProxyServer.getLogger().info(ChatColor.stripColor(String.toLegacyText()));
 			}
 

@@ -17,9 +17,9 @@ Settings:
 Proxy:
     enabled: false
     run-on-launch: true
+    log: true
     dir: './Folder'
     exec: 'java -Djline.terminal=jline.UnsupportedTerminal -jar SubServers.Bungee.jar'
-    log: true
     auto-restart: false
 #
 # This Is the List of your Servers

@@ -150,7 +150,7 @@ public class SubServerCreator {
         writer.println("allow-nether=true");
         writer.println("resource-pack-hash=");
         writer.println("level-name=world");
-        writer.println("enable-query=false");
+        writer.println("enable-query=true");
         writer.println("allow-flight=false");
         writer.println("announce-player-achievements=false");
         writer.println("server-port=" + Port);

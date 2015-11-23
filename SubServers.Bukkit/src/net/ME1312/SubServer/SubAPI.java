@@ -149,6 +149,7 @@ public class SubAPI {
                         Thread.sleep(1500);
                         Main.Servers.get(Main.PIDs.get(Name)).waitFor();
                         Thread.sleep(1000);
+                        Main.Servers.get(Main.PIDs.get(Name)).destroy();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -195,6 +196,7 @@ public class SubAPI {
                         Thread.sleep(1500);
                         Main.Servers.get(Main.PIDs.get(Name)).waitFor();
                         Thread.sleep(1000);
+                        Main.Servers.get(Main.PIDs.get(Name)).destroy();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

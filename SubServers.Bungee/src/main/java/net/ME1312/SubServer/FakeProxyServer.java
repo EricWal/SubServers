@@ -8,11 +8,13 @@ import net.ME1312.SubServer.Commands.FindCMD;
 import net.ME1312.SubServer.Commands.ListCMD;
 import net.ME1312.SubServer.Commands.NavCMD;
 import net.ME1312.SubServer.Commands.SubDebugCMD;
+import net.ME1312.SubServer.Libraries.SubServerInfo;
 import net.md_5.bungee.BungeeCord;
 import net.md_5.bungee.BungeeServerInfo;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.plugin.PluginDescription;
 import net.md_5.bungee.api.config.ServerInfo;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
@@ -36,7 +38,7 @@ public class FakeProxyServer extends BungeeCord {
         PluginDescription Plugin = new PluginDescription();
         Plugin.setName("SubServers");
         Plugin.setAuthor("ME1312");
-        Plugin.setVersion("1.8.8s");
+        Plugin.setVersion("1.8.8t");
         this.Plugin = Plugin;
 
         EnablePlugin();
@@ -83,8 +85,18 @@ public class FakeProxyServer extends BungeeCord {
 
     protected void DisablePlugin() {
         if (running) {
-            running = false;
+            for(Iterator<SubServerInfo> servers = ConfigServers.values().iterator(); servers.hasNext(); ) {
+                servers.next().destroy();
+            }
 
+            for(Iterator<SubServerInfo> servers = ServerInfo.values().iterator(); servers.hasNext(); ) {
+                servers.next().destroy();
+            }
+
+            for(Iterator<SubServerInfo> servers = PlayerServerInfo.values().iterator(); servers.hasNext(); ) {
+                servers.next().destroy();
+            }
+            running = false;
             System.out.println(Plugin.getName() + " Proxy Shutting Down...");
         }
     }

@@ -6,8 +6,13 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
+import net.ME1312.SubServer.Libraries.ServerPing;
+import net.ME1312.SubServer.Libraries.Version.Version;
 import net.ME1312.SubServer.SubAPI;
 import net.ME1312.SubServer.Main;
 import net.ME1312.SubServer.Libraries.Events.SubEvent;
@@ -15,6 +20,7 @@ import net.ME1312.SubServer.Libraries.Events.SubEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 /**
  * Subserver Creator Class
@@ -31,12 +37,14 @@ public class SubServer implements Serializable {
 	public boolean Temporary;
 	public boolean Enabled;
 	public int Port;
+    public boolean AutoRestart;
 	
 	protected Main Main;
 	protected File Dir;
 	protected Executable Exec;
 
-    private boolean AutoRestart;
+    private List<BukkitTask> tasks = new ArrayList<BukkitTask>();
+    private ServerPing.StatusResponse query;
 	private Process Process;
 	private String StdIn;
 	private SubServer Server = this;
@@ -55,7 +63,7 @@ public class SubServer implements Serializable {
 	 * @param AutoRestart Restart when Stopped
 	 * @param Temporary Toggle Temporary Server Options
 	 */
-	public SubServer(Boolean Enabled, String Name, int PID, int Port, boolean Log, boolean SharedChat, File Dir, Executable Exec, boolean AutoRestart, boolean Temporary, Main Main) {
+	public SubServer(final Boolean Enabled, final String Name, final int PID, final int Port, final boolean Log, final boolean SharedChat, final File Dir, final Executable Exec, final boolean AutoRestart, final boolean Temporary, final Main Main) {
 		this.Enabled = Enabled;
 		this.Name = Name;
 		this.PID = PID;
@@ -67,6 +75,20 @@ public class SubServer implements Serializable {
 		this.Exec = Exec;
 		this.AutoRestart = AutoRestart;
 		this.Main = Main;
+
+        if (Main.MCVersion.compareTo(new Version("1.8")) >= 0) {
+            tasks.add(new BukkitRunnable() {
+                @Override
+                public void run() {
+                    if (isRunning() && PID != 0)
+                        try {
+                            query = new ServerPing(new InetSocketAddress(Main.config.getString("Settings.Server-IP"), Port)).fetchData();
+                        } catch (NullPointerException | IOException e) {
+                            query = null;
+                        }
+                }
+            }.runTaskTimerAsynchronously(Main.Plugin, 20 * 30, 20 * 30));
+        }
 	}
 	
 	private void start(boolean value) {
@@ -508,4 +530,30 @@ public class SubServer implements Serializable {
 		
 		return running;
 	}
+
+    /**
+     * Get the Server's Query
+     *
+     * @return the query or null if offline.
+     */
+    public ServerPing.StatusResponse getServer() {
+        return query;
+    }
+
+    /**
+     * Cleanup method for a SubServer
+     *
+     * @return success value
+     */
+    public boolean destroy() {
+        if (!isRunning()) {
+            for(Iterator<BukkitTask> tasks = this.tasks.iterator(); tasks.hasNext(); ) {
+                BukkitTask task = tasks.next();
+                task.cancel();
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
