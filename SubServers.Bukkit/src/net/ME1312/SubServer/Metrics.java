@@ -18,6 +18,7 @@ public class Metrics {
     private JavaPlugin Plugin;
     private YamlConfiguration config;
 
+    private String PluginName;
     private Version PluginVersion;
     private Version JavaVersion;
     private String ServerSoftware;
@@ -49,6 +50,7 @@ public class Metrics {
         }
 
         //Set Data Variables
+        this.PluginName = Plugin.getName();
         this.PluginVersion = new Version(Plugin.getDescription().getVersion());
         this.JavaVersion = new Version(System.getProperty("java.version"));
         try {
@@ -84,7 +86,7 @@ public class Metrics {
 
     private int submitData() throws IOException {
         if (!config.getBoolean("opt-out")) {
-            URL FullURL = new URL(BaseURL + URLEncoder.encode("&pluginversion=" + PluginVersion.toString() + "&javaversion=" + JavaVersion.toString() +
+            URL FullURL = new URL(BaseURL + URLEncoder.encode("&pluginname=" + PluginName + "&pluginversion=" + PluginVersion.toString() + "&javaversion=" + JavaVersion.toString() +
                     "&serversoftware=" + ServerSoftware + "&serverversion=" + MinecraftVersion.toString() + "&serveruuid=" + ServerUUID.toString() + "&os=" + OperatingSystem +
                     "&osversion=" + OperatingSystemVersion.toString(), "UTF-8").replace("%26", "&").replace("%3D", "="));
             HttpURLConnection connection = (HttpURLConnection) FullURL.openConnection();

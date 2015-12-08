@@ -38,7 +38,7 @@ public class FakeProxyServer extends BungeeCord {
         PluginDescription Plugin = new PluginDescription();
         Plugin.setName("SubServers");
         Plugin.setAuthor("ME1312");
-        Plugin.setVersion("1.8.8t");
+        Plugin.setVersion("1.8.8u");
         this.Plugin = Plugin;
 
         EnablePlugin();
@@ -155,6 +155,14 @@ public class FakeProxyServer extends BungeeCord {
 
     public SubServerInfo getSubServerInfo(String server) {
         return getSubServers().get(server);
+    }
+
+    public String getLangValue(String key) {
+        return lang.get(key);
+    }
+
+    public HashMap<String, String> getLang() {
+        return lang;
     }
 
     @Override

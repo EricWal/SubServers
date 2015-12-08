@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import net.ME1312.SubServer.SubAPI;
-import net.ME1312.SubServer.Main;
+import net.ME1312.SubServer.SubPlugin;
 import net.ME1312.SubServer.Libraries.Version.Version;
 
 import org.bukkit.Bukkit;
@@ -23,16 +23,16 @@ import org.bukkit.scheduler.BukkitRunnable;
  * @author ME1312
  *
  */
-public class GUI implements Listener {
+public class SubGUI implements Listener {
 	protected boolean closeWindow = false;
 	
 	private ItemStack block = null;
 	private ItemMeta  blockMeta = null;
 	private Inventory inv = null;
-	private Main Main;
+	private SubPlugin SubPlugin;
 	
-	protected GUI(Main Main) {
-		this.Main = Main;
+	protected SubGUI(SubPlugin SubPlugin) {
+		this.SubPlugin = SubPlugin;
 	}
 	
 	/**
@@ -44,9 +44,9 @@ public class GUI implements Listener {
 	 */
 	
 	@SuppressWarnings("deprecation")
-	public GUI(Player player, int page, String server, Main Main) {
-		this.Main = Main;
-		inv = Bukkit.createInventory(null, 27, ChatColor.DARK_GREEN + Main.lang.getString("Lang.GUI.Server-List-Title").replace("$Int$", Integer.toString(page + 1)));
+	public SubGUI(Player player, int page, String server, SubPlugin SubPlugin) {
+		this.SubPlugin = SubPlugin;
+		inv = Bukkit.createInventory(null, 27, ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Server-List-Title").replace("$Int$", Integer.toString(page + 1)));
 		
 		if (server == null) {
 			int i = 0;
@@ -54,27 +54,27 @@ public class GUI implements Listener {
 			int max = (min + 17);
 			block = null;
 			blockMeta = null;
-			for(Iterator<String> str = Main.SubServers.iterator(); str.hasNext(); ) {
+			for(Iterator<String> str = SubPlugin.SubServers.iterator(); str.hasNext(); ) {
 			    String item = str.next();
 			    if (SubAPI.getSubServer(item).Enabled) {
-			    	if (Main.SubServers.indexOf(item) >= min && Main.SubServers.indexOf(item) <= max) {
+			    	if (SubPlugin.SubServers.indexOf(item) >= min && SubPlugin.SubServers.indexOf(item) <= max) {
 			    		if (SubAPI.getSubServer(item).Temporary) {
 			    			block = new ItemStack(289);
 			    			blockMeta = block.getItemMeta();
 			    			blockMeta.setDisplayName(ChatColor.YELLOW + item);
-			    			blockMeta.setLore(Arrays.asList(ChatColor.DARK_GREEN + Main.lang.getString("Lang.GUI.Online"), ChatColor.GRAY + Main.lang.getString("Lang.GUI.Temp-Server")));
+			    			blockMeta.setLore(Arrays.asList(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Online"), ChatColor.GRAY + SubPlugin.lang.getString("Lang.GUI.Temp-Server")));
 			    			block.setItemMeta(blockMeta);
 			    		} else if (SubAPI.getSubServer(item).isRunning()) {
 			    			block = new ItemStack(Material.GLOWSTONE_DUST);
 			    			blockMeta = block.getItemMeta();
 			    			blockMeta.setDisplayName(ChatColor.YELLOW + item);
-			    			blockMeta.setLore(Arrays.asList(ChatColor.DARK_GREEN + Main.lang.getString("Lang.GUI.Online")));
+			    			blockMeta.setLore(Arrays.asList(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Online")));
 			    			block.setItemMeta(blockMeta);
 			    		} else {
 			    			block = new ItemStack(Material.REDSTONE);
 			    			blockMeta = block.getItemMeta();
 			    			blockMeta.setDisplayName(ChatColor.YELLOW + item);
-			    			blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Offline")));
+			    			blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Offline")));
 			    			block.setItemMeta(blockMeta);
 			    		}
 			    		inv.setItem(i, block);
@@ -87,31 +87,31 @@ public class GUI implements Listener {
 			
 			block = new ItemStack(Material.ENCHANTED_BOOK);
 	    	blockMeta = block.getItemMeta();
-	    	blockMeta.setDisplayName(ChatColor.GRAY + Main.Plugin.getName() + " v" + Main.Plugin.getDescription().getVersion());
-	    	blockMeta.setLore(Arrays.asList("\u00A9 ME1312 EPIC 2015", "", ChatColor.DARK_AQUA + Main.lang.getString("Lang.GUI.Sub-Help-Book").split("\\|\\|\\|")[0], ChatColor.DARK_AQUA + Main.lang.getString("Lang.GUI.Sub-Help-Book").split("\\|\\|\\|")[1]));
+	    	blockMeta.setDisplayName(ChatColor.GRAY + SubPlugin.Plugin.getName() + " v" + SubPlugin.Plugin.getDescription().getVersion());
+	    	blockMeta.setLore(Arrays.asList("\u00A9 ME1312 EPIC 2015", "", ChatColor.DARK_AQUA + SubPlugin.lang.getString("Lang.GUI.Sub-Help-Book").split("\\|\\|\\|")[0], ChatColor.DARK_AQUA + SubPlugin.lang.getString("Lang.GUI.Sub-Help-Book").split("\\|\\|\\|")[1]));
 	    	block.setItemMeta(blockMeta);
 	    	inv.setItem(18, block);
 	    	block = null;
 	    	blockMeta = null;
 	    	
-	    	if (Main.SubServers.size() > max) {
+	    	if (SubPlugin.SubServers.size() > max) {
 	    		block = new ItemStack(Material.IRON_INGOT);
 	    		blockMeta = block.getItemMeta();
-	    		blockMeta.setDisplayName(ChatColor.DARK_GREEN + Main.lang.getString("Lang.GUI.Next"));
+	    		blockMeta.setDisplayName(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Next"));
 	    		block.setItemMeta(blockMeta);
 	    		inv.setItem(23, block);
 	    		block = null;
 	    		blockMeta = null;
 	    	}
 	    	
-	    	if (Main.config.getBoolean("Proxy.enabled")) {
+	    	if (SubPlugin.config.getBoolean("Proxy.enabled")) {
 				block = new ItemStack(Material.EMERALD);
 				blockMeta = block.getItemMeta();
 				blockMeta.setDisplayName(ChatColor.YELLOW + "~Proxy");
 				if (SubAPI.getSubServer(0).isRunning()) {
-					blockMeta.setLore(Arrays.asList(ChatColor.DARK_GREEN + Main.lang.getString("Lang.GUI.Online")));
+					blockMeta.setLore(Arrays.asList(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Online")));
 				} else {
-					blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Offline")));
+					blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Offline")));
 				}
 				block.setItemMeta(blockMeta);
 				inv.setItem(22, block);
@@ -120,22 +120,22 @@ public class GUI implements Listener {
 	    	if (min != 0) {
 	    		block = new ItemStack(Material.IRON_INGOT);
 	    		blockMeta = block.getItemMeta();
-	    		blockMeta.setDisplayName(ChatColor.DARK_GREEN + Main.lang.getString("Lang.GUI.Back"));
+	    		blockMeta.setDisplayName(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Back"));
 	    		block.setItemMeta(blockMeta);
 	    		inv.setItem(21, block);
 	    		block = null;
 	    		blockMeta = null;
 	    	}
 	    	
-	    	if (Main.ServerCreator == null || !Main.ServerCreator.isRunning()) {
-	    		if (Main.MCVersion.compareTo(new Version("1.8")) >= 0) {
+	    	if (SubPlugin.ServerCreator == null || !SubPlugin.ServerCreator.isRunning()) {
+	    		if (SubPlugin.MCVersion.compareTo(new Version("1.8")) >= 0) {
 	    			block = new ItemStack(168, 1, (short) 1);
 	    		} else {
 	    			block = new ItemStack(Material.DIAMOND_BLOCK);
 	    		}
 	    		blockMeta = block.getItemMeta();
-	    		blockMeta.setDisplayName(ChatColor.AQUA + Main.lang.getString("Lang.GUI.Create-Server"));
-	    		if (!player.hasPermission("SubServer.Command.create")) blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Permission-Error")));
+	    		blockMeta.setDisplayName(ChatColor.AQUA + SubPlugin.lang.getString("Lang.GUI.Create-Server"));
+	    		if (!player.hasPermission("SubServer.Command.create")) blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Permission-Error")));
 	    		block.setItemMeta(blockMeta);
 	    		inv.setItem(25, block);
 	    		block = null;
@@ -143,20 +143,20 @@ public class GUI implements Listener {
 	    	} else {
 	    		block = new ItemStack(Material.GOLD_BLOCK);
 	    		blockMeta = block.getItemMeta();
-	    		blockMeta.setDisplayName(ChatColor.YELLOW + Main.lang.getString("Lang.GUI.Create-Server-Busy"));
+	    		blockMeta.setDisplayName(ChatColor.YELLOW + SubPlugin.lang.getString("Lang.GUI.Create-Server-Busy"));
 	    		block.setItemMeta(blockMeta);
 	    		inv.setItem(25, block);
 	    		block = null;
 	    		blockMeta = null;
 	    	}
 	    	
-	    	if (Main.MCVersion.compareTo(new Version("1.8")) >= 0) {
+	    	if (SubPlugin.MCVersion.compareTo(new Version("1.8")) >= 0) {
 	    		block = new ItemStack(166);
 	    	} else {
 	    		block = new ItemStack(Material.REDSTONE_BLOCK);
 	    	}
 	    	blockMeta = block.getItemMeta();
-	    	blockMeta.setDisplayName(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Exit"));
+	    	blockMeta.setDisplayName(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Exit"));
 	    	block.setItemMeta(blockMeta);
 	    	inv.setItem(26, block);
 	    	block = null;
@@ -164,7 +164,7 @@ public class GUI implements Listener {
 	    	
 	    	player.openInventory(inv);
 			inv = null;
-		} else if (Main.SubServers.contains(server) || server.equalsIgnoreCase("~Proxy")) {
+		} else if (SubPlugin.SubServers.contains(server) || server.equalsIgnoreCase("~Proxy")) {
 			openServerWindow(player, server);
 		}
 	}
@@ -178,16 +178,16 @@ public class GUI implements Listener {
 	@SuppressWarnings("deprecation")
 	protected void openServerWindow(Player player, String server) {
 		if (server != null) {
-			inv = Bukkit.createInventory(null, 27, ChatColor.DARK_GREEN + Main.lang.getString("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW + server);
+			inv = Bukkit.createInventory(null, 27, ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW + server);
 
 			if (SubAPI.getSubServer(server).isRunning()) {
 				block = new ItemStack(Material.EMERALD_BLOCK);
 		    	blockMeta = block.getItemMeta();
-		    	blockMeta.setDisplayName(ChatColor.GRAY + Main.lang.getString("Lang.GUI.Start"));
+		    	blockMeta.setDisplayName(ChatColor.GRAY + SubPlugin.lang.getString("Lang.GUI.Start"));
 		    	if (!player.hasPermission("SubServer.Command.start." + server) && !player.hasPermission("SubServer.Command.start.*")) {
-		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Already-Running"), ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Permission-Error")));
+		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Already-Running"), ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Permission-Error")));
 		    	} else {
-		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Already-Running")));
+		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Already-Running")));
 		    	}
 		    	block.setItemMeta(blockMeta);
 		    	inv.setItem(1, block);
@@ -196,9 +196,9 @@ public class GUI implements Listener {
 		    	
 		    	block = new ItemStack(Material.REDSTONE_BLOCK);
 		    	blockMeta = block.getItemMeta();
-		    	blockMeta.setDisplayName(ChatColor.RED + Main.lang.getString("Lang.GUI.Stop"));
+		    	blockMeta.setDisplayName(ChatColor.RED + SubPlugin.lang.getString("Lang.GUI.Stop"));
 		    	if (!player.hasPermission("SubServer.Command.stop." + server) && !player.hasPermission("SubServer.Command.stop.*")) {
-		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Permission-Error")));
+		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Permission-Error")));
 		    	}
 		    	block.setItemMeta(blockMeta);
 		    	inv.setItem(3, block);
@@ -207,9 +207,9 @@ public class GUI implements Listener {
 		    	
 		    	block = new ItemStack(Material.GRAVEL);
 		    	blockMeta = block.getItemMeta();
-		    	blockMeta.setDisplayName(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Terminate"));
+		    	blockMeta.setDisplayName(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Terminate"));
 		    	if (!player.hasPermission("SubServer.Command.kill." + server) && !player.hasPermission("SubServer.Command.kill.*")) {
-		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Permission-Error")));
+		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Permission-Error")));
 		    	}
 		    	block.setItemMeta(blockMeta);
 		    	inv.setItem(5, block);
@@ -218,9 +218,9 @@ public class GUI implements Listener {
 		    	
 		    	block = new ItemStack(356);
 		    	blockMeta = block.getItemMeta();
-		    	blockMeta.setDisplayName(ChatColor.AQUA + Main.lang.getString("Lang.GUI.Send-CMD"));
+		    	blockMeta.setDisplayName(ChatColor.AQUA + SubPlugin.lang.getString("Lang.GUI.Send-CMD"));
 		    	if (!player.hasPermission("SubServer.Command.send." + server) && !player.hasPermission("SubServer.Command.send.*")) {
-		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Permission-Error")));
+		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Permission-Error")));
 		    	}
 		    	block.setItemMeta(blockMeta);
 		    	inv.setItem(7, block);
@@ -230,7 +230,7 @@ public class GUI implements Listener {
 		    	if (!SubAPI.getSubServer(server).Temporary) {
 		    		block = new ItemStack(Material.GLOWSTONE_DUST);
 		    		blockMeta = block.getItemMeta();
-		    		blockMeta.setDisplayName(ChatColor.DARK_GREEN + Main.lang.getString("Lang.GUI.Online"));
+		    		blockMeta.setDisplayName(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Online"));
 		    		if (SubAPI.getSubServer(0).isRunning() && (player.hasPermission("SubServer.Command.teleport." + server) || player.hasPermission("SubServer.Command.teleport.*")) && !server.equalsIgnoreCase("~Proxy")) {
 		    			blockMeta.setLore(Arrays.asList(ChatColor.GRAY + "Click to Teleport"));
 		    		}
@@ -241,11 +241,11 @@ public class GUI implements Listener {
 		    	} else {
 		    		block = new ItemStack(289);
 		    		blockMeta = block.getItemMeta();
-		    		blockMeta.setDisplayName(ChatColor.DARK_GREEN + Main.lang.getString("Lang.GUI.Online"));
+		    		blockMeta.setDisplayName(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Online"));
 		    		if (SubAPI.getSubServer(0).isRunning() && (player.hasPermission("SubServer.Command.teleport." + server) || player.hasPermission("SubServer.Command.teleport.*")) && !server.equalsIgnoreCase("~Proxy")) {
-		    			blockMeta.setLore(Arrays.asList(ChatColor.GRAY + Main.lang.getString("Lang.GUI.Temp-Server"), ChatColor.GRAY + "Click to Teleport"));
+		    			blockMeta.setLore(Arrays.asList(ChatColor.GRAY + SubPlugin.lang.getString("Lang.GUI.Temp-Server"), ChatColor.GRAY + "Click to Teleport"));
 		    		} else {
-		    			blockMeta.setLore(Arrays.asList(ChatColor.GRAY + Main.lang.getString("Lang.GUI.Temp-Server")));
+		    			blockMeta.setLore(Arrays.asList(ChatColor.GRAY + SubPlugin.lang.getString("Lang.GUI.Temp-Server")));
 		    		}
 		    		block.setItemMeta(blockMeta);
 		    		inv.setItem(22, block);
@@ -256,9 +256,9 @@ public class GUI implements Listener {
 				if (!SubAPI.getSubServer(server).Temporary) {
 					block = new ItemStack(Material.EMERALD_BLOCK);
 					blockMeta = block.getItemMeta();
-					blockMeta.setDisplayName(ChatColor.DARK_GREEN + Main.lang.getString("Lang.GUI.Start"));
+					blockMeta.setDisplayName(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Start"));
 					if (!player.hasPermission("SubServer.Command.start." + server) && !player.hasPermission("SubServer.Command.start.*")) {
-						blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Permission-Error")));
+						blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Permission-Error")));
 					}
 					block.setItemMeta(blockMeta);
 					inv.setItem(1, block);
@@ -267,11 +267,11 @@ public class GUI implements Listener {
 				} else {
 					block = new ItemStack(Material.EMERALD_BLOCK);
 					blockMeta = block.getItemMeta();
-					blockMeta.setDisplayName(ChatColor.GRAY + Main.lang.getString("Lang.GUI.Start"));
+					blockMeta.setDisplayName(ChatColor.GRAY + SubPlugin.lang.getString("Lang.GUI.Start"));
 					if (player.hasPermission("SubServer.Command.start." + server) && player.hasPermission("SubServer.Command.start.*")) {
-						blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Removed")));
+						blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Removed")));
 					} else {
-						blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Removed"), ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Permission-Error")));
+						blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Removed"), ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Permission-Error")));
 					}
 					block.setItemMeta(blockMeta);
 					inv.setItem(1, block);
@@ -281,11 +281,11 @@ public class GUI implements Listener {
 		    	
 		    	block = new ItemStack(Material.REDSTONE_BLOCK);
 		    	blockMeta = block.getItemMeta();
-		    	blockMeta.setDisplayName(ChatColor.GRAY + Main.lang.getString("Lang.GUI.Stop"));
+		    	blockMeta.setDisplayName(ChatColor.GRAY + SubPlugin.lang.getString("Lang.GUI.Stop"));
 		    	if (!player.hasPermission("SubServer.Command.stop." + server) && !player.hasPermission("SubServer.Command.stop.*")) {
-		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Not-Running"), ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Permission-Error")));
+		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Not-Running"), ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Permission-Error")));
 		    	} else {
-		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Not-Running")));
+		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Not-Running")));
 		    	}
 		    	block.setItemMeta(blockMeta);
 		    	inv.setItem(3, block);
@@ -294,11 +294,11 @@ public class GUI implements Listener {
 		    	
 		    	block = new ItemStack(Material.GRAVEL);
 		    	blockMeta = block.getItemMeta();
-		    	blockMeta.setDisplayName(ChatColor.GRAY + Main.lang.getString("Lang.GUI.Terminate"));
+		    	blockMeta.setDisplayName(ChatColor.GRAY + SubPlugin.lang.getString("Lang.GUI.Terminate"));
 		    	if (!player.hasPermission("SubServer.Command.kill." + server) && !player.hasPermission("SubServer.Command.kill.*")) {
-		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Not-Running"), ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Permission-Error")));
+		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Not-Running"), ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Permission-Error")));
 		    	} else {
-		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Not-Running")));
+		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Not-Running")));
 		    	}
 		    	block.setItemMeta(blockMeta);
 		    	inv.setItem(5, block);
@@ -307,11 +307,11 @@ public class GUI implements Listener {
 		    	
 		    	block = new ItemStack(356);
 	    		blockMeta = block.getItemMeta();
-	    		blockMeta.setDisplayName(ChatColor.GRAY + Main.lang.getString("Lang.GUI.Send-CMD"));
+	    		blockMeta.setDisplayName(ChatColor.GRAY + SubPlugin.lang.getString("Lang.GUI.Send-CMD"));
 	    		if (!player.hasPermission("SubServer.Command.send." + server) && !player.hasPermission("SubServer.Command.send.*")) {
-	    			blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Not-Running"), ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Permission-Error")));
+	    			blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Not-Running"), ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Permission-Error")));
 	    		} else {
-	    			blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Not-Running")));
+	    			blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Not-Running")));
 	    		}
 	    		block.setItemMeta(blockMeta);
 	    		inv.setItem(7, block);
@@ -321,7 +321,7 @@ public class GUI implements Listener {
 		    	if (!SubAPI.getSubServer(server).Temporary) {
 		    		block = new ItemStack(Material.REDSTONE);
 		    		blockMeta = block.getItemMeta();
-		    		blockMeta.setDisplayName(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Offline"));
+		    		blockMeta.setDisplayName(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Offline"));
 		    		block.setItemMeta(blockMeta);
 		    		inv.setItem(22, block);
 		    		block = null;
@@ -329,8 +329,8 @@ public class GUI implements Listener {
 		    	} else {
 		    		block = new ItemStack(289);
 		    		blockMeta = block.getItemMeta();
-		    		blockMeta.setDisplayName(ChatColor.GRAY + Main.lang.getString("Lang.GUI.Temp-Server"));
-		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Removed")));
+		    		blockMeta.setDisplayName(ChatColor.GRAY + SubPlugin.lang.getString("Lang.GUI.Temp-Server"));
+		    		blockMeta.setLore(Arrays.asList(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Removed")));
 		    		block.setItemMeta(blockMeta);
 		    		inv.setItem(22, block);
 		    		block = null;
@@ -339,8 +339,8 @@ public class GUI implements Listener {
 			}
 			block = new ItemStack(Material.ENCHANTED_BOOK);
 	    	blockMeta = block.getItemMeta();
-	    	blockMeta.setDisplayName(ChatColor.GRAY + Main.Plugin.getName() + " v" + Main.Plugin.getDescription().getVersion());
-	    	blockMeta.setLore(Arrays.asList("\u00A9 ME1312 EPIC 2015", "", ChatColor.DARK_AQUA + Main.lang.getString("Lang.GUI.Sub-Help-Book").split("\\|\\|\\|")[0], ChatColor.DARK_AQUA + Main.lang.getString("Lang.GUI.Sub-Help-Book").split("\\|\\|\\|")[1]));
+	    	blockMeta.setDisplayName(ChatColor.GRAY + SubPlugin.Plugin.getName() + " v" + SubPlugin.Plugin.getDescription().getVersion());
+	    	blockMeta.setLore(Arrays.asList("\u00A9 ME1312 EPIC 2015", "", ChatColor.DARK_AQUA + SubPlugin.lang.getString("Lang.GUI.Sub-Help-Book").split("\\|\\|\\|")[0], ChatColor.DARK_AQUA + SubPlugin.lang.getString("Lang.GUI.Sub-Help-Book").split("\\|\\|\\|")[1]));
 	    	block.setItemMeta(blockMeta);
 	    	inv.setItem(18, block);
 	    	block = null;
@@ -348,19 +348,19 @@ public class GUI implements Listener {
 			
 			block = new ItemStack(Material.IRON_INGOT);
 	    	blockMeta = block.getItemMeta();
-	    	blockMeta.setDisplayName(ChatColor.YELLOW + Main.lang.getString("Lang.GUI.Back"));
+	    	blockMeta.setDisplayName(ChatColor.YELLOW + SubPlugin.lang.getString("Lang.GUI.Back"));
 	    	block.setItemMeta(blockMeta);
 	    	inv.setItem(25, block);
 	    	block = null;
 	    	blockMeta = null;
 	    	
-	    	if (Main.MCVersion.compareTo(new Version("1.8")) >= 0) {
+	    	if (SubPlugin.MCVersion.compareTo(new Version("1.8")) >= 0) {
 	    		block = new ItemStack(166);
 	    	} else {
 	    		block = new ItemStack(Material.REDSTONE_BLOCK);
 	    	}
 	    	blockMeta = block.getItemMeta();
-	    	blockMeta.setDisplayName(ChatColor.DARK_RED + Main.lang.getString("Lang.GUI.Exit"));
+	    	blockMeta.setDisplayName(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Exit"));
 	    	block.setItemMeta(blockMeta);
 	    	inv.setItem(26, block);
 	    	block = null;
@@ -386,9 +386,9 @@ public class GUI implements Listener {
 	 */
 	@SuppressWarnings("deprecation")
 	protected void openLoader(final Player player, final String args, final String done) {
-		final Inventory inventory = Bukkit.createInventory(null, 9, Main.lang.getString("Lang.GUI.Loading"));
+		final Inventory inventory = Bukkit.createInventory(null, 9, SubPlugin.lang.getString("Lang.GUI.Loading"));
 		
-		if (Main.MCVersion.compareTo(new Version("1.8")) < 0) invBlock = new ItemStack(35, 1, (short) 9);
+		if (SubPlugin.MCVersion.compareTo(new Version("1.8")) < 0) invBlock = new ItemStack(35, 1, (short) 9);
     	ItemMeta invBlockMeta = invBlock.getItemMeta();
     	invBlockMeta.setDisplayName("");
     	invBlock.setItemMeta(invBlockMeta);
@@ -498,12 +498,12 @@ public class GUI implements Listener {
 				stopLoader = false;
 				player.closeInventory();
 				if (done.equalsIgnoreCase("openServerWindow")) {
-					new GUI(player, 0, args, Main);
+					new SubGUI(player, 0, args, SubPlugin);
 				} else if (done.equalsIgnoreCase("openSelectionWindow")) {
-					new GUI(player, Integer.parseInt(args), null, Main);
+					new SubGUI(player, Integer.parseInt(args), null, SubPlugin);
 				}
 			}
-		}.runTaskAsynchronously(Main.Plugin);
+		}.runTaskAsynchronously(SubPlugin.Plugin);
 	}
 	
 	/**
@@ -513,10 +513,10 @@ public class GUI implements Listener {
 	 * @param server Server Name
 	 */
 	protected void openSentCommand(Player player, String server) {
-		inv = Bukkit.createInventory(null, 18, ChatColor.DARK_GREEN + Main.lang.getString("Lang.GUI.Success") + ChatColor.YELLOW + server);
+		inv = Bukkit.createInventory(null, 18, ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Success") + ChatColor.YELLOW + server);
 		block = new ItemStack(Material.EMERALD_BLOCK);
     	blockMeta = block.getItemMeta();
-    	blockMeta.setDisplayName(ChatColor.GREEN + Main.lang.getString("Lang.GUI.OK"));
+    	blockMeta.setDisplayName(ChatColor.GREEN + SubPlugin.lang.getString("Lang.GUI.OK"));
     	block.setItemMeta(blockMeta);
     	inv.setItem(5, block);
     	inv.setItem(4, block);
@@ -532,10 +532,10 @@ public class GUI implements Listener {
 	
 	@SuppressWarnings("deprecation")
 	protected void openMojangAgreement(Player player) {
-		inv = Bukkit.createInventory(null, 18, Main.lang.getString("Lang.Create-Server.Mojang-Agreement"));
+		inv = Bukkit.createInventory(null, 18, SubPlugin.lang.getString("Lang.Create-Server.Mojang-Agreement"));
 		block = new ItemStack(Material.EMERALD_BLOCK);
 		blockMeta = block.getItemMeta();
-		blockMeta.setDisplayName(ChatColor.GREEN + Main.lang.getString("Lang.Create-Server.Mojang-Agreement-Accept"));
+		blockMeta.setDisplayName(ChatColor.GREEN + SubPlugin.lang.getString("Lang.Create-Server.Mojang-Agreement-Accept"));
 		block.setItemMeta(blockMeta);
 		inv.setItem(0, block);
 		inv.setItem(1, block);
@@ -546,13 +546,13 @@ public class GUI implements Listener {
 		block = null;
 		blockMeta = null;
 		
-		if (Main.MCVersion.compareTo(new Version("1.8")) >= 0) {
+		if (SubPlugin.MCVersion.compareTo(new Version("1.8")) >= 0) {
     		block = new ItemStack(168, 1, (short) 1);
     	} else {
     		block = new ItemStack(Material.DIAMOND_BLOCK);
     	}
     	blockMeta = block.getItemMeta();
-    	blockMeta.setDisplayName(ChatColor.AQUA + Main.lang.getString("Lang.Create-Server.Mojang-Agreement-Link"));
+    	blockMeta.setDisplayName(ChatColor.AQUA + SubPlugin.lang.getString("Lang.Create-Server.Mojang-Agreement-Link"));
     	block.setItemMeta(blockMeta);
     	inv.setItem(4, block);
     	inv.setItem(13, block);
@@ -561,7 +561,7 @@ public class GUI implements Listener {
 		
 		block = new ItemStack(Material.REDSTONE_BLOCK);
     	blockMeta = block.getItemMeta();
-    	blockMeta.setDisplayName(ChatColor.RED + Main.lang.getString("Lang.Create-Server.Mojang-Agreement-Decline"));
+    	blockMeta.setDisplayName(ChatColor.RED + SubPlugin.lang.getString("Lang.Create-Server.Mojang-Agreement-Decline"));
     	block.setItemMeta(blockMeta);
     	inv.setItem(6, block);
     	inv.setItem(7, block);
@@ -577,7 +577,7 @@ public class GUI implements Listener {
 	}
 	
 	protected void openServerTypeSelector(Player player) {
-		inv = Bukkit.createInventory(null, 18, Main.lang.getString("Lang.Create-Server.Server-Type"));
+		inv = Bukkit.createInventory(null, 18, SubPlugin.lang.getString("Lang.Create-Server.Server-Type"));
 		block = new ItemStack(Material.WATER_BUCKET);
 		blockMeta = block.getItemMeta();
 		blockMeta.setDisplayName(ChatColor.GRAY + "Spigot");

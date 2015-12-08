@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
 
+import net.ME1312.SubServer.GUI.SubGUIListener;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -15,7 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.google.common.io.Files;
 
-import net.ME1312.SubServer.Executable.SubServerCreator;
+import net.ME1312.SubServer.Executable.SubCreator;
 import net.ME1312.SubServer.Executable.Executable;
 import net.ME1312.SubServer.Executable.SubServer;
 import net.ME1312.SubServer.Libraries.Config.ConfigFile;
@@ -26,13 +27,13 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import javax.annotation.Nullable;
 
-public class Main {
+public class SubPlugin {
     public HashMap<Integer, SubServer> Servers = new HashMap<Integer, SubServer>();
     public HashMap<String, Integer> PIDs = new HashMap<String, Integer>();
     public HashMap<JavaPlugin, List<SubListener>> EventHandlers = new HashMap<JavaPlugin, List<SubListener>>();
     public List<String> SubServers = new ArrayList<String>();
     public JavaPlugin Plugin;
-    public SubServerCreator ServerCreator;
+    public SubCreator ServerCreator;
 
     public String lprefix;
     public ConfigFile config;
@@ -42,9 +43,10 @@ public class Main {
     public Version MCVersion;
 
     private ConfigManager confmanager;
-    private Main instance;
+    private SubPlugin instance;
 
-    protected Main(JavaPlugin plugin) throws IllegalArgumentException {
+    // Main Plugin Class
+    protected SubPlugin(JavaPlugin plugin) throws IllegalArgumentException {
         if (plugin != null && plugin.getDescription().getName().equalsIgnoreCase("SubServers")) {
             Plugin = plugin;
         } else {
@@ -109,7 +111,7 @@ public class Main {
         /**
          * Registers Listeners
          */
-        pm.registerEvents(new net.ME1312.SubServer.GUI.GUIListener(this), Plugin);
+        pm.registerEvents(new SubGUIListener(this), Plugin);
 
         /**
          * Auto-Starts Servers,
@@ -139,8 +141,8 @@ public class Main {
         /**
          * Registers Commands
          */
-        Plugin.getCommand("subserver").setExecutor(new SubServersCMD(this));
-        Plugin.getCommand("sub").setExecutor(new SubServersCMD(this));
+        Plugin.getCommand("subserver").setExecutor(new SubCMD(this));
+        Plugin.getCommand("sub").setExecutor(new SubCMD(this));
 
         /**
          * ME1312.net Stats
@@ -297,7 +299,7 @@ public class Main {
     }
 
     public void copyFromJar(String resource, String destination) {
-        InputStream resStreamIn = Main.class.getClassLoader().getResourceAsStream(resource);
+        InputStream resStreamIn = SubPlugin.class.getClassLoader().getResourceAsStream(resource);
         File resDestFile = new File(destination);
         try {
             OutputStream resStreamOut = new FileOutputStream(resDestFile);

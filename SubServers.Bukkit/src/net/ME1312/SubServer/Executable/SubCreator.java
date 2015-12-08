@@ -13,7 +13,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import net.ME1312.SubServer.Main;
+import net.ME1312.SubServer.SubPlugin;
 import net.ME1312.SubServer.Libraries.Events.SubEvent;
 import net.ME1312.SubServer.Libraries.Version.Version;
 import org.w3c.dom.Document;
@@ -25,7 +25,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-public class SubServerCreator {
+public class SubCreator {
     public enum ServerTypes {
         spigot,
         bukkit,
@@ -42,11 +42,11 @@ public class SubServerCreator {
     private Version Version;
     private Player Player;
     private ServerTypes Type;
-    private Main Main;
+    private SubPlugin SubPlugin;
     private boolean Running;
     private Process Process;
 
-    public SubServerCreator(String Name, int Port, File Dir, ServerTypes Type, Version Version, int Memory, Player Player, Main Main) {
+    public SubCreator(String Name, int Port, File Dir, ServerTypes Type, Version Version, int Memory, Player Player, SubPlugin SubPlugin) {
         this.Name = Name;
         this.Port = Port;
         this.Dir = Dir;
@@ -54,7 +54,7 @@ public class SubServerCreator {
         this.Version = Version;
         this.Player = Player;
         this.Type = Type;
-        this.Main = Main;
+        this.SubPlugin = SubPlugin;
 
         if (!Dir.exists()) Dir.mkdirs();
 
@@ -159,7 +159,7 @@ public class SubServerCreator {
         writer.println("enable-rcon=false");
         writer.println("level-seed=");
         writer.println("force-gamemode=false");
-        writer.println("server-ip=" + Main.config.getString("Settings.Server-IP"));
+        writer.println("server-ip=" + SubPlugin.config.getString("Settings.Server-IP"));
         writer.println("network-compression-threshold=256");
         writer.println("max-build-height=256");
         writer.println("spawn-npcs=true");
@@ -460,7 +460,7 @@ public class SubServerCreator {
 
     public boolean run() {
         try {
-            if (SubEvent.RunEvent(Main, SubEvent.Events.SubCreateEvent, new SubServer(true, Name, -1, Port, true, true, Dir, Exec, false, false, Main), Player, Type)) {
+            if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubCreateEvent, new SubServer(true, Name, -1, Port, true, true, Dir, Exec, false, false, SubPlugin), Player, Type)) {
                 run(true);
                 return true;
             } else {
@@ -479,17 +479,17 @@ public class SubServerCreator {
 
                 @Override
                 public void run() {
-                    Player.sendMessage(ChatColor.GOLD + Main.lprefix + Main.lang.getString("Lang.Create-Server.Server-Create-Loading"));
+                    Player.sendMessage(ChatColor.GOLD + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Create-Loading"));
                     try {
                         if (System.getProperty("os.name").toLowerCase().indexOf("win") >= 0) {
-                            String GitBash = new File(new File(Main.config.getRawString("Settings.Server-Creation.git-dir")), "bin" + File.separatorChar + "bash.exe").getAbsolutePath();
-                            Main.copyFromJar("build-subserver.sh", new File(Dir, "build-subserver.sh").getPath());
+                            String GitBash = new File(new File(SubPlugin.config.getRawString("Settings.Server-Creation.git-dir")), "bin" + File.separatorChar + "bash.exe").getAbsolutePath();
+                            SubPlugin.copyFromJar("build-subserver.sh", new File(Dir, "build-subserver.sh").getPath());
 
                             if (!(new File(Dir, "build-subserver.sh").exists())) {
-                                Bukkit.getLogger().severe(Main.lprefix + "Problem Copying Script!");
+                                Bukkit.getLogger().severe(SubPlugin.lprefix + "Problem Copying Script!");
                             } else {
                                 Process = Runtime.getRuntime().exec("\"" + GitBash + "\" --login -i -c \"bash build-subserver.sh " + Version.toString() + " " + Type.toString() + "\"", null, Dir);
-                                StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Main.config.getBoolean("Settings.Server-Creation.log"), new File(Dir, "SubCreator-" + Type.toString() + "-" + Version.toString().replace("::", "@") + ".log"), Main.lang.getString("Lang.Create-Server.Log-Prefix") + Name, Main);
+                                SubConsole read = new SubConsole(Process.getInputStream(), "OUTPUT", SubPlugin.config.getBoolean("Settings.Server-Creation.log"), new File(Dir, "SubCreator-" + Type.toString() + "-" + Version.toString().replace("::", "@") + ".log"), SubPlugin.lang.getString("Lang.Create-Server.Log-Prefix") + Name, SubPlugin);
                                 read.start();
                                 try {
                                     Process.waitFor();
@@ -499,33 +499,33 @@ public class SubServerCreator {
                                 }
 
                                 if (Process.exitValue() == 0) {
-                                    Player.sendMessage(ChatColor.AQUA + Main.lprefix + Main.lang.getString("Lang.Create-Server.Server-Create-Done"));
-                                    final int PID = (Main.SubServers.size() + 1);
-                                    Main.Servers.put(PID, new SubServer(true, Name, PID, Port, true, true, Dir, Exec, false, false, Main));
-                                    Main.PIDs.put(Name, PID);
-                                    Main.SubServers.add(Name);
+                                    Player.sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Create-Done"));
+                                    final int PID = (SubPlugin.SubServers.size() + 1);
+                                    SubPlugin.Servers.put(PID, new SubServer(true, Name, PID, Port, true, true, Dir, Exec, false, false, SubPlugin));
+                                    SubPlugin.PIDs.put(Name, PID);
+                                    SubPlugin.SubServers.add(Name);
 
-                                    Main.Servers.get(PID).start();
-                                    if (SubAPI.getSubServer(0).isRunning()) SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver " + Name + " " + Main.config.getString("Settings.Server-IP") + " " + Port + " true");
+                                    SubPlugin.Servers.get(PID).start();
+                                    if (SubAPI.getSubServer(0).isRunning()) SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver " + Name + " " + SubPlugin.config.getString("Settings.Server-IP") + " " + Port + " true");
 
-                                    Main.config.set("Servers." + Name + ".enabled", true);
-                                    Main.config.set("Servers." + Name + ".port", Port);
-                                    Main.config.set("Servers." + Name + ".run-on-launch", false);
-                                    Main.config.set("Servers." + Name + ".log", true);
-                                    Main.config.set("Servers." + Name + ".use-shared-chat", true);
-                                    Main.config.set("Servers." + Name + ".dir", Dir.getPath());
-                                    Main.config.set("Servers." + Name + ".exec", Exec.toString());
-                                    Main.config.set("Servers." + Name + ".auto-restart", false);
-                                    Main.config.saveConfig();
+                                    SubPlugin.config.set("Servers." + Name + ".enabled", true);
+                                    SubPlugin.config.set("Servers." + Name + ".port", Port);
+                                    SubPlugin.config.set("Servers." + Name + ".run-on-launch", false);
+                                    SubPlugin.config.set("Servers." + Name + ".log", true);
+                                    SubPlugin.config.set("Servers." + Name + ".use-shared-chat", true);
+                                    SubPlugin.config.set("Servers." + Name + ".dir", Dir.getPath());
+                                    SubPlugin.config.set("Servers." + Name + ".exec", Exec.toString());
+                                    SubPlugin.config.set("Servers." + Name + ".auto-restart", false);
+                                    SubPlugin.config.saveConfig();
                                 } else {
-                                    Bukkit.getLogger().severe(Main.lprefix + "build-subserver.sh exited with an errors. Please try again.");
+                                    Bukkit.getLogger().severe(SubPlugin.lprefix + "build-subserver.sh exited with an errors. Please try again.");
                                 }
                             }
                         } else {
-                            Main.copyFromJar("build-subserver.sh", new File(Dir, "build-subserver.sh").getPath());
+                            SubPlugin.copyFromJar("build-subserver.sh", new File(Dir, "build-subserver.sh").getPath());
 
                             if (!(new File(Dir, "build-subserver.sh").exists())) {
-                                Bukkit.getLogger().severe(Main.lprefix + "Problem Copying Script!");
+                                Bukkit.getLogger().severe(SubPlugin.lprefix + "Problem Copying Script!");
                             } else {
                                 Process Process1 = Runtime.getRuntime().exec("chmod +x build-subserver.sh", null, Dir);
                                 try {
@@ -535,12 +535,12 @@ public class SubServerCreator {
                                     e.printStackTrace();
                                 }
                                 if (Process1.exitValue() != 0) {
-                                    Bukkit.getLogger().warning(Main.lprefix + "Problem Setting Executable Permissions for build-subserver.sh");
+                                    Bukkit.getLogger().warning(SubPlugin.lprefix + "Problem Setting Executable Permissions for build-subserver.sh");
                                     Bukkit.getLogger().warning("This may cause errors in the Build Process");
                                 }
 
                                 Process = Runtime.getRuntime().exec("bash build-subserver.sh " + Version.toString() + " " + Type.toString() + " " + System.getProperty("user.home"), null, Dir);
-                                StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Main.config.getBoolean("Settings.Server-Creation.log"), new File(Dir, "SubCreator-" + Type.toString() + "-" + Version.toString().replace("::", "@") + ".log"), Main.lang.getString("Lang.Create-Server.Log-Prefix") + Name, Main);
+                                SubConsole read = new SubConsole(Process.getInputStream(), "OUTPUT", SubPlugin.config.getBoolean("Settings.Server-Creation.log"), new File(Dir, "SubCreator-" + Type.toString() + "-" + Version.toString().replace("::", "@") + ".log"), SubPlugin.lang.getString("Lang.Create-Server.Log-Prefix") + Name, SubPlugin);
                                 read.start();
                                 try {
                                     Process.waitFor();
@@ -550,26 +550,26 @@ public class SubServerCreator {
                                 }
 
                                 if (Process.exitValue() == 0) {
-                                    Player.sendMessage(ChatColor.AQUA + Main.lprefix + Main.lang.getString("Lang.Create-Server.Server-Create-Done").replace("$Server$", Name));
-                                    final int PID = (Main.SubServers.size() + 1);
-                                    Main.Servers.put(PID, new SubServer(true, Name, PID, Port, true, true, Dir, Exec, false, false, Main));
-                                    Main.PIDs.put(Name, PID);
-                                    Main.SubServers.add(Name);
+                                    Player.sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Create-Done").replace("$Server$", Name));
+                                    final int PID = (SubPlugin.SubServers.size() + 1);
+                                    SubPlugin.Servers.put(PID, new SubServer(true, Name, PID, Port, true, true, Dir, Exec, false, false, SubPlugin));
+                                    SubPlugin.PIDs.put(Name, PID);
+                                    SubPlugin.SubServers.add(Name);
 
-                                    Main.Servers.get(PID).start();
-                                    if (SubAPI.getSubServer(0).isRunning()) SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver " + Name + " " + Main.config.getString("Settings.Server-IP") + " " + Port + " true");
+                                    SubPlugin.Servers.get(PID).start();
+                                    if (SubAPI.getSubServer(0).isRunning()) SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver " + Name + " " + SubPlugin.config.getString("Settings.Server-IP") + " " + Port + " true");
 
-                                    Main.config.set("Servers." + Name + ".enabled", true);
-                                    Main.config.set("Servers." + Name + ".port", Port);
-                                    Main.config.set("Servers." + Name + ".run-on-launch", false);
-                                    Main.config.set("Servers." + Name + ".log", true);
-                                    Main.config.set("Servers." + Name + ".use-shared-chat", true);
-                                    Main.config.set("Servers." + Name + ".dir", Dir.getPath());
-                                    Main.config.set("Servers." + Name + ".exec", Exec.toString());
-                                    Main.config.set("Servers." + Name + ".auto-restart", false);
-                                    Main.config.saveConfig();
+                                    SubPlugin.config.set("Servers." + Name + ".enabled", true);
+                                    SubPlugin.config.set("Servers." + Name + ".port", Port);
+                                    SubPlugin.config.set("Servers." + Name + ".run-on-launch", false);
+                                    SubPlugin.config.set("Servers." + Name + ".log", true);
+                                    SubPlugin.config.set("Servers." + Name + ".use-shared-chat", true);
+                                    SubPlugin.config.set("Servers." + Name + ".dir", Dir.getPath());
+                                    SubPlugin.config.set("Servers." + Name + ".exec", Exec.toString());
+                                    SubPlugin.config.set("Servers." + Name + ".auto-restart", false);
+                                    SubPlugin.config.saveConfig();
                                 } else {
-                                    Bukkit.getLogger().severe(Main.lprefix + "build-subserver.sh exited with an errors. Please try again.");
+                                    Bukkit.getLogger().severe(SubPlugin.lprefix + "build-subserver.sh exited with an errors. Please try again.");
                                 }
                             }
                         }
@@ -578,7 +578,7 @@ public class SubServerCreator {
                     }
                     Running = false;
                 }
-            }.runTaskAsynchronously(Main.Plugin);
+            }.runTaskAsynchronously(SubPlugin.Plugin);
         }
     }
 

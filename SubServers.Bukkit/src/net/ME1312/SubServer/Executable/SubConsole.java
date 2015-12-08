@@ -4,23 +4,23 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import net.ME1312.SubServer.Main;
+import net.ME1312.SubServer.SubPlugin;
 import org.bukkit.Bukkit;
 
-public class StreamGobbler extends Thread {
+public class SubConsole extends Thread {
     InputStream is;
     String type;
     boolean log;
     String id;
-    Main Main;
+    SubPlugin SubPlugin;
     PrintWriter writer = null;
 
-    StreamGobbler(InputStream is, String type, boolean log, File file, String id, Main Main) {
+    SubConsole(InputStream is, String type, boolean log, File file, String id, SubPlugin SubPlugin) {
         this.is = is;
         this.type = type;
         this.log = log;
         this.id = id;
-        this.Main = Main;
+        this.SubPlugin = SubPlugin;
         if (file != null)
             try {
                 this.writer = new PrintWriter(file, "UTF-8");
@@ -40,12 +40,12 @@ public class StreamGobbler extends Thread {
             while ((line = br.readLine()) != null) {
                 if (id.equalsIgnoreCase("~Proxy")) {
                     if (log && !line.startsWith(">") && !line.contains("subconf@")) {
-                        Bukkit.getLogger().info(Main.lang.getString("Lang.Debug.Server-Logging-Prefix").replace("$Server$", "Proxy") +
+                        Bukkit.getLogger().info(SubPlugin.lang.getString("Lang.Debug.Server-Logging-Prefix").replace("$Server$", "Proxy") +
                                 line.replace(new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) + " ", ""));
                     }
                 } else {
                     if (log && !line.startsWith(">") && !line.contains("subconf@")) {
-                        Bukkit.getLogger().info(Main.lang.getString("Lang.Debug.Server-Logging-Prefix").replace("$Server$", id) + line
+                        Bukkit.getLogger().info(SubPlugin.lang.getString("Lang.Debug.Server-Logging-Prefix").replace("$Server$", id) + line
                                 .replace("[" + new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) + " ", "[")
                                 .replace("[" + new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) + "] [Server thread/", "[")
                                 .replace("[" + new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) + "] ", ""));

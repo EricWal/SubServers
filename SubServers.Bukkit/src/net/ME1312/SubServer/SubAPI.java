@@ -31,10 +31,10 @@ import net.ME1312.SubServer.Libraries.Version.Version;
  */
 @SuppressWarnings("static-access")
 public class SubAPI {
-    private static Main Main;
+    private static SubPlugin SubPlugin;
 
-    protected SubAPI(Main Main) {
-        this.Main = Main;
+    protected SubAPI(SubPlugin SubPlugin) {
+        this.SubPlugin = SubPlugin;
     }
 
     /**
@@ -43,9 +43,9 @@ public class SubAPI {
      * @param Command The Command to Execute
      */
     public static void sendCommandToAll(String Command) {
-        for(Iterator<String> str = Main.SubServers.iterator(); str.hasNext(); ) {
+        for(Iterator<String> str = SubPlugin.SubServers.iterator(); str.hasNext(); ) {
             String item = str.next();
-            if (!item.equalsIgnoreCase("~Proxy") && Main.Servers.keySet().contains(Main.PIDs.get(item)) && getSubServer(item).isRunning()) {
+            if (!item.equalsIgnoreCase("~Proxy") && SubPlugin.Servers.keySet().contains(SubPlugin.PIDs.get(item)) && getSubServer(item).isRunning()) {
                 getSubServer(item).sendCommand(Command);
             }
         }
@@ -58,9 +58,9 @@ public class SubAPI {
      * @param Sender The player who sent this Command
      */
     public static void sendCommandToAll(Player Sender, String Command) {
-        for(Iterator<String> str = Main.SubServers.iterator(); str.hasNext(); ) {
+        for(Iterator<String> str = SubPlugin.SubServers.iterator(); str.hasNext(); ) {
             String item = str.next();
-            if (!item.equalsIgnoreCase("~Proxy") && Main.Servers.keySet().contains(Main.PIDs.get(item)) && getSubServer(item).isRunning()) {
+            if (!item.equalsIgnoreCase("~Proxy") && SubPlugin.Servers.keySet().contains(SubPlugin.PIDs.get(item)) && getSubServer(item).isRunning()) {
                 getSubServer(item).sendCommand(Sender, Command);
             }
         }
@@ -70,9 +70,9 @@ public class SubAPI {
      * Stop All Remote Servers
      */
     public static void stopAll() {
-        for(Iterator<String> str = Main.SubServers.iterator(); str.hasNext(); ) {
+        for(Iterator<String> str = SubPlugin.SubServers.iterator(); str.hasNext(); ) {
             String item = str.next();
-            if (!item.equalsIgnoreCase("~Proxy") && Main.Servers.keySet().contains(Main.PIDs.get(item)) && getSubServer(item).isRunning()) {
+            if (!item.equalsIgnoreCase("~Proxy") && SubPlugin.Servers.keySet().contains(SubPlugin.PIDs.get(item)) && getSubServer(item).isRunning()) {
                 getSubServer(item).stop();
             }
         }
@@ -84,9 +84,9 @@ public class SubAPI {
      * @param Sender The player who sent this Command
      */
     public static void stopAll(Player Sender) {
-        for(Iterator<String> str = Main.SubServers.iterator(); str.hasNext(); ) {
+        for(Iterator<String> str = SubPlugin.SubServers.iterator(); str.hasNext(); ) {
             String item = str.next();
-            if (!item.equalsIgnoreCase("~Proxy") && Main.Servers.keySet().contains(Main.PIDs.get(item)) && getSubServer(item).isRunning()) {
+            if (!item.equalsIgnoreCase("~Proxy") && SubPlugin.Servers.keySet().contains(SubPlugin.PIDs.get(item)) && getSubServer(item).isRunning()) {
                 getSubServer(item).stop(Sender);
             }
         }
@@ -99,17 +99,17 @@ public class SubAPI {
      */
     public static List<SubServer> getSubServers() {
         List<SubServer> Server = new ArrayList<SubServer>();
-        Server.addAll(Main.Servers.values());
+        Server.addAll(SubPlugin.Servers.values());
         return Server;
     }
 
     public static SubServer getSubServer(int PID) {
-        return Main.Servers.get(PID);
+        return SubPlugin.Servers.get(PID);
 
     }
 
     public static SubServer getSubServer(String Name) {
-        return Main.Servers.get(Main.PIDs.get(Name));
+        return SubPlugin.Servers.get(SubPlugin.PIDs.get(Name));
 
     }
 
@@ -126,39 +126,39 @@ public class SubAPI {
      * @param Temporary Toggles Temporary Server actions
      */
     public static void addServer(final String Name, int Port, boolean Log, boolean SharedChat, File Dir, Executable Exec, boolean AutoRestart, boolean Temporary) {
-        final int PID = (Main.SubServers.size() + 1);
+        final int PID = (SubPlugin.SubServers.size() + 1);
         if (Temporary) {
-            Main.Servers.put(PID, new SubServer(true, Name, PID, Port, Log, SharedChat, Dir, Exec, false, true, Main));
+            SubPlugin.Servers.put(PID, new SubServer(true, Name, PID, Port, Log, SharedChat, Dir, Exec, false, true, SubPlugin));
         } else {
-            Main.Servers.put(PID, new SubServer(true, Name, PID, Port, Log, SharedChat, Dir, Exec, AutoRestart, false, Main));
+            SubPlugin.Servers.put(PID, new SubServer(true, Name, PID, Port, Log, SharedChat, Dir, Exec, AutoRestart, false, SubPlugin));
         }
-        Main.PIDs.put(Name, PID);
-        Main.SubServers.add(Name);
-        Bukkit.getLogger().info("Servers: " + Main.Servers.toString());
-        Bukkit.getLogger().info("PIDs: " + Main.PIDs.toString());
-        Bukkit.getLogger().info("SubServers: " + Main.SubServers.toString());
+        SubPlugin.PIDs.put(Name, PID);
+        SubPlugin.SubServers.add(Name);
+        Bukkit.getLogger().info("Servers: " + SubPlugin.Servers.toString());
+        Bukkit.getLogger().info("PIDs: " + SubPlugin.PIDs.toString());
+        Bukkit.getLogger().info("SubServers: " + SubPlugin.SubServers.toString());
 
-        if (getSubServer(0).isRunning()) getSubServer(0).sendCommandSilently("subconf@proxy addserver " + Name + " " + Main.config.getString("Settings.Server-IP") + " " + Port + " " + SharedChat);
+        if (getSubServer(0).isRunning()) getSubServer(0).sendCommandSilently("subconf@proxy addserver " + Name + " " + SubPlugin.config.getString("Settings.Server-IP") + " " + Port + " " + SharedChat);
 
         if (Temporary) {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    Main.Servers.get(PID).start();
+                    SubPlugin.Servers.get(PID).start();
                     try {
                         Thread.sleep(1500);
-                        Main.Servers.get(Main.PIDs.get(Name)).waitFor();
+                        SubPlugin.Servers.get(SubPlugin.PIDs.get(Name)).waitFor();
                         Thread.sleep(1000);
-                        Main.Servers.get(Main.PIDs.get(Name)).destroy();
+                        SubPlugin.Servers.get(SubPlugin.PIDs.get(Name)).destroy();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     if (getSubServer(0).isRunning()) getSubServer(0).sendCommandSilently("subconf@proxy removeserver " + Name);
-                    Main.Servers.remove(PID);
-                    Main.PIDs.remove(Name);
-                    Main.SubServers.remove(Name);
+                    SubPlugin.Servers.remove(PID);
+                    SubPlugin.PIDs.remove(Name);
+                    SubPlugin.SubServers.remove(Name);
                 }
-            }.runTaskAsynchronously(Main.Plugin);
+            }.runTaskAsynchronously(SubPlugin.Plugin);
         }
     }
 
@@ -176,36 +176,36 @@ public class SubAPI {
      * @param Temporary Toggles Temporary Server actions
      */
     public static void addServer(Player Sender, final String Name, int Port, boolean Log, boolean SharedChat, File Dir, Executable Exec, boolean AutoRestart, boolean Temporary) {
-        final int PID = (Main.SubServers.size() + 1);
+        final int PID = (SubPlugin.SubServers.size() + 1);
         if (Temporary) {
-            Main.Servers.put(PID, new SubServer(true, Name, PID, Port, Log, SharedChat, Dir, Exec, false, true, Main));
+            SubPlugin.Servers.put(PID, new SubServer(true, Name, PID, Port, Log, SharedChat, Dir, Exec, false, true, SubPlugin));
         } else {
-            Main.Servers.put(PID, new SubServer(true, Name, PID, Port, Log, SharedChat, Dir, Exec, AutoRestart, false, Main));
+            SubPlugin.Servers.put(PID, new SubServer(true, Name, PID, Port, Log, SharedChat, Dir, Exec, AutoRestart, false, SubPlugin));
         }
-        Main.PIDs.put(Name, PID);
-        Main.SubServers.add(Name);
+        SubPlugin.PIDs.put(Name, PID);
+        SubPlugin.SubServers.add(Name);
 
-        getSubServer(0).sendCommandSilently("subconf@proxy addserver " + Name + " " + Main.config.getString("Settings.Server-IP") + " " + Port + " " + SharedChat);
+        getSubServer(0).sendCommandSilently("subconf@proxy addserver " + Name + " " + SubPlugin.config.getString("Settings.Server-IP") + " " + Port + " " + SharedChat);
 
         if (Temporary) {
-            Main.Servers.get(PID).start(Sender);
+            SubPlugin.Servers.get(PID).start(Sender);
             new BukkitRunnable() {
                 @Override
                 public void run() {
                     try {
                         Thread.sleep(1500);
-                        Main.Servers.get(Main.PIDs.get(Name)).waitFor();
+                        SubPlugin.Servers.get(SubPlugin.PIDs.get(Name)).waitFor();
                         Thread.sleep(1000);
-                        Main.Servers.get(Main.PIDs.get(Name)).destroy();
+                        SubPlugin.Servers.get(SubPlugin.PIDs.get(Name)).destroy();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     if (getSubServer(0).isRunning()) getSubServer(0).sendCommandSilently("subconf@proxy removeserver " + Name);
-                    Main.Servers.remove(PID);
-                    Main.PIDs.remove(Name);
-                    Main.SubServers.remove(Name);
+                    SubPlugin.Servers.remove(PID);
+                    SubPlugin.PIDs.remove(Name);
+                    SubPlugin.SubServers.remove(Name);
                 }
-            }.runTaskAsynchronously(Main.Plugin);
+            }.runTaskAsynchronously(SubPlugin.Plugin);
         }
     }
 
@@ -220,9 +220,9 @@ public class SubAPI {
         if (RegisterBukkit) Bukkit.getServer().getPluginManager().registerEvents(Listener, Plugin);
 
         List<SubListener> listeners = new ArrayList<SubListener>();
-        if (Main.EventHandlers.keySet().contains(Plugin)) listeners.addAll(Main.EventHandlers.get(Plugin));
+        if (SubPlugin.EventHandlers.keySet().contains(Plugin)) listeners.addAll(SubPlugin.EventHandlers.get(Plugin));
         listeners.add(Listener);
-        Main.EventHandlers.put(Plugin, listeners);
+        SubPlugin.EventHandlers.put(Plugin, listeners);
 
     }
 
@@ -236,9 +236,9 @@ public class SubAPI {
         Bukkit.getServer().getPluginManager().registerEvents(Listener, Plugin);
 
         List<SubListener> listeners = new ArrayList<SubListener>();
-        if (Main.EventHandlers.keySet().contains(Plugin)) listeners.addAll(Main.EventHandlers.get(Plugin));
+        if (SubPlugin.EventHandlers.keySet().contains(Plugin)) listeners.addAll(SubPlugin.EventHandlers.get(Plugin));
         listeners.add(Listener);
-        Main.EventHandlers.put(Plugin, listeners);
+        SubPlugin.EventHandlers.put(Plugin, listeners);
 
     }
     /**
@@ -246,7 +246,7 @@ public class SubAPI {
      *
      * @return The lang file's nodes
      */
-    public static ConfigFile getLang() { return Main.lang; }
+    public static ConfigFile getLang() { return SubPlugin.lang; }
 
 
     /**
@@ -261,7 +261,7 @@ public class SubAPI {
      * @throws SecurityException
      */
     public static boolean executeEvent(SubEvent.Events Event, Object... Args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-        return SubEvent.RunEvent(Main, Event, Args);
+        return SubEvent.RunEvent(SubPlugin, Event, Args);
     }
 
     /**
@@ -269,7 +269,7 @@ public class SubAPI {
      *
      * @return The SubServers Version
      */
-    public static Version getPluginVersion() { return Main.PluginVersion; }
+    public static Version getPluginVersion() { return SubPlugin.PluginVersion; }
 
-    public static Version getMinecraftVersion() { return Main.MCVersion; }
+    public static Version getMinecraftVersion() { return SubPlugin.MCVersion; }
 }

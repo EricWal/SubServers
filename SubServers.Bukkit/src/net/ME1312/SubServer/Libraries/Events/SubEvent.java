@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 
-import net.ME1312.SubServer.Main;
-import net.ME1312.SubServer.Executable.SubServerCreator.ServerTypes;
+import net.ME1312.SubServer.SubPlugin;
+import net.ME1312.SubServer.Executable.SubCreator.ServerTypes;
 import net.ME1312.SubServer.Executable.SubServer;
 import net.ME1312.SubServer.Libraries.Events.SubEvent.SubPlayerEvent.SubCreateEvent;
 
@@ -20,7 +20,7 @@ import net.ME1312.SubServer.Libraries.Events.SubEvent.SubPlayerEvent.SubCreateEv
 public class SubEvent {
 	protected boolean isCancelled = false;
 	protected SubServer Server;
-	protected Main Main;
+	protected SubPlugin SubPlugin;
 	private Events Event;
 	public static enum Events {
 		SubCreateEvent,
@@ -30,8 +30,8 @@ public class SubEvent {
 		SubStopEvent,
 	}
 	
-	public SubEvent(Main Main, Events Event, SubServer Server) {
-		this.Main = Main;
+	public SubEvent(SubPlugin SubPlugin, Events Event, SubServer Server) {
+		this.SubPlugin = SubPlugin;
 		this.Server = Server;
 		this.Event = Event;
 	}
@@ -73,8 +73,8 @@ public class SubEvent {
 	public static class SubPlayerEvent extends SubEvent {
 		protected Player Player;
 
-		protected SubPlayerEvent(Main Main, Events Event, SubServer Server, Player Player) {
-			super(Main, Event, Server);
+		protected SubPlayerEvent(SubPlugin SubPlugin, Events Event, SubServer Server, Player Player) {
+			super(SubPlugin, Event, Server);
 			this.Player = Player;
 		}
 		
@@ -93,8 +93,8 @@ public class SubEvent {
 		public static class SubCreateEvent extends SubPlayerEvent {
 			private ServerTypes Type;
 			
-			public SubCreateEvent(Main Main, SubServer Server, Player Player, ServerTypes Type) {
-				super(Main, Events.SubCreateEvent, Server, Player);
+			public SubCreateEvent(SubPlugin SubPlugin, SubServer Server, Player Player, ServerTypes Type) {
+				super(SubPlugin, Events.SubCreateEvent, Server, Player);
 				this.Type = Type;
 			}
 			
@@ -109,8 +109,8 @@ public class SubEvent {
 		public static class SubRunCommandEvent extends SubPlayerEvent {
 			private String Command;
 			
-			public SubRunCommandEvent(Main Main, SubServer Server, Player Player, String Command) {
-				super(Main, Events.SubRunCommandEvent, Server, Player);
+			public SubRunCommandEvent(SubPlugin SubPlugin, SubServer Server, Player Player, String Command) {
+				super(SubPlugin, Events.SubRunCommandEvent, Server, Player);
 				this.Command = Command;
 			}
 			
@@ -125,7 +125,7 @@ public class SubEvent {
 	/**
 	 * Runs a SubEvent
 	 * 
-	 * @param Main SubServers Main Class
+	 * @param SubPlugin SubServers Main Class
 	 * @param Event The event to Trigger
 	 * @param args A List of Objects to be Cast to the proper Arguments
 	 * @return False if Cancelled
@@ -135,37 +135,37 @@ public class SubEvent {
 	 * @throws NoSuchMethodException
 	 * @throws SecurityException
 	 */
-	public static boolean RunEvent(Main Main, Events Event, Object... args)
+	public static boolean RunEvent(SubPlugin SubPlugin, Events Event, Object... args)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		
 		boolean EventStatus = true;
-		for(Iterator<List<SubListener>> List = Main.EventHandlers.values().iterator(); List.hasNext(); ) {
+		for(Iterator<List<SubListener>> List = SubPlugin.EventHandlers.values().iterator(); List.hasNext(); ) {
 			List<SubListener> item = List.next();
 			
 			for(Iterator<SubListener> Listeners = item.iterator(); Listeners.hasNext(); ) {
 				SubListener Listener = Listeners.next();
 				
 				if (Event.equals(SubEvent.Events.SubCreateEvent)) {
-					SubPlayerEvent EventClass = new SubCreateEvent(Main, (SubServer) args[0], (Player) args[1], (ServerTypes) args[2]);
+					SubPlayerEvent EventClass = new SubCreateEvent(SubPlugin, (SubServer) args[0], (Player) args[1], (ServerTypes) args[2]);
 					Listener.getClass().getMethod("onSubServerCreate", SubCreateEvent.class).invoke(Listener, EventClass);
 					if (EventClass.isCancelled()) EventStatus = false;
 					
 				} else if (Event.equals(SubEvent.Events.SubStartEvent)) {
-					SubPlayerEvent EventClass = new SubPlayerEvent(Main, SubEvent.Events.SubStartEvent, (SubServer) args[0], (Player) args[1]);
+					SubPlayerEvent EventClass = new SubPlayerEvent(SubPlugin, SubEvent.Events.SubStartEvent, (SubServer) args[0], (Player) args[1]);
 					Listener.getClass().getMethod("onSubServerStart", SubPlayerEvent.class).invoke(Listener, EventClass);
 					if (EventClass.isCancelled()) EventStatus = false;
 					
 				} else if (Event.equals(SubEvent.Events.SubRunCommandEvent)) {
-					SubPlayerEvent.SubRunCommandEvent EventClass = new SubPlayerEvent.SubRunCommandEvent(Main, (SubServer) args[0], (Player) args[1], (String) args[2]);
+					SubPlayerEvent.SubRunCommandEvent EventClass = new SubPlayerEvent.SubRunCommandEvent(SubPlugin, (SubServer) args[0], (Player) args[1], (String) args[2]);
 					Listener.getClass().getMethod("onSubServerCommand", SubPlayerEvent.SubRunCommandEvent.class).invoke(Listener, EventClass);
 					if (EventClass.isCancelled()) EventStatus = false;
 					
 				} else if (Event.equals(SubEvent.Events.SubShellExitEvent)) {
 					Listener.getClass().getMethod("onSubServerShellExit", SubEvent.class)
-						.invoke(Listener, new SubEvent(Main, SubEvent.Events.SubShellExitEvent, (SubServer) args[0]));
+						.invoke(Listener, new SubEvent(SubPlugin, SubEvent.Events.SubShellExitEvent, (SubServer) args[0]));
 					
 				} else if (Event.equals(SubEvent.Events.SubStopEvent)) {
-					SubPlayerEvent EventClass = new SubPlayerEvent(Main, SubEvent.Events.SubStopEvent, (SubServer) args[0], (Player) args[1]);
+					SubPlayerEvent EventClass = new SubPlayerEvent(SubPlugin, SubEvent.Events.SubStopEvent, (SubServer) args[0], (Player) args[1]);
 					Listener.getClass().getMethod("onSubServerStop", SubPlayerEvent.class).invoke(Listener, EventClass);
 					if (EventClass.isCancelled()) EventStatus = false;
 					

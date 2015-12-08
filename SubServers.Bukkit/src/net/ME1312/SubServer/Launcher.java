@@ -2,14 +2,14 @@ package net.ME1312.SubServer;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
-public class Load extends JavaPlugin {
-	private Main Main;
+public class Launcher extends JavaPlugin {
+	private SubPlugin SubPlugin;
 	
 	@Override
 	public void onEnable() {
 		try {
-			Main = new Main(this);
-			Main.EnablePlugin();
+			SubPlugin = new SubPlugin(this);
+			SubPlugin.EnablePlugin();
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 			setEnabled(false);
@@ -18,8 +18,8 @@ public class Load extends JavaPlugin {
 	
 	@Override
 	public void onDisable() {
-		if (Main != null) {
-			Main.DisablePlugin();
+		if (SubPlugin != null) {
+			SubPlugin.DisablePlugin();
 		}
 	}
 

@@ -14,7 +14,7 @@ import java.util.List;
 import net.ME1312.SubServer.Libraries.ServerPing;
 import net.ME1312.SubServer.Libraries.Version.Version;
 import net.ME1312.SubServer.SubAPI;
-import net.ME1312.SubServer.Main;
+import net.ME1312.SubServer.SubPlugin;
 import net.ME1312.SubServer.Libraries.Events.SubEvent;
 
 import org.bukkit.Bukkit;
@@ -39,7 +39,7 @@ public class SubServer implements Serializable {
 	public int Port;
     public boolean AutoRestart;
 	
-	protected Main Main;
+	protected SubPlugin SubPlugin;
 	protected File Dir;
 	protected Executable Exec;
 
@@ -63,7 +63,7 @@ public class SubServer implements Serializable {
 	 * @param AutoRestart Restart when Stopped
 	 * @param Temporary Toggle Temporary Server Options
 	 */
-	public SubServer(final Boolean Enabled, final String Name, final int PID, final int Port, final boolean Log, final boolean SharedChat, final File Dir, final Executable Exec, final boolean AutoRestart, final boolean Temporary, final Main Main) {
+	public SubServer(final Boolean Enabled, final String Name, final int PID, final int Port, final boolean Log, final boolean SharedChat, final File Dir, final Executable Exec, final boolean AutoRestart, final boolean Temporary, final SubPlugin SubPlugin) {
 		this.Enabled = Enabled;
 		this.Name = Name;
 		this.PID = PID;
@@ -74,20 +74,20 @@ public class SubServer implements Serializable {
 		this.Dir = Dir;
 		this.Exec = Exec;
 		this.AutoRestart = AutoRestart;
-		this.Main = Main;
+		this.SubPlugin = SubPlugin;
 
-        if (Main.MCVersion.compareTo(new Version("1.8")) >= 0) {
+        if (SubPlugin.MCVersion.compareTo(new Version("1.8")) >= 0) {
             tasks.add(new BukkitRunnable() {
                 @Override
                 public void run() {
                     if (isRunning() && PID != 0)
                         try {
-                            query = new ServerPing(new InetSocketAddress(Main.config.getString("Settings.Server-IP"), Port)).fetchData();
+                            query = new ServerPing(new InetSocketAddress(SubPlugin.config.getString("Settings.Server-IP"), Port)).fetchData();
                         } catch (NullPointerException | IOException e) {
                             query = null;
                         }
                 }
-            }.runTaskTimerAsynchronously(Main.Plugin, 20 * 30, 20 * 30));
+            }.runTaskTimerAsynchronously(SubPlugin.Plugin, 20 * 30, 20 * 30));
         }
 	}
 	
@@ -103,8 +103,8 @@ public class SubServer implements Serializable {
 							 * StreamGobbler Starter
 							 */
 							Process = Runtime.getRuntime().exec(Exec.toString(), null, Dir); //Whatever you want to execute
-							Bukkit.getLogger().info(Main.lprefix + Main.lang.getString("Lang.Debug.Server-Logging-Start").replace("$Server$", "The Proxy").replace("$Shell$", Exec.toString()));
-							final StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Log, null, Name, Main);
+							Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Debug.Server-Logging-Start").replace("$Server$", "The Proxy").replace("$Shell$", Exec.toString()));
+							final SubConsole read = new SubConsole(Process.getInputStream(), "OUTPUT", Log, null, Name, SubPlugin);
 							read.start();
 							final BufferedWriter cmd = new BufferedWriter(new OutputStreamWriter(Process.getOutputStream()));
 							new BukkitRunnable() {
@@ -126,45 +126,45 @@ public class SubServer implements Serializable {
 										}
 									} while (read.isAlive() == true);
 								};
-							}.runTaskAsynchronously(Main.Plugin);
+							}.runTaskAsynchronously(SubPlugin.Plugin);
 							new BukkitRunnable() {
 								@Override
 								public void run() {
 									try {
-										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport " + Main.lang.getString("Lang.Commands.Teleport").replace(" ", "%20"));
+										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport " + SubPlugin.lang.getString("Lang.Commands.Teleport").replace(" ", "%20"));
 										Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Server-List " + Main.lang.getString("Lang.Commands.Teleport-Server-List").replace(" ", "%20"));
+										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Server-List " + SubPlugin.lang.getString("Lang.Commands.Teleport-Server-List").replace(" ", "%20"));
 										Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Player-Error " + Main.lang.getString("Lang.Commands.Teleport-Player-Error").replace(" ", "%20"));
+										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Player-Error " + SubPlugin.lang.getString("Lang.Commands.Teleport-Player-Error").replace(" ", "%20"));
 										Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Config-Error " + Main.lang.getString("Lang.Commands.Teleport-Config-Error").replace(" ", "%20"));
+										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Config-Error " + SubPlugin.lang.getString("Lang.Commands.Teleport-Config-Error").replace(" ", "%20"));
 										Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Permission-Error " + Main.lang.getString("Lang.Commands.Teleport-Permission-Error").replace(" ", "%20"));
+										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Permission-Error " + SubPlugin.lang.getString("Lang.Commands.Teleport-Permission-Error").replace(" ", "%20"));
 										Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Offline-Error " + Main.lang.getString("Lang.Commands.Teleport-Offline-Error").replace(" ", "%20"));
+										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Offline-Error " + SubPlugin.lang.getString("Lang.Commands.Teleport-Offline-Error").replace(" ", "%20"));
 										Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Console-Error " + Main.lang.getString("Lang.Commands.Teleport-Console-Error").replace(" ", "%20"));
+										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Console-Error " + SubPlugin.lang.getString("Lang.Commands.Teleport-Console-Error").replace(" ", "%20"));
 										Thread.sleep(500);
 										
-										sendCommandSilently("subconf@proxy lang Lang.Proxy.Register-Server " + Main.lang.getString("Lang.Proxy.Register-Server").replace(" ", "%20"));
+										sendCommandSilently("subconf@proxy lang Lang.Proxy.Register-Server " + SubPlugin.lang.getString("Lang.Proxy.Register-Server").replace(" ", "%20"));
 										Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Proxy.Remove-Server " + Main.lang.getString("Lang.Proxy.Remove-Server").replace(" ", "%20"));
+										sendCommandSilently("subconf@proxy lang Lang.Proxy.Remove-Server " + SubPlugin.lang.getString("Lang.Proxy.Remove-Server").replace(" ", "%20"));
 										Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Proxy.Reset-Storage " + Main.lang.getString("Lang.Proxy.Reset-Storage").replace(" ", "%20"));
+										sendCommandSilently("subconf@proxy lang Lang.Proxy.Reset-Storage " + SubPlugin.lang.getString("Lang.Proxy.Reset-Storage").replace(" ", "%20"));
 										Thread.sleep(500);
-                                        sendCommandSilently("subconf@proxy lang Lang.Proxy.Chat-Format " + Main.lang.getString("Lang.Proxy.Chat-Format").replace(" ", "%20"));
+                                        sendCommandSilently("subconf@proxy lang Lang.Proxy.Chat-Format " + SubPlugin.lang.getString("Lang.Proxy.Chat-Format").replace(" ", "%20"));
                                         Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Proxy.Teleport " + Main.lang.getString("Lang.Proxy.Teleport").replace(" ", "%20"));
+										sendCommandSilently("subconf@proxy lang Lang.Proxy.Teleport " + SubPlugin.lang.getString("Lang.Proxy.Teleport").replace(" ", "%20"));
 										Thread.sleep(500);
 										
-										sendCommandSilently("subconf@proxy addserver ~Lobby " + Main.config.getString("Settings.Server-IP") + " " + Main.config.getString("Settings.Lobby-Port") + " true");
+										sendCommandSilently("subconf@proxy addserver ~Lobby " + SubPlugin.config.getString("Settings.Server-IP") + " " + SubPlugin.config.getString("Settings.Lobby-Port") + " true");
 										Thread.sleep(500);
 									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}
-									for(Iterator<String> str = Main.SubServers.iterator(); str.hasNext(); ) {
+									for(Iterator<String> str = SubPlugin.SubServers.iterator(); str.hasNext(); ) {
 										String item = str.next();
-										sendCommandSilently("subconf@proxy addserver " + item + " " + Main.config.getString("Settings.Server-IP") + " " + SubAPI.getSubServer(item).Port + " " + SubAPI.getSubServer(item).SharedChat);
+										sendCommandSilently("subconf@proxy addserver " + item + " " + SubPlugin.config.getString("Settings.Server-IP") + " " + SubAPI.getSubServer(item).Port + " " + SubAPI.getSubServer(item).SharedChat);
 										try {
 											Thread.sleep(500);
 										} catch (InterruptedException e) {
@@ -172,10 +172,10 @@ public class SubServer implements Serializable {
 										}
 									}
 								};
-							}.runTaskAsynchronously(Main.Plugin);
+							}.runTaskAsynchronously(SubPlugin.Plugin);
 							try {
 								Process.waitFor();
-								SubEvent.RunEvent(Main, SubEvent.Events.SubShellExitEvent, Server);
+								SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubShellExitEvent, Server);
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
@@ -188,7 +188,7 @@ public class SubServer implements Serializable {
 						/**
 						 * Reset the Server's PID for future use
 						 */
-						Bukkit.getLogger().info(Main.lprefix + Main.lang.getString("Lang.Debug.Server-Logging-End").replace("$Server$", "Proxy"));
+						Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Debug.Server-Logging-End").replace("$Server$", "Proxy"));
 						Process = null;
 						StdIn = null;
                         if (AutoRestart) {
@@ -200,7 +200,7 @@ public class SubServer implements Serializable {
                             }
                         }
 					}
-				}.runTaskAsynchronously(Main.Plugin);
+				}.runTaskAsynchronously(SubPlugin.Plugin);
 			} else if (Enabled) {
 				new BukkitRunnable() {
 					@Override
@@ -211,8 +211,8 @@ public class SubServer implements Serializable {
 							 * StreamGobbler Starter
 							 */
 							Process = Runtime.getRuntime().exec(Exec.toString(), null, Dir); //Whatever you want to execute
-							Bukkit.getLogger().info(Main.lprefix + Main.lang.getString("Lang.Debug.Server-Logging-Start").replace("$Server$", Name).replace("$Shell$", Exec.toString()));
-							final StreamGobbler read = new StreamGobbler(Process.getInputStream(), "OUTPUT", Log, null, Name, Main);
+							Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Debug.Server-Logging-Start").replace("$Server$", Name).replace("$Shell$", Exec.toString()));
+							final SubConsole read = new SubConsole(Process.getInputStream(), "OUTPUT", Log, null, Name, SubPlugin);
 							read.start();
 							final BufferedWriter cmd = new BufferedWriter(new OutputStreamWriter(Process.getOutputStream()));
 							new BukkitRunnable() {
@@ -234,10 +234,10 @@ public class SubServer implements Serializable {
 										}
 									} while (read.isAlive() == true);
 								};
-							}.runTaskAsynchronously(Main.Plugin);
+							}.runTaskAsynchronously(SubPlugin.Plugin);
 							try {
 								Process.waitFor();
-								SubEvent.RunEvent(Main, SubEvent.Events.SubShellExitEvent, Server);
+								SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubShellExitEvent, Server);
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 							} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
@@ -250,7 +250,7 @@ public class SubServer implements Serializable {
 						/**
 						 * Reset the Server's PID for future use
 						 */
-						Bukkit.getLogger().info(Main.lprefix + Main.lang.getString("Lang.Debug.Server-Logging-End").replace("$Server$", Name));	
+						Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Debug.Server-Logging-End").replace("$Server$", Name));
 						Process = null;
 						StdIn = null;
                         if (AutoRestart) {
@@ -262,7 +262,7 @@ public class SubServer implements Serializable {
                             }
                         }
 					};
-				}.runTaskAsynchronously(Main.Plugin);
+				}.runTaskAsynchronously(SubPlugin.Plugin);
 			}
 		}
 	}
@@ -289,7 +289,7 @@ public class SubServer implements Serializable {
 	 */
 	public boolean start() {
 		try {
-			if (SubEvent.RunEvent(Main, SubEvent.Events.SubStartEvent, this, null)) {
+			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubStartEvent, this, null)) {
 				start(true);
 				return true;
 			} else {
@@ -308,7 +308,7 @@ public class SubServer implements Serializable {
 	 */
 	public boolean start(final Player sender) {
 		try {
-			if (SubEvent.RunEvent(Main, SubEvent.Events.SubStartEvent, this, sender)) {
+			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubStartEvent, this, sender)) {
 				start(true);
 				return true;
 			} else {
@@ -326,7 +326,7 @@ public class SubServer implements Serializable {
 	 */
 	public boolean sendCommand(String cmd) {
 		try {
-			if (SubEvent.RunEvent(Main, SubEvent.Events.SubRunCommandEvent, this, null, cmd)) {
+			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubRunCommandEvent, this, null, cmd)) {
 				StdIn = cmd;
 				return true;
 			} else {
@@ -345,7 +345,7 @@ public class SubServer implements Serializable {
 	 */
 	public boolean sendCommand(Player sender, String cmd) {
 		try {
-			if (SubEvent.RunEvent(Main, SubEvent.Events.SubRunCommandEvent, this, sender, cmd)) {
+			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubRunCommandEvent, this, sender, cmd)) {
 				StdIn = cmd;
 				return true;
 			} else {
@@ -370,7 +370,7 @@ public class SubServer implements Serializable {
 	 */
 	public boolean stop() {
 		try {
-			if (SubEvent.RunEvent(Main, SubEvent.Events.SubStopEvent, this, null)) {
+			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubStopEvent, this, null)) {
 				if (Name.equalsIgnoreCase("~Proxy")) {
 					StdIn = "end";
 				} else {
@@ -390,7 +390,7 @@ public class SubServer implements Serializable {
                                 e.printStackTrace();
                             }
                         }
-                    }.runTaskAsynchronously(Main.Plugin);
+                    }.runTaskAsynchronously(SubPlugin.Plugin);
                 }
 				return true;
 			} else {
@@ -408,7 +408,7 @@ public class SubServer implements Serializable {
 	 */
 	public boolean stop(Player sender) {
 		try {
-			if (SubEvent.RunEvent(Main, SubEvent.Events.SubStopEvent, this, sender)) {
+			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubStopEvent, this, sender)) {
 				if (Name.equalsIgnoreCase("~Proxy")) {
 					StdIn = "end";
 				} else {
@@ -428,7 +428,7 @@ public class SubServer implements Serializable {
                                 e.printStackTrace();
                             }
                         }
-                    }.runTaskAsynchronously(Main.Plugin);
+                    }.runTaskAsynchronously(SubPlugin.Plugin);
                 }
 				return true;
 			} else {
@@ -445,7 +445,7 @@ public class SubServer implements Serializable {
 	 */
 	public boolean terminate() {
 		try {
-			if (SubEvent.RunEvent(Main, SubEvent.Events.SubStopEvent, this, null)) {
+			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubStopEvent, this, null)) {
 				Process.destroy();
 
                 if (AutoRestart) {
@@ -460,7 +460,7 @@ public class SubServer implements Serializable {
                                 e.printStackTrace();
                             }
                         }
-                    }.runTaskAsynchronously(Main.Plugin);
+                    }.runTaskAsynchronously(SubPlugin.Plugin);
                 }
 				return true;
 			} else {
@@ -478,7 +478,7 @@ public class SubServer implements Serializable {
 	 */
 	public boolean terminate(Player sender) {
 		try {
-			if (SubEvent.RunEvent(Main, SubEvent.Events.SubStopEvent, this, sender)) {
+			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubStopEvent, this, sender)) {
 				Process.destroy();
 
                 if (AutoRestart) {
@@ -493,7 +493,7 @@ public class SubServer implements Serializable {
                                 e.printStackTrace();
                             }
                         }
-                    }.runTaskAsynchronously(Main.Plugin);
+                    }.runTaskAsynchronously(SubPlugin.Plugin);
                 }
 				return true;
 			} else {

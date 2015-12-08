@@ -1,29 +1,26 @@
 package net.ME1312.SubServer.GUI;
 
-import net.ME1312.SubServer.Main;
+import net.ME1312.SubServer.SubPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by ME1312 on 10/15/15.
  */
 @SuppressWarnings("deprecation")
-public class ChatListener implements Listener {
+public class SubGUIChat implements Listener {
     public boolean chatEnabled = true;
     public String chatText = "";
 
-    private Main Main;
+    private SubPlugin SubPlugin;
     private Player Player;
 
-    protected ChatListener(Player Player, Main Main) {
-        this.Main = Main;
+    protected SubGUIChat(Player Player, SubPlugin SubPlugin) {
+        this.SubPlugin = SubPlugin;
         this.Player = Player;
-        Bukkit.getPluginManager().registerEvents(this, Main.Plugin);
+        Bukkit.getPluginManager().registerEvents(this, SubPlugin.Plugin);
     }
 
     /**
