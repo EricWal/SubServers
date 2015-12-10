@@ -34,7 +34,7 @@ public class SubServerInfo extends BungeeServerInfo {
                     });
                 } catch (NullPointerException e) {}
             }
-        }, 0L, TimeUnit.SECONDS.toMillis(30));
+        }, 0L, TimeUnit.SECONDS.toMillis(10));
     }
 
     public boolean isSharedChat() {

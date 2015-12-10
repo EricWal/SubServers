@@ -43,8 +43,8 @@ public class PlayerListener implements Listener {
 
         String server = FakeProxyServer.getConfig().getListeners().toArray(new ListenerInfo[FakeProxyServer.getConfig().getListeners().size()])[0].getFallbackServer();
 
-        if (FakeProxyServer.ServerInfo.keySet().contains(server)) {
-            ServerInfo kickTo = FakeProxyServer.ServerInfo.get(server);
+        if (FakeProxyServer.getServers().keySet().contains(server)) {
+            ServerInfo kickTo = FakeProxyServer.getServers().get(server);
             if (kickedFrom != null && !kickedFrom.equals(kickTo)) {
                 event.getPlayer().setReconnectServer(kickTo);
                 event.setCancelled(true);

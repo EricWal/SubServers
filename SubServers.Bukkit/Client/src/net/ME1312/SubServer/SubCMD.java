@@ -1,18 +1,17 @@
 package net.ME1312.SubServer;
 
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Arrays;
-import java.util.Iterator;
-
 import net.ME1312.SubServer.GUI.SubGUI;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Iterator;
 
 public class SubCMD implements CommandExecutor {
 	SubPlugin SubPlugin;
@@ -27,42 +26,42 @@ public class SubCMD implements CommandExecutor {
 				if (args.length == 2) {
 					if (!(sender instanceof Player) || (((Player) sender).hasPermission("SubServer.Command.Start." + args[1])) || ((Player) sender).hasPermission("SubServer.Command.Start.*")) {
 						if (args[1].equals("~Proxy")) {
-							if (SubPlugin.config.getBoolean("Proxy.enabled") == true && !SubAPI.getSubServer(0).isRunning()) {
+							if (SubAPI.getSubServer(0).Enabled && !SubAPI.getSubServer(0).isRunning()) {
 								if (sender instanceof Player) {
 									SubAPI.getSubServer(args[1]).start((Player) sender);
-									((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Proxy-Start"));
+									((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Proxy-Start"));
 								} else {
 									SubAPI.getSubServer(args[1]).start();
 								}
 							} else {
 								if (sender instanceof Player) {
-									((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Proxy-Start-Error"));
+									((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Proxy-Start-Error"));
 								} else {
-									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Proxy-Start-Error"));
+									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Proxy-Start-Error"));
 								}
 							}
-						} else if (SubPlugin.config.getBoolean("Servers." + args[1] + ".enabled") == true && !SubAPI.getSubServer(args[1]).isRunning()) {
+						} else if (SubAPI.getSubServer(args[1]).Enabled && !SubAPI.getSubServer(args[1]).isRunning()) {
 							if (sender instanceof Player) {
 								SubAPI.getSubServer(args[1]).start((Player) sender);
-								((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Server-Start"));
+								((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Server-Start"));
 							} else {
 								SubAPI.getSubServer(args[1]).start();
 							}
 						} else if (!SubPlugin.SubServers.contains(args[1])) {
 							if (sender instanceof Player) {
-								((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Start-Config-Error"));
+								((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Start-Config-Error"));
 							} else {
-								Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Start-Config-Error"));
+								Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Start-Config-Error"));
 							}
 						} else {
 							if (sender instanceof Player) {
-								((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Server-Start-Error"));
+								((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Server-Start-Error"));
 							} else {
-								Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Server-Start-Error"));
+								Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Server-Start-Error"));
 							}
 						}
 					} else if (sender instanceof Player) {
-						((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Start-Permission-Error"));
+						((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Start-Permission-Error"));
 					}
 				} else {
 					if (sender instanceof Player) {
@@ -88,15 +87,15 @@ public class SubCMD implements CommandExecutor {
 								}
 								if (sender instanceof Player) {
 									SubAPI.getSubServer(args[1]).sendCommand((Player) sender, str);
-									((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Send-Command-Proxy"));
+									((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Send-Command-Proxy"));
 								} else {
 									SubAPI.getSubServer(args[1]).sendCommand(str);
 								}
 							} else {
 								if (sender instanceof Player) {
-									((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Send-Command-Proxy-Error"));
+									((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Send-Command-Proxy-Error"));
 								} else {
-									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Send-Command-Proxy-Error"));
+									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Send-Command-Proxy-Error"));
 								}
 							}
 						} else if (SubPlugin.SubServers.contains(args[1])) {
@@ -111,26 +110,26 @@ public class SubCMD implements CommandExecutor {
 								}
 								if (sender instanceof Player) {
 									SubAPI.getSubServer(args[1]).sendCommand((Player) sender, str);
-									((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Send-Command-Server"));
+									((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Send-Command-Server"));
 								} else {
 									SubAPI.getSubServer(args[1]).sendCommand(str);
 								}
 							} else {
 								if (sender instanceof Player) {
-									((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Send-Command-Server-Error"));
+									((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Send-Command-Server-Error"));
 								} else {
-									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Send-Command-Server-Error"));
+									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Send-Command-Server-Error"));
 								}
 							}
 						} else {
 							if (sender instanceof Player) {
-								((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Send-Command-Config-Error"));
+								((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Send-Command-Config-Error"));
 							} else {
-								Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Send-Command-Config-Error"));
+								Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Send-Command-Config-Error"));
 							}
 						}
 					} else if (sender instanceof Player) {
-						((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Send-Command-Permission-Error"));
+						((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Send-Command-Permission-Error"));
 					}
 				} else {
 					if (sender instanceof Player) {
@@ -148,41 +147,41 @@ public class SubCMD implements CommandExecutor {
 							if (SubAPI.getSubServer(args[1]).isRunning()) {
 								if (sender instanceof Player) {
 									SubAPI.getSubServer(args[1]).stop((Player) sender);
-									((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Proxy-Stop"));
+									((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Proxy-Stop"));
 								} else {
 									SubAPI.getSubServer(args[1]).stop();
 								}
 							} else {
 								if (sender instanceof Player) {
-									((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Proxy-Stop-Error"));
+									((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Proxy-Stop-Error"));
 								} else {
-									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Proxy-Stop-Error"));
+									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Proxy-Stop-Error"));
 								}
 							}
 						} else if (SubPlugin.SubServers.contains(args[1])) {
 							if (SubAPI.getSubServer(args[1]).isRunning()) {
 								if (sender instanceof Player) {
 									SubAPI.getSubServer(args[1]).stop((Player) sender);
-									((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Server-Stop"));
+									((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Server-Stop"));
 								} else {
 									SubAPI.getSubServer(args[1]).stop();
 								}
 							} else {
 								if (sender instanceof Player) {
-									((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Server-Stop-Error"));
+									((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Server-Stop-Error"));
 								} else {
-									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Server-Stop-Error"));
+									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Server-Stop-Error"));
 								}
 							}
 						} else {
 							if (sender instanceof Player) {
-								((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Stop-Config-Error"));
+								((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Stop-Config-Error"));
 							} else {
-								Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Stop-Config-Error"));
+								Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Stop-Config-Error"));
 							}
 						}
 					} else if (sender instanceof Player) {
-						((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Stop-Permission-Error"));
+						((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Stop-Permission-Error"));
 					}
 				} else {
 					if (sender instanceof Player) {
@@ -200,41 +199,41 @@ public class SubCMD implements CommandExecutor {
 							if (SubAPI.getSubServer(args[1]).isRunning()) {
 								if (sender instanceof Player) {
 									SubAPI.getSubServer(args[1]).terminate((Player) sender);
-									((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Proxy-Kill"));
+									((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Proxy-Kill"));
 								} else {
 									SubAPI.getSubServer(args[1]).terminate();
 								}
 							} else {
 								if (sender instanceof Player) {
-									((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Proxy-Kill-Error"));
+									((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Proxy-Kill-Error"));
 								} else {
-									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Proxy-Kill-Error"));
+									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Proxy-Kill-Error"));
 								}
 							}
 						} else if (SubPlugin.SubServers.contains(args[1])) {
 							if (SubAPI.getSubServer(args[1]).isRunning()) {
 								if (sender instanceof Player) {
-									((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Server-Kill"));
+									((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Server-Kill"));
 									SubAPI.getSubServer(args[1]).terminate((Player) sender);
 								} else {
 									SubAPI.getSubServer(args[1]).terminate();
 								}
 							} else {
 								if (sender instanceof Player) {
-									((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Server-Kill-Error"));
+									((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Server-Kill-Error"));
 								} else {
-									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Server-Kill-Error"));
+									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Server-Kill-Error"));
 								}
 							}
 						} else {
 							if (sender instanceof Player) {
-								((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Kill-Config-Error"));
+								((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Kill-Config-Error"));
 							} else {
-								Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Kill-Config-Error"));
+								Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Kill-Config-Error"));
 							}
 						}
 					} else if (sender instanceof Player) {
-						((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Kill-Permission-Error"));
+						((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Kill-Permission-Error"));
 					}
 				} else {
 					if (sender instanceof Player) {
@@ -249,21 +248,21 @@ public class SubCMD implements CommandExecutor {
                 if (args.length == 3) {
                     if (!(SubPlugin.SubServers.contains(args[1]) || args[1].equalsIgnoreCase("~Lobby"))) {
                         if (sender instanceof Player) {
-                            ((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Teleport-Config-Error"));
+                            ((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Teleport-Config-Error"));
                         } else {
-                            Bukkit.getLogger().info(String.valueOf(SubPlugin.lprefix) + SubPlugin.lang.getString("Lang.Commands.Teleport-Config-Error"));
+                            Bukkit.getLogger().info(String.valueOf(SubPlugin.lprefix) + SubPlugin.lang.get("Lang.Commands.Teleport-Config-Error"));
                         }
                     } else if ((sender instanceof Player) && (!((Player) sender).hasPermission("subserver.command.teleport.others.*")) && (!((Player) sender).hasPermission("subserver.command.teleport.others." + args[1]))) {
                         if (sender instanceof Player) {
-                            ((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Teleport-Permission-Error"));
+                            ((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Teleport-Permission-Error"));
                         } else {
-                            Bukkit.getLogger().info(String.valueOf(SubPlugin.lprefix) + SubPlugin.lang.getString("Lang.Commands.Teleport-Permission-Error"));
+                            Bukkit.getLogger().info(String.valueOf(SubPlugin.lprefix) + SubPlugin.lang.get("Lang.Commands.Teleport-Permission-Error"));
                         }
                     } else if (!args[1].equalsIgnoreCase("~Lobby") && !(SubAPI.getSubServer(args[1]).isRunning())) {
                         if (sender instanceof Player) {
-                            ((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Teleport-Offline-Error"));
+                            ((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Teleport-Offline-Error"));
                         } else {
-                            Bukkit.getLogger().info(String.valueOf(SubPlugin.lprefix) + SubPlugin.lang.getString("Lang.Commands.Teleport-Offline-Error"));
+                            Bukkit.getLogger().info(String.valueOf(SubPlugin.lprefix) + SubPlugin.lang.get("Lang.Commands.Teleport-Offline-Error"));
                         }
                     } else {
                         if (args[1].equalsIgnoreCase("~Lobby")) {
@@ -293,27 +292,27 @@ public class SubCMD implements CommandExecutor {
                 } else if (args.length == 2) {
                     if (!(SubPlugin.SubServers.contains(args[1]) || args[1].equalsIgnoreCase("~Lobby"))) {
                         if (sender instanceof Player) {
-                            ((Player)sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Teleport-Config-Error"));
+                            ((Player)sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Teleport-Config-Error"));
                         } else {
-                            Bukkit.getLogger().info(String.valueOf(SubPlugin.lprefix) + SubPlugin.lang.getString("Lang.Commands.Teleport-Config-Error"));
+                            Bukkit.getLogger().info(String.valueOf(SubPlugin.lprefix) + SubPlugin.lang.get("Lang.Commands.Teleport-Config-Error"));
                         }
                     } else if ((sender instanceof Player) && (!((Player) sender).hasPermission("subserver.command.teleport." + args[1])) && (!((Player) sender).hasPermission("subserver.command.teleport.*"))) {
                         if (sender instanceof Player) {
-                            ((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Teleport-Permission-Error"));
+                            ((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Teleport-Permission-Error"));
                         } else {
-                            Bukkit.getLogger().info(String.valueOf(SubPlugin.lprefix) + SubPlugin.lang.getString("Lang.Commands.Teleport-Permission-Error"));
+                            Bukkit.getLogger().info(String.valueOf(SubPlugin.lprefix) + SubPlugin.lang.get("Lang.Commands.Teleport-Permission-Error"));
                         }
                     } else if (!args[1].equalsIgnoreCase("~Lobby") && !(SubAPI.getSubServer(args[1]).isRunning())) {
                         if (sender instanceof Player) {
-                            ((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Teleport-Offline-Error"));
+                            ((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Teleport-Offline-Error"));
                         } else {
-                            Bukkit.getLogger().info(String.valueOf(SubPlugin.lprefix) + SubPlugin.lang.getString("Lang.Commands.Teleport-Offline-Error"));
+                            Bukkit.getLogger().info(String.valueOf(SubPlugin.lprefix) + SubPlugin.lang.get("Lang.Commands.Teleport-Offline-Error"));
                         }
                     } else if (!(sender instanceof Player)) {
                         if (sender instanceof Player) {
-                            ((Player)sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Teleport-Console-Error"));
+                            ((Player)sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Teleport-Console-Error"));
                         } else {
-                            Bukkit.getLogger().info(String.valueOf(SubPlugin.lprefix) + SubPlugin.lang.getString("Lang.Commands.Teleport-Console-Error"));
+                            Bukkit.getLogger().info(String.valueOf(SubPlugin.lprefix) + SubPlugin.lang.get("Lang.Commands.Teleport-Console-Error"));
                         }
                     } else {
                         if (args[1].equalsIgnoreCase("~Lobby")) {
@@ -347,18 +346,6 @@ public class SubCMD implements CommandExecutor {
                     Bukkit.getLogger().info("Usage:");
                     Bukkit.getLogger().info("/SubServer Tp <Server> <Player>");
                 }
-            } else if (args[0].equalsIgnoreCase("reload")) {
-                if (!(sender instanceof Player) || ((Player) sender).hasPermission("SubServer.Command.Reload")) {
-                    if (sender instanceof Player) {
-                        ((Player) sender).sendMessage(ChatColor.GOLD + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Debug.Config-Reload-Warn"));
-                        SubPlugin.ReloadPlugin((Player) sender);
-                    } else {
-                        Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Debug.Config-Reload-Warn"));
-                        SubPlugin.ReloadPlugin(null);
-                    }
-                } else if (sender instanceof Player) {
-                    ((Player) sender).sendMessage(ChatColor.RED + "You do not have permission to Reload this plugin.");
-                }
             } else if (args[0].equalsIgnoreCase("list")) {
                 if (sender instanceof Player) {
                     boolean Spigot = false;
@@ -370,7 +357,7 @@ public class SubCMD implements CommandExecutor {
 
                     if (!(Spigot && ((Player) sender).hasPermission("subserver.command"))) {
                         ((Player) sender).sendMessage(new String[]{
-                                ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[1].replace("$online$", Integer.toString(SubPlugin.SubServers.size())),
+                                ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[1].replace("$online$", Integer.toString(SubPlugin.SubServers.size())),
                                 SubPlugin.SubServers.toString().replace("[", ChatColor.DARK_AQUA.toString()).replace(", ", ", " + ChatColor.DARK_AQUA).replace("]", "")
                         });
                     } else {
@@ -385,11 +372,11 @@ public class SubCMD implements CommandExecutor {
                             String.addExtra(net.md_5.bungee.api.ChatColor.DARK_AQUA + ", ");
                         }
 
-                        ((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[1].replace("$online$", Integer.toString(SubPlugin.SubServers.size())));
+                        ((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[1].replace("$online$", Integer.toString(SubPlugin.SubServers.size())));
                         ((Player) sender).spigot().sendMessage(String);
                     }
                 } else {
-                    Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[1].replace("$online$", Integer.toString(SubPlugin.SubServers.size())));
+                    Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[1].replace("$online$", Integer.toString(SubPlugin.SubServers.size())));
                     Bukkit.getLogger().info(SubPlugin.SubServers.toString().replace("[", "").replace("]", ""));
                 }
 			} else if (args[0].equalsIgnoreCase("version") || args[0].equalsIgnoreCase("ver")) {
@@ -443,7 +430,6 @@ public class SubCMD implements CommandExecutor {
                 ((isPlayer) ? ChatColor.AQUA.toString() : "") + "SubServers Command List:",
                 ((isPlayer) ? ChatColor.AQUA.toString() : "") + "GUI: /SubServer [Server]",
                 ((isPlayer) ? ChatColor.AQUA.toString() : "") + "Help: /SubServer Help",
-                ((isPlayer) ? ChatColor.AQUA.toString() : "") + "Reload Plugin: /SubServer Reload",
                 ((isPlayer) ? ChatColor.AQUA.toString() : "") + "List Servers: /SubServer List",
                 ((isPlayer) ? ChatColor.AQUA.toString() : "") + "Plugin Version: /SubServer Version",
                 ((isPlayer) ? ChatColor.AQUA.toString() : "") + "Stop Server: /SubServer Stop <Server>",

@@ -1,13 +1,14 @@
 package net.ME1312.SubServer;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 import net.ME1312.SubServer.GUI.SubGUIListener;
+import net.ME1312.SubServer.Libraries.SQL.MySQL;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -38,6 +39,7 @@ public class SubPlugin {
     public String lprefix;
     public ConfigFile config;
     public ConfigFile lang;
+    public MySQL sql;
 
     public Version PluginVersion;
     public Version MCVersion;
@@ -82,7 +84,7 @@ public class SubPlugin {
         if (!(new File(Plugin.getDataFolder() + File.separator + "config.yml").exists())) {
             copyFromJar("config.yml", Plugin.getDataFolder() + File.separator + "config.yml");
             Bukkit.getLogger().info(lprefix + "Created Config.yml!");
-        } else if (!confmanager.getNewConfig("config.yml").getString("Settings.config-version").equalsIgnoreCase("1.8.8s+")) {
+        } else if (!confmanager.getNewConfig("config.yml").getString("Settings.config-version").equalsIgnoreCase("1.8.9a+")) {
             try {
                 Files.move(new File(Plugin.getDataFolder() + File.separator + "config.yml"), new File(Plugin.getDataFolder() + File.separator + "old-config." + Math.round(Math.random() * 100000) + ".yml"));
                 copyFromJar("config.yml", Plugin.getDataFolder() + File.separator + "config.yml");
@@ -109,6 +111,41 @@ public class SubPlugin {
         SubServers.addAll(config.getConfigurationSection("Servers").getKeys(false));
 
         /**
+         * Re-Sync to SQL
+         */
+        try {
+            sql = new MySQL(config.getRawString("Settings.SQL.hostname"), Integer.toString(config.getInt("Settings.SQL.port")), config.getRawString("Settings.SQL.database"),
+                    config.getRawString("Settings.SQL.username"), config.getRawString("Settings.SQL.password"));
+            sql.openConnection();
+            Statement update = sql.getConnection().createStatement();
+
+            update.executeUpdate("CREATE TABLE IF NOT EXISTS `SubServers` (`Name` VARCHAR(32), `IP` VARCHAR(32), `PID` INTEGER, `Enabled` BOOLEAN, `Shared_Chat` BOOLEAN, `Temp` BOOLEAN, `Running` BOOLEAN)");
+            update.executeUpdate("DELETE FROM `SubServers`");
+            update.executeUpdate("CREATE TABLE IF NOT EXISTS `SubQueue` (`PID` INTEGER, `Type` INTEGER, `Player` VARCHAR(64), `Args` VARCHAR(64))");
+            update.executeUpdate("DELETE FROM `SubQueue`");
+            update.executeUpdate("CREATE TABLE IF NOT EXISTS `SubLang` (`Key` VARCHAR(64), `Value` VARCHAR(128))");
+            update.executeUpdate("DELETE FROM `SubLang`");
+            try {
+                for (Iterator<String> keys = lang.getConfigurationSection("Lang").getKeys(false).iterator(); keys.hasNext(); ) {
+                    String key = keys.next();
+                    for (Iterator<String> str = lang.getConfigurationSection("Lang." + key).getKeys(false).iterator(); str.hasNext(); ) {
+                        String item = str.next();
+                        update.executeUpdate("INSERT INTO `SubLang` (`Key`, `Value`) VALUES ('Lang." + key + "." + item + "', '" + URLEncoder.encode(lang.getRawString("Lang." + key + "." + item), "UTF-8") + "')");
+                    }
+                }
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
+            update.close();
+        } catch (SQLException | ClassNotFoundException e) {
+            Bukkit.getLogger().severe("Could not setup Database!");
+            e.printStackTrace();
+            sql = null;
+        }
+
+
+        /**
          * Registers Listeners
          */
         pm.registerEvents(new SubGUIListener(this), Plugin);
@@ -129,12 +166,23 @@ public class SubPlugin {
             Servers.put(i, new SubServer(config.getBoolean("Servers." + item + ".enabled"), item, i, config.getInt("Servers." + item + ".port"), config.getBoolean("Servers." + item + ".log"),
                     config.getBoolean("Servers." + item + ".use-shared-chat"), new File(config.getRawString("Servers." + item + ".dir")), new Executable(config.getRawString("Servers." + item + ".exec")),
                     config.getBoolean("Servers." + item + ".auto-restart"), false, this));
+            if (sql != null) {
+                try {
+                    Statement update = sql.getConnection().createStatement();
+                    update.executeUpdate("INSERT INTO `SubServers` (`Name`, `IP`, `PID`, `Enabled`, `Shared_Chat`, `Temp`, `Running`) VALUES " +
+                            "('"+ item +"', '"+ config.getString("Settings.Server-IP")+":"+config.getInt("Servers." + item + ".port") +"', '" + i +"', '"+ ((config.getBoolean("Servers." + item + ".enabled"))?"1":"0") +"', '"+ ((config.getBoolean("Servers." + item + ".use-shared-chat"))?"1":"0") +"', '0', '0')");
+                    update.close();
+                } catch (SQLException e) {
+                    Bukkit.getLogger().severe("Problem Syncing Database!");
+                    e.printStackTrace();
+                }
+            }
             if (config.getBoolean("Servers." + item + ".enabled") && config.getBoolean("Servers." + item + ".run-on-launch")) {
                 Servers.get(i).start();
             }
         }
 
-        if ((config.getBoolean("Proxy.enabled") == true) && (config.getBoolean("Proxy.run-on-launch") == true)) {
+        if ((config.getBoolean("Proxy.enabled")) && (config.getBoolean("Proxy.run-on-launch"))) {
             Servers.get(0).start();
         }
 
@@ -153,6 +201,7 @@ public class SubPlugin {
 
     protected void DisablePlugin() {
         Bukkit.getLogger().info(lprefix + "Stopping SubServers...");
+
         try {
             if (ServerCreator != null && ServerCreator.isRunning()) {
                 ServerCreator.waitFor();
@@ -180,8 +229,8 @@ public class SubPlugin {
                         Thread.sleep(500);
                     }
                     Thread.sleep(1000);
-                    SubAPI.getSubServer(item).destroy();
                 }
+                SubAPI.getSubServer(item).destroy();
             }
             Bukkit.getLogger().info(lprefix + " Plugin Disabled.");
         } catch (InterruptedException e) {
@@ -190,6 +239,14 @@ public class SubPlugin {
             e.printStackTrace();
             Bukkit.getLogger().warning(lprefix + "Config Not Saved: Preserved config from Invalid Changes.");
             Bukkit.getLogger().warning(lprefix + " Plugin Partially Disabled.");
+        } finally {
+            if (sql != null) {
+                try {
+                    sql.closeConnection();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -197,8 +254,6 @@ public class SubPlugin {
         if (!Servers.get(0).isRunning()) {
             Servers.get(0).destroy();
             Servers.remove(0);
-        } else {
-            SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy resetplugin");
         }
 
         int i = 0;
@@ -215,6 +270,7 @@ public class SubPlugin {
                 SubServers.remove(item);
             }
         }
+
         config.reloadConfig();
         lang.reloadConfig();
 
@@ -226,65 +282,60 @@ public class SubPlugin {
         new BukkitRunnable() {
             @Override
             public void run() {
-                int i = 0;
-                if (SubAPI.getSubServer(0).isRunning()) {
-                    try {
-                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport " + lang.getString("Lang.Commands.Teleport").replace(" ", "%20"));
-                        Thread.sleep(500);
-                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Server-List " + lang.getString("Lang.Commands.Teleport-Server-List").replace(" ", "%20"));
-                        Thread.sleep(500);
-                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Player-Error " + lang.getString("Lang.Commands.Teleport-Player-Error").replace(" ", "%20"));
-                        Thread.sleep(500);
-                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Config-Error " + lang.getString("Lang.Commands.Teleport-Config-Error").replace(" ", "%20"));
-                        Thread.sleep(500);
-                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Permission-Error " + lang.getString("Lang.Commands.Teleport-Permission-Error").replace(" ", "%20"));
-                        Thread.sleep(500);
-                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Offline-Error " + lang.getString("Lang.Commands.Teleport-Offline-Error").replace(" ", "%20"));
-                        Thread.sleep(500);
-                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Console-Error " + lang.getString("Lang.Commands.Teleport-Console-Error").replace(" ", "%20"));
-                        Thread.sleep(500);
+                try {
+                    sql.closeConnection();
 
-                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Proxy.Register-Server " + lang.getString("Lang.Proxy.Register-Server").replace(" ", "%20"));
-                        Thread.sleep(500);
-                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Proxy.Remove-Server " + lang.getString("Lang.Proxy.Remove-Server").replace(" ", "%20"));
-                        Thread.sleep(500);
-                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Proxy.Reset-Storage " + lang.getString("Lang.Proxy.Reset-Storage").replace(" ", "%20"));
-                        Thread.sleep(500);
-                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Proxy.Chat-Format " + lang.getString("Lang.Proxy.Chat-Format").replace(" ", "%20"));
-                        Thread.sleep(500);
-                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang.Proxy.Teleport " + lang.getString("Lang.Proxy.Teleport").replace(" ", "%20"));
-                        Thread.sleep(500);
+                    sql = new MySQL(config.getRawString("Settings.SQL.hostname"), Integer.toString(config.getInt("Settings.SQL.port")), config.getRawString("Settings.SQL.database"),
+                            config.getRawString("Settings.SQL.username"), config.getRawString("Settings.SQL.password"));
+                    sql.openConnection();
+                    Statement update = sql.getConnection().createStatement();
 
-                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver ~Lobby " + config.getString("Settings.Server-IP") + " " + config.getString("Settings.Lobby-Port") + " true");
-                        Thread.sleep(500);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                    update.executeUpdate("CREATE TABLE IF NOT EXISTS `SubServers` (`Name` VARCHAR(32), `IP` VARCHAR(32), `PID` INTEGER, `Enabled` BOOLEAN, `Shared_Chat` BOOLEAN, `Temp` BOOLEAN, `Running` BOOLEAN)");
+                    update.executeUpdate("DELETE FROM `SubServers`");
+                    update.executeUpdate("CREATE TABLE IF NOT EXISTS `SubQueue` (`PID` INTEGER, `Type` INTEGER, `Player` VARCHAR(64), `Args` VARCHAR(64))");
+                    update.executeUpdate("DELETE FROM `SubQueue`");
+                    update.executeUpdate("CREATE TABLE IF NOT EXISTS `SubLang` (`Key` VARCHAR(64), `Value` VARCHAR(128))");
+                    update.executeUpdate("DELETE FROM `SubLang`");
+
+                    for(Iterator<String> keys = lang.getConfigurationSection("Lang").getKeys(false).iterator(); keys.hasNext(); ) {
+                        String key = keys.next();
+                        for(Iterator<String> str = lang.getConfigurationSection("Lang." + key).getKeys(false).iterator(); str.hasNext(); ) {
+                            String item = str.next();
+                            update.executeUpdate("INSERT INTO `SubLang` (`Key`, `Value`) VALUES ('Lang."+ key +"."+ item +"', '"+ lang.getRawString("Lang."+ key +"."+ item) +"')");
+                        }
                     }
+
+                    update.close();
+                } catch (SQLException | ClassNotFoundException e) {
+                    Bukkit.getLogger().severe("Could not setup Database!");
+                    e.printStackTrace();
+                    sql = null;
                 }
+
+                int i = 0;
                 for(Iterator<String> str = config.getConfigurationSection("Servers").getKeys(false).iterator(); str.hasNext(); ) {
                     String item = str.next();
                     do {
                         i++;
-                    } while (Servers.keySet().contains(i));
+                    } while (Servers.keySet().contains((Object)i));
 
-                    if (SubServers.contains(item)) {
-                        i--;
-                    } else {
-                        SubServers.add(item);
-                        PIDs.put(item, i);
-                        Servers.put(i, new SubServer(config.getBoolean("Servers." + item + ".enabled"), item, i, config.getInt("Servers." + item + ".port"),
-                                config.getBoolean("Servers." + item + ".log"), config.getBoolean("Servers." + item + ".use-shared-chat"), new File(config.getRawString("Servers." + item + ".dir")),
-                                new Executable(config.getRawString("Servers." + item + ".exec")), config.getBoolean("Servers." + item + ".auto-restart"), false, instance));
-                    }
+                    SubServers.add(item);
+                    PIDs.put(item, i);
+                    Servers.put(i, new SubServer(config.getBoolean("Servers." + item + ".enabled"), item, i, config.getInt("Servers." + item + ".port"),
+                            config.getBoolean("Servers." + item + ".log"), config.getBoolean("Servers." + item + ".use-shared-chat"), new File(config.getRawString("Servers." + item + ".dir")),
+                            new Executable(config.getRawString("Servers." + item + ".exec")), config.getBoolean("Servers." + item + ".auto-restart"), false, instance));
                 }
 
                 for(Iterator<String> str = SubServers.iterator(); str.hasNext(); ) {
                     String item = str.next();
-                    if (SubAPI.getSubServer(0).isRunning()) {
-                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver " + item + " " + config.getString("Settings.Server-IP") + " " + SubAPI.getSubServer(item).Port + " " + SubAPI.getSubServer(item).SharedChat);
+                    if (sql != null) {
                         try {
-                            Thread.sleep(500);
-                        } catch (InterruptedException e) {
+                            Statement update = sql.getConnection().createStatement();
+                            update.executeUpdate("INSERT INTO `SubServers` (`Name`, `IP`, `PID`, `Enabled`, `Shared_Chat`, `Temp`, `Running`) VALUES " +
+                                    "('"+ item +"', '"+ config.getString("Settings.Server-IP")+":"+SubAPI.getSubServer(item).Port +"', '" + SubAPI.getSubServer(item).PID +"', '" + ((SubAPI.getSubServer(item).Enabled)?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).SharedChat)?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).Temporary)?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).isRunning())?"1":"0") +"')");
+                            update.close();
+                        } catch (SQLException e) {
+                            Bukkit.getLogger().severe("Problem Syncing Database!");
                             e.printStackTrace();
                         }
                     }

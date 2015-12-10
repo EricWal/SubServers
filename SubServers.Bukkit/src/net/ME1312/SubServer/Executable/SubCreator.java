@@ -4,10 +4,11 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import net.ME1312.SubServer.SubAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -63,9 +64,10 @@ public class SubCreator {
             this.Exec = new Executable("java -Xmx" + Memory + "M -Djline.terminal=jline.UnsupportedTerminal -Dcom.mojang.eula.agree=true -jar " + Jar);
 
             try {
+                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubServers.Bukkit.Client.jar").exists()) CopyClientJar();
                 GenerateSpigotYAML();
                 GenerateProperties();
-            } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
 
@@ -74,9 +76,10 @@ public class SubCreator {
             this.Exec = new Executable("java -Xmx" + Memory + "M -Djline.terminal=jline.UnsupportedTerminal -jar " + Jar + " -o false");
 
             try {
+                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubServers.Bukkit.Client.jar").exists()) CopyClientJar();
                 GenerateEULA();
                 GenerateProperties();
-            } catch (FileNotFoundException | UnsupportedEncodingException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
 
@@ -128,6 +131,45 @@ public class SubCreator {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void CopyClientJar() throws IOException {
+        if (!new File(new File(Dir, "plugins"), "SubServersClient").exists()) new File(new File(Dir, "plugins"), "SubServersClient").mkdirs();
+
+        InputStream input = null;
+        OutputStream output = null;
+
+        input = new FileInputStream(new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubServers.Bukkit.Client.jar"));
+        output = new FileOutputStream(new File(new File(Dir, "plugins"), "SubServers.Bukkit.Client.jar"));
+        byte[] buf = new byte[1024];
+        int bytesRead;
+        while ((bytesRead = input.read(buf)) > 0) {
+            output.write(buf, 0, bytesRead);
+        }
+        input.close();
+        output.close();
+
+        PrintWriter writer = new PrintWriter(new File(new File(new File(Dir, "plugins"), "SubServersClient"), "config.yml"), "UTF-8");
+
+        writer.println("# SubServer Plugin Configuration");
+        writer.println("# This is The Main Config for this Plugin");
+        writer.println("#");
+        writer.println("# These are the Plugin Settings");
+        writer.println("Settings:");
+        writer.println("    config-version: 1.8.9a+");
+        writer.println("    GUI:");
+        writer.println("        Enabled: " + SubPlugin.config.getBoolean("Settings.GUI.Enabled"));
+        writer.println("        Trigger-Item: '" + SubPlugin.config.getRawString("Settings.GUI.Trigger-Item") + "'");
+        writer.println("    SQL:");
+        writer.println("        hostname: '" + SubPlugin.config.getRawString("Settings.SQL.hostname") + "'");
+        writer.println("        port: " + SubPlugin.config.getInt("Settings.SQL.port"));
+        writer.println("        username: '" + SubPlugin.config.getRawString("Settings.SQL.username") + "'");
+        writer.println("        password: '" + SubPlugin.config.getRawString("Settings.SQL.password") + "'");
+        writer.println("        database: '" + SubPlugin.config.getRawString("Settings.SQL.database") + "'");
+        writer.println("");
+
+        writer.close();
+
     }
 
     private void GenerateEULA() throws FileNotFoundException, UnsupportedEncodingException {
@@ -505,8 +547,18 @@ public class SubCreator {
                                     SubPlugin.PIDs.put(Name, PID);
                                     SubPlugin.SubServers.add(Name);
 
+                                    if (SubPlugin.sql != null) {
+                                        try {
+                                            Statement update = SubPlugin.sql.getConnection().createStatement();
+                                            update.executeUpdate("INSERT INTO `SubServers` (`Name`, `IP`, `PID`, `Enabled`, `Shared_Chat`, `Temp`, `Running`) VALUES " +
+                                                    "('"+ Name +"', '"+ SubPlugin.config.getString("Settings.Server-IP")+":"+Integer.toString(Port) +"', '"+ PID +"', '1', '1', '0', '0')");
+                                            update.close();
+                                        } catch (SQLException e) {
+                                            Bukkit.getLogger().severe("Problem Syncing Database!");
+                                            e.printStackTrace();
+                                        }
+                                    }
                                     SubPlugin.Servers.get(PID).start();
-                                    if (SubAPI.getSubServer(0).isRunning()) SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver " + Name + " " + SubPlugin.config.getString("Settings.Server-IP") + " " + Port + " true");
 
                                     SubPlugin.config.set("Servers." + Name + ".enabled", true);
                                     SubPlugin.config.set("Servers." + Name + ".port", Port);
@@ -556,8 +608,18 @@ public class SubCreator {
                                     SubPlugin.PIDs.put(Name, PID);
                                     SubPlugin.SubServers.add(Name);
 
+                                    if (SubPlugin.sql != null) {
+                                        try {
+                                            Statement update = SubPlugin.sql.getConnection().createStatement();
+                                            update.executeUpdate("INSERT INTO `SubServers` (`Name`, `IP`, `PID`, `Enabled`, `Shared_Chat`, `Temp`, `Running`) VALUES " +
+                                                    "('"+ Name +"', '"+ SubPlugin.config.getString("Settings.Server-IP")+":"+Integer.toString(Port) +"', '"+ PID +"', '1', '1', '0', '0')");
+                                            update.close();
+                                        } catch (SQLException e) {
+                                            Bukkit.getLogger().severe("Problem Syncing Database!");
+                                            e.printStackTrace();
+                                        }
+                                    }
                                     SubPlugin.Servers.get(PID).start();
-                                    if (SubAPI.getSubServer(0).isRunning()) SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver " + Name + " " + SubPlugin.config.getString("Settings.Server-IP") + " " + Port + " true");
 
                                     SubPlugin.config.set("Servers." + Name + ".enabled", true);
                                     SubPlugin.config.set("Servers." + Name + ".port", Port);

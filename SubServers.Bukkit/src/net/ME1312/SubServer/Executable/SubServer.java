@@ -7,9 +7,13 @@ import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import net.ME1312.SubServer.Libraries.ServerPing;
 import net.ME1312.SubServer.Libraries.Version.Version;
@@ -18,7 +22,7 @@ import net.ME1312.SubServer.SubPlugin;
 import net.ME1312.SubServer.Libraries.Events.SubEvent;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -87,7 +91,65 @@ public class SubServer implements Serializable {
                             query = null;
                         }
                 }
-            }.runTaskTimerAsynchronously(SubPlugin.Plugin, 20 * 30, 20 * 30));
+            }.runTaskTimerAsynchronously(SubPlugin.Plugin, 20 * 10, 20 * 10));
+        }
+        if (SubPlugin.sql != null) {
+            tasks.add(new BukkitRunnable() {
+                @Override
+                public void run() {
+                    try {
+                        Statement update = SubPlugin.sql.getConnection().createStatement();
+                        ResultSet results = update.executeQuery("SELECT * FROM `SubQueue` WHERE PID='" + PID + "'");
+                        while (results.next()) {
+                            boolean sent = false;
+                            if (results.getInt("Type") == 1) {
+                                if (!isRunning()) {
+                                    if (results.getString("Player") != null) {
+                                        start(Bukkit.getOfflinePlayer(UUID.fromString(results.getString("Player"))));
+                                    } else {
+                                        start();
+                                    }
+                                }
+                                sent = true;
+                            } else if (results.getInt("Type") == 2) {
+                                if (isRunning()) {
+                                    if (results.getString("Player") != null) {
+                                        stop(Bukkit.getOfflinePlayer(UUID.fromString(results.getString("Player"))));
+                                    } else {
+                                        stop();
+                                    }
+                                }
+                                sent = true;
+                            } else if (results.getInt("Type") == 3) {
+                                if (isRunning()) {
+                                    if (results.getString("Player") != null) {
+                                        terminate(Bukkit.getOfflinePlayer(UUID.fromString(results.getString("Player"))));
+                                    } else {
+                                        terminate();
+                                    }
+                                }
+                                sent = true;
+                            } else if (results.getInt("Type") == 4) {
+                                if (isRunning()) {
+                                    if (results.getString("Player") != null) {
+                                        sendCommand(Bukkit.getOfflinePlayer(UUID.fromString(results.getString("Player"))), results.getString("Args"));
+                                    } else {
+                                        sendCommand(results.getString("Args"));
+                                    }
+                                }
+                                sent = true;
+                            }
+                        }
+                        update.executeUpdate("DELETE FROM `SubQueue` WHERE PID='" + PID + "'");
+                        results.close();
+                        update.close();
+                    } catch (SQLException e) {
+                        Bukkit.getLogger().severe("Problem Syncing Database!");
+                        e.printStackTrace();
+                    }
+                }
+
+            }.runTaskTimerAsynchronously(SubPlugin.Plugin, 20 * 5, 20 * 5));
         }
 	}
 	
@@ -127,52 +189,6 @@ public class SubServer implements Serializable {
 									} while (read.isAlive() == true);
 								};
 							}.runTaskAsynchronously(SubPlugin.Plugin);
-							new BukkitRunnable() {
-								@Override
-								public void run() {
-									try {
-										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport " + SubPlugin.lang.getString("Lang.Commands.Teleport").replace(" ", "%20"));
-										Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Server-List " + SubPlugin.lang.getString("Lang.Commands.Teleport-Server-List").replace(" ", "%20"));
-										Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Player-Error " + SubPlugin.lang.getString("Lang.Commands.Teleport-Player-Error").replace(" ", "%20"));
-										Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Config-Error " + SubPlugin.lang.getString("Lang.Commands.Teleport-Config-Error").replace(" ", "%20"));
-										Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Permission-Error " + SubPlugin.lang.getString("Lang.Commands.Teleport-Permission-Error").replace(" ", "%20"));
-										Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Offline-Error " + SubPlugin.lang.getString("Lang.Commands.Teleport-Offline-Error").replace(" ", "%20"));
-										Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Commands.Teleport-Console-Error " + SubPlugin.lang.getString("Lang.Commands.Teleport-Console-Error").replace(" ", "%20"));
-										Thread.sleep(500);
-										
-										sendCommandSilently("subconf@proxy lang Lang.Proxy.Register-Server " + SubPlugin.lang.getString("Lang.Proxy.Register-Server").replace(" ", "%20"));
-										Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Proxy.Remove-Server " + SubPlugin.lang.getString("Lang.Proxy.Remove-Server").replace(" ", "%20"));
-										Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Proxy.Reset-Storage " + SubPlugin.lang.getString("Lang.Proxy.Reset-Storage").replace(" ", "%20"));
-										Thread.sleep(500);
-                                        sendCommandSilently("subconf@proxy lang Lang.Proxy.Chat-Format " + SubPlugin.lang.getString("Lang.Proxy.Chat-Format").replace(" ", "%20"));
-                                        Thread.sleep(500);
-										sendCommandSilently("subconf@proxy lang Lang.Proxy.Teleport " + SubPlugin.lang.getString("Lang.Proxy.Teleport").replace(" ", "%20"));
-										Thread.sleep(500);
-										
-										sendCommandSilently("subconf@proxy addserver ~Lobby " + SubPlugin.config.getString("Settings.Server-IP") + " " + SubPlugin.config.getString("Settings.Lobby-Port") + " true");
-										Thread.sleep(500);
-									} catch (InterruptedException e) {
-										e.printStackTrace();
-									}
-									for(Iterator<String> str = SubPlugin.SubServers.iterator(); str.hasNext(); ) {
-										String item = str.next();
-										sendCommandSilently("subconf@proxy addserver " + item + " " + SubPlugin.config.getString("Settings.Server-IP") + " " + SubAPI.getSubServer(item).Port + " " + SubAPI.getSubServer(item).SharedChat);
-										try {
-											Thread.sleep(500);
-										} catch (InterruptedException e) {
-											e.printStackTrace();
-										}
-									}
-								};
-							}.runTaskAsynchronously(SubPlugin.Plugin);
 							try {
 								Process.waitFor();
 								SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubShellExitEvent, Server);
@@ -205,6 +221,16 @@ public class SubServer implements Serializable {
 				new BukkitRunnable() {
 					@Override
 					public void run() {
+                        if (SubPlugin.sql != null) {
+                            try {
+                                Statement update = SubPlugin.sql.getConnection().createStatement();
+                                update.executeUpdate("UPDATE `SubServers` SET Running='1' WHERE PID='" + PID + "'");
+                                update.close();
+                            } catch (SQLException e) {
+                                Bukkit.getLogger().severe("Problem Syncing Database!");
+                                e.printStackTrace();
+                            }
+                        }
 						try {
 							/**
 							 * Process Creator,
@@ -253,6 +279,17 @@ public class SubServer implements Serializable {
 						Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Debug.Server-Logging-End").replace("$Server$", Name));
 						Process = null;
 						StdIn = null;
+
+                        if (SubPlugin.sql != null) {
+                            try {
+                                Statement update = SubPlugin.sql.getConnection().createStatement();
+                                update.executeUpdate("UPDATE `SubServers` SET Running='0' WHERE PID='" + PID + "'");
+                                update.close();
+                            } catch (SQLException e) {
+                                Bukkit.getLogger().severe("Problem Syncing Database!");
+                                e.printStackTrace();
+                            }
+                        }
                         if (AutoRestart) {
                             try {
                                 Thread.sleep(2500);
@@ -306,7 +343,7 @@ public class SubServer implements Serializable {
 	 * 
 	 * @param sender Player that sent this command
 	 */
-	public boolean start(final Player sender) {
+	public boolean start(final OfflinePlayer sender) {
 		try {
 			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubStartEvent, this, sender)) {
 				start(true);
@@ -343,7 +380,7 @@ public class SubServer implements Serializable {
 	 * @param sender Player that sent this command
 	 * @param cmd The Command to send
 	 */
-	public boolean sendCommand(Player sender, String cmd) {
+	public boolean sendCommand(OfflinePlayer sender, String cmd) {
 		try {
 			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubRunCommandEvent, this, sender, cmd)) {
 				StdIn = cmd;
@@ -406,7 +443,7 @@ public class SubServer implements Serializable {
 	 * Stops a Server
 	 * @param sender Player that sent this command
 	 */
-	public boolean stop(Player sender) {
+	public boolean stop(OfflinePlayer sender) {
 		try {
 			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubStopEvent, this, sender)) {
 				if (Name.equalsIgnoreCase("~Proxy")) {
@@ -476,7 +513,7 @@ public class SubServer implements Serializable {
 	 * Terminates the Server
 	 * @param sender Player that sent this command
 	 */
-	public boolean terminate(Player sender) {
+	public boolean terminate(OfflinePlayer sender) {
 		try {
 			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubStopEvent, this, sender)) {
 				Process.destroy();
@@ -510,10 +547,17 @@ public class SubServer implements Serializable {
 	 * 
 	 * @param player
 	 */
-	public void sendPlayer(Player player) {
-		if (SubAPI.getSubServer(0).isRunning()) {
-			SubAPI.getSubServer("~Proxy").sendCommandSilently("subconf@proxy sendplayer " + player.getName() + " " + Name);
-		}
+	public void sendPlayer(OfflinePlayer player) {
+        if (SubPlugin.sql != null) {
+            try {
+                Statement update = SubPlugin.sql.getConnection().createStatement();
+                update.executeUpdate("INSERT INTO `SubQueue` (`PID`, `Type`, `Args`) VALUES ('-1', '4', 'go "+ Name +" "+ player.getName() +"')");
+                update.close();
+            } catch (SQLException e) {
+                Bukkit.getLogger().severe("Problem Syncing Database!");
+                e.printStackTrace();
+            }
+        }
 	}
 	
 	/**

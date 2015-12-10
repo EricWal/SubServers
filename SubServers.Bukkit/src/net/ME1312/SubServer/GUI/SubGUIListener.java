@@ -165,10 +165,9 @@ public class SubGUIListener implements Listener {
                     }
                 } else if ((ChatColor.DARK_GREEN.toString() + SubPlugin.lang.getString("Lang.GUI.Online")).equals(displayName)) {
                     String server = event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, "");
-                    if (SubAPI.getSubServer(0).isRunning() && (player.hasPermission("SubServer.Command.teleport." + server) || player.hasPermission("SubServer.Command.teleport.*")) && !server.equalsIgnoreCase("~Proxy")) {
+                    if ((player.hasPermission("SubServer.Command.teleport." + server) || player.hasPermission("SubServer.Command.teleport.*")) && !server.equalsIgnoreCase("~Proxy")) {
                         player.closeInventory();
-                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy sendplayer " + player.getName() + " " + server);
-                        player.sendMessage(ChatColor.AQUA + SubPlugin.lprefix +  SubPlugin.lang.getString("Lang.Commands.Teleport"));
+                        SubAPI.getSubServer(server).sendPlayer(player);
                     }
                 }
             }

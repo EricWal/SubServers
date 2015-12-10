@@ -1,4 +1,4 @@
-name: 'SubServers'
+name: 'SubServersClient'
 main: 'net.ME1312.SubServer.Launcher'
 version: '1.8.9a'
 authors: [ME1312]

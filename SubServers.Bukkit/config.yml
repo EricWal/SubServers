@@ -6,12 +6,18 @@ Settings:
     Server-Creation:
         git-dir: 'C:\Program Files\Git'
         log: true
-    config-version: 1.8.8s+
+    config-version: 1.8.9a+
     GUI:
         Enabled: true
         Trigger-Item: '129'
     Server-IP: '127.0.0.1'
     Lobby-Port: 25565
+    SQL:
+        hostname: '127.0.0.1'
+        port: 3306
+        username: 'root'
+        password: ''
+        database: 'minecraft'
 #
 # This is the settings for the proxy
 Proxy:

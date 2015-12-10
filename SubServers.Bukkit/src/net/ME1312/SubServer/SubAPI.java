@@ -2,6 +2,8 @@ package net.ME1312.SubServer;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -9,7 +11,7 @@ import java.util.List;
 import net.ME1312.SubServer.Libraries.Config.ConfigFile;
 import net.ME1312.SubServer.Libraries.Events.SubEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -57,7 +59,7 @@ public class SubAPI {
      * @param Command The Command to Execute
      * @param Sender The player who sent this Command
      */
-    public static void sendCommandToAll(Player Sender, String Command) {
+    public static void sendCommandToAll(OfflinePlayer Sender, String Command) {
         for(Iterator<String> str = SubPlugin.SubServers.iterator(); str.hasNext(); ) {
             String item = str.next();
             if (!item.equalsIgnoreCase("~Proxy") && SubPlugin.Servers.keySet().contains(SubPlugin.PIDs.get(item)) && getSubServer(item).isRunning()) {
@@ -83,7 +85,7 @@ public class SubAPI {
      *
      * @param Sender The player who sent this Command
      */
-    public static void stopAll(Player Sender) {
+    public static void stopAll(OfflinePlayer Sender) {
         for(Iterator<String> str = SubPlugin.SubServers.iterator(); str.hasNext(); ) {
             String item = str.next();
             if (!item.equalsIgnoreCase("~Proxy") && SubPlugin.Servers.keySet().contains(SubPlugin.PIDs.get(item)) && getSubServer(item).isRunning()) {
@@ -138,7 +140,17 @@ public class SubAPI {
         Bukkit.getLogger().info("PIDs: " + SubPlugin.PIDs.toString());
         Bukkit.getLogger().info("SubServers: " + SubPlugin.SubServers.toString());
 
-        if (getSubServer(0).isRunning()) getSubServer(0).sendCommandSilently("subconf@proxy addserver " + Name + " " + SubPlugin.config.getString("Settings.Server-IP") + " " + Port + " " + SharedChat);
+        if (SubPlugin.sql != null) {
+            try {
+                Statement update = SubPlugin.sql.getConnection().createStatement();
+                update.executeUpdate("INSERT INTO `SubServers` (`Name`, `IP`, `PID`, `Enabled`, `Shared_Chat`, `Temp`, `Running`) VALUES " +
+                        "('"+ Name +"', '"+ SubPlugin.config.getString("Settings.Server-IP")+":"+Integer.toString(Port) +"', '"+ PID +"', '1', '"+ ((SharedChat)?"1":"0") +"', '"+ ((Temporary)?"1":"0") +"', '0')");
+                update.close();
+            } catch (SQLException e) {
+                Bukkit.getLogger().severe("Problem Syncing Database!");
+                e.printStackTrace();
+            }
+        }
 
         if (Temporary) {
             new BukkitRunnable() {
@@ -153,7 +165,18 @@ public class SubAPI {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    if (getSubServer(0).isRunning()) getSubServer(0).sendCommandSilently("subconf@proxy removeserver " + Name);
+
+                    if (SubPlugin.sql != null) {
+                        try {
+                            Statement update = SubPlugin.sql.getConnection().createStatement();
+                            update.executeUpdate("DELETE FROM `SubServers` WHERE PID='"+ PID + "'");
+                            update.close();
+                        } catch (SQLException e) {
+                            Bukkit.getLogger().severe("Problem Syncing Database!");
+                            e.printStackTrace();
+                        }
+                    }
+
                     SubPlugin.Servers.remove(PID);
                     SubPlugin.PIDs.remove(Name);
                     SubPlugin.SubServers.remove(Name);
@@ -175,7 +198,7 @@ public class SubAPI {
      * @param AutoRestart AutoRestarts Server
      * @param Temporary Toggles Temporary Server actions
      */
-    public static void addServer(Player Sender, final String Name, int Port, boolean Log, boolean SharedChat, File Dir, Executable Exec, boolean AutoRestart, boolean Temporary) {
+    public static void addServer(OfflinePlayer Sender, final String Name, int Port, boolean Log, boolean SharedChat, File Dir, Executable Exec, boolean AutoRestart, boolean Temporary) {
         final int PID = (SubPlugin.SubServers.size() + 1);
         if (Temporary) {
             SubPlugin.Servers.put(PID, new SubServer(true, Name, PID, Port, Log, SharedChat, Dir, Exec, false, true, SubPlugin));
@@ -185,7 +208,17 @@ public class SubAPI {
         SubPlugin.PIDs.put(Name, PID);
         SubPlugin.SubServers.add(Name);
 
-        getSubServer(0).sendCommandSilently("subconf@proxy addserver " + Name + " " + SubPlugin.config.getString("Settings.Server-IP") + " " + Port + " " + SharedChat);
+        if (SubPlugin.sql != null) {
+            try {
+                Statement update = SubPlugin.sql.getConnection().createStatement();
+                update.executeUpdate("INSERT INTO `SubServers` (`Name`, `IP`, `PID`, `Enabled`, `Shared_Chat`, `Temp`, `Running`) VALUES " +
+                        "('"+ Name +"', '"+ SubPlugin.config.getString("Settings.Server-IP")+":"+Integer.toString(Port) +"', '"+ PID +"', '1', '"+ ((SharedChat)?"1":"0") +"', '"+ ((Temporary)?"1":"0") +"', '0')");
+                update.close();
+            } catch (SQLException e) {
+                Bukkit.getLogger().severe("Problem Syncing Database!");
+                e.printStackTrace();
+            }
+        }
 
         if (Temporary) {
             SubPlugin.Servers.get(PID).start(Sender);
@@ -200,7 +233,18 @@ public class SubAPI {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    if (getSubServer(0).isRunning()) getSubServer(0).sendCommandSilently("subconf@proxy removeserver " + Name);
+
+                    if (SubPlugin.sql != null) {
+                        try {
+                            Statement update = SubPlugin.sql.getConnection().createStatement();
+                            update.executeUpdate("DELETE FROM `SubServers` WHERE PID='"+ PID + "'");
+                            update.close();
+                        } catch (SQLException e) {
+                            Bukkit.getLogger().severe("Problem Syncing Database!");
+                            e.printStackTrace();
+                        }
+                    }
+
                     SubPlugin.Servers.remove(PID);
                     SubPlugin.PIDs.remove(Name);
                     SubPlugin.SubServers.remove(Name);

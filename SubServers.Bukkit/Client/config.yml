@@ -1,0 +1,15 @@
+# SubServer Plugin Configuration
+# This is The Main Config for this Plugin
+#
+# These are the Plugin Settings
+Settings:
+    config-version: 1.8.9a+
+    GUI:
+        Enabled: true
+        Trigger-Item: '129'
+    SQL:
+        hostname: '127.0.0.1'
+        port: 3306
+        username: 'root'
+        password: ''
+        database: 'minecraft'

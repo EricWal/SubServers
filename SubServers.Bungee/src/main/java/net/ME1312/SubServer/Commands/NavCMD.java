@@ -41,7 +41,7 @@ public class NavCMD extends Command {
 			if (FakeProxyServer.ConfigServers.keySet().size() > 0) {
                 for (Iterator<String> servers = FakeProxyServer.ConfigServers.keySet().iterator(); servers.hasNext(); ) {
                     String server = servers.next();
-                    if (!server.equalsIgnoreCase("~Lobby") && FakeProxyServer.ConfigServers.get(server).isOnline()) {
+                    if (FakeProxyServer.ConfigServers.get(server).isOnline()) {
                         TextComponent text = new TextComponent(server);
                         text.setColor(ChatColor.DARK_AQUA);
                         text.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/go " + server));
@@ -73,7 +73,7 @@ public class NavCMD extends Command {
 				FakeProxyServer.getLogger().info(ChatColor.stripColor(String.toLegacyText()));
 			}
 
-		} else if (FakeProxyServer.ConfigServers.keySet().contains(args[0]) && !args[0].equalsIgnoreCase("~Lobby")) {
+		} else if (FakeProxyServer.ConfigServers.keySet().contains(args[0])) {
 			if (args.length > 1) {
 				if (FakeProxyServer.getPlayer(sender.getName()) == null || FakeProxyServer.getPlayer(sender.getName()).hasPermission("bungeecord.command.send") || FakeProxyServer.getPlayer(sender.getName()).hasPermission("SubServers.Teleport.Others")) {
 					if (FakeProxyServer.getPlayer(args[1]) == null) {
