@@ -9,6 +9,7 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import net.ME1312.SubServer.SubAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -557,7 +558,7 @@ public class SubCreator {
                                             Bukkit.getLogger().severe("Problem Syncing Database!");
                                             e.printStackTrace();
                                         }
-                                    }
+                                    } else if (SubAPI.getSubServer(0).isRunning()) SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver " + Name + " " + SubPlugin.config.getString("Settings.Server-IP") + " " + Port + " true");
                                     SubPlugin.Servers.get(PID).start();
 
                                     SubPlugin.config.set("Servers." + Name + ".enabled", true);
@@ -618,7 +619,7 @@ public class SubCreator {
                                             Bukkit.getLogger().severe("Problem Syncing Database!");
                                             e.printStackTrace();
                                         }
-                                    }
+                                    } else if (SubAPI.getSubServer(0).isRunning()) SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver " + Name + " " + SubPlugin.config.getString("Settings.Server-IP") + " " + Port + " true");
                                     SubPlugin.Servers.get(PID).start();
 
                                     SubPlugin.config.set("Servers." + Name + ".enabled", true);

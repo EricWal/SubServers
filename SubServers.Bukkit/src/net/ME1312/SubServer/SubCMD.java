@@ -276,18 +276,18 @@ public class SubCMD implements CommandExecutor {
                                     Bukkit.getLogger().severe("Problem Syncing Database!");
                                     e.printStackTrace();
                                 }
-                            }
+                            } else if (SubAPI.getSubServer(0).isRunning()) SubAPI.getSubServer(0).sendCommandSilently("go ~Lobby "+ args[2]);
                         } else {
                             if (SubPlugin.sql != null) {
                                 try {
                                     Statement update = SubPlugin.sql.getConnection().createStatement();
-                                    update.executeUpdate("INSERT INTO `SubQueue` (`PID`, `Type`, `Args`) VALUES ('-1', '4', 'go "+ args[1] +" "+ args[2] +"')");
+                                    update.executeUpdate("INSERT INTO `SubQueue` (`PID`, `Type`, `Args`) VALUES ('-1', '4', 'go " + args[1] + " " + args[2] + "')");
                                     update.close();
                                 } catch (SQLException e) {
                                     Bukkit.getLogger().severe("Problem Syncing Database!");
                                     e.printStackTrace();
                                 }
-                            }
+                            } else if (SubAPI.getSubServer(0).isRunning()) SubAPI.getSubServer(0).sendCommandSilently("go " + args[1] + " " + args[2]);
                         }
                     }
                 } else if (args.length == 2) {
@@ -326,7 +326,7 @@ public class SubCMD implements CommandExecutor {
                                     Bukkit.getLogger().severe("Problem Syncing Database!");
                                     e.printStackTrace();
                                 }
-                            }
+                            } else if (SubAPI.getSubServer(0).isRunning()) SubAPI.getSubServer(0).sendCommandSilently("go ~Lobby "+ ((Player) sender).getName());
                         } else {
                             if (SubPlugin.sql != null) {
                                 try {
@@ -337,7 +337,7 @@ public class SubCMD implements CommandExecutor {
                                     Bukkit.getLogger().severe("Problem Syncing Database!");
                                     e.printStackTrace();
                                 }
-                            }
+                            } else if (SubAPI.getSubServer(0).isRunning()) SubAPI.getSubServer(0).sendCommandSilently("go "+ args[1] +" "+ ((Player) sender).getName());
                         }
                     }
                 } else if (sender instanceof Player) {

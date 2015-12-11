@@ -150,7 +150,7 @@ public class SubAPI {
                 Bukkit.getLogger().severe("Problem Syncing Database!");
                 e.printStackTrace();
             }
-        }
+        } else if (getSubServer(0).isRunning()) getSubServer(0).sendCommandSilently("subconf@proxy addserver " + Name + " " + SubPlugin.config.getString("Settings.Server-IP") + " " + Port + " " + SharedChat);
 
         if (Temporary) {
             new BukkitRunnable() {
@@ -175,7 +175,7 @@ public class SubAPI {
                             Bukkit.getLogger().severe("Problem Syncing Database!");
                             e.printStackTrace();
                         }
-                    }
+                    } else if (getSubServer(0).isRunning()) getSubServer(0).sendCommandSilently("subconf@proxy removeserver " + Name);
 
                     SubPlugin.Servers.remove(PID);
                     SubPlugin.PIDs.remove(Name);
@@ -218,7 +218,7 @@ public class SubAPI {
                 Bukkit.getLogger().severe("Problem Syncing Database!");
                 e.printStackTrace();
             }
-        }
+        } else if (getSubServer(0).isRunning()) getSubServer(0).sendCommandSilently("subconf@proxy addserver " + Name + " " + SubPlugin.config.getString("Settings.Server-IP") + " " + Port + " " + SharedChat);
 
         if (Temporary) {
             SubPlugin.Servers.get(PID).start(Sender);
@@ -243,7 +243,7 @@ public class SubAPI {
                             Bukkit.getLogger().severe("Problem Syncing Database!");
                             e.printStackTrace();
                         }
-                    }
+                    } else if (getSubServer(0).isRunning()) getSubServer(0).sendCommandSilently("subconf@proxy removeserver " + Name);
 
                     SubPlugin.Servers.remove(PID);
                     SubPlugin.PIDs.remove(Name);

@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import net.ME1312.SubServer.Commands.FindCMD;
 import net.ME1312.SubServer.Commands.ListCMD;
 import net.ME1312.SubServer.Commands.NavCMD;
+import net.ME1312.SubServer.Commands.SubDebugCMD;
 import net.ME1312.SubServer.Libraries.SQL.MySQL;
 import net.ME1312.SubServer.Libraries.SubServerInfo;
 import net.md_5.bungee.BungeeCord;
@@ -44,7 +45,7 @@ public class FakeProxyServer extends BungeeCord {
         PluginDescription Plugin = new PluginDescription();
         Plugin.setName("SubServers");
         Plugin.setAuthor("ME1312");
-        Plugin.setVersion("1.8.9a");
+        Plugin.setVersion("1.8.9b");
         this.Plugin = Plugin;
 
         EnablePlugin();
@@ -81,8 +82,8 @@ public class FakeProxyServer extends BungeeCord {
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (ClassNotFoundException | SQLException e) {
-                System.out.println("Could not connect to Database!");
-                e.printStackTrace();
+                System.out.println("Could not connect to Database:");
+                System.out.println(e.getLocalizedMessage());
                 sql = null;
             }
 
@@ -94,6 +95,7 @@ public class FakeProxyServer extends BungeeCord {
             }
 
             getPluginManager().registerListener(null, new PlayerListener(this));
+            if (sql == null) getPluginManager().registerCommand(null, new SubDebugCMD(this, "subconf@proxy"));
 
             if (!configuration.getStringList("disabled_commands").contains("/go")) getPluginManager().registerCommand(null, new NavCMD(this, "go"));
             if (!configuration.getStringList("disabled_commands").contains("/server")) getPluginManager().registerCommand(null, new NavCMD(this, "server"));

@@ -1,12 +1,9 @@
 package net.ME1312.SubServer.Executable;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
+import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -189,6 +186,36 @@ public class SubServer implements Serializable {
 									} while (read.isAlive() == true);
 								};
 							}.runTaskAsynchronously(SubPlugin.Plugin);
+                            if (SubPlugin.sql == null) {
+                                new BukkitRunnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            try {
+                                                for (Iterator<String> keys = SubPlugin.lang.getConfigurationSection("Lang").getKeys(false).iterator(); keys.hasNext(); ) {
+                                                    String key = keys.next();
+                                                    for (Iterator<String> str = SubPlugin.lang.getConfigurationSection("Lang." + key).getKeys(false).iterator(); str.hasNext(); ) {
+                                                        String item = str.next();
+                                                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang." + key + "." + item + " " + URLEncoder.encode(SubPlugin.lang.getRawString("Lang." + key + "." + item), "UTF-8"));
+                                                        Thread.sleep(100);
+                                                    }
+                                                }
+                                            } catch (UnsupportedEncodingException | InterruptedException e2) {
+                                                e2.printStackTrace();
+                                            }
+                                            for (Iterator<String> str = SubPlugin.SubServers.iterator(); str.hasNext(); ) {
+                                                String item = str.next();
+                                                sendCommandSilently("subconf@proxy addserver " + item + " " + SubPlugin.config.getString("Settings.Server-IP") + " " + SubAPI.getSubServer(item).Port + " " + SubAPI.getSubServer(item).SharedChat);
+                                                Thread.sleep(100);
+                                            }
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+
+                                    ;
+                                }.runTaskAsynchronously(SubPlugin.Plugin);
+                            }
 							try {
 								Process.waitFor();
 								SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubShellExitEvent, Server);
@@ -557,7 +584,7 @@ public class SubServer implements Serializable {
                 Bukkit.getLogger().severe("Problem Syncing Database!");
                 e.printStackTrace();
             }
-        }
+        } else if (SubAPI.getSubServer(0).isRunning()) SubAPI.getSubServer(0).sendCommandSilently("go "+ Name +" "+ player.getName());
 	}
 	
 	/**

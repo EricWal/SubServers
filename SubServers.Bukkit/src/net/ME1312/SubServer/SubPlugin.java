@@ -139,8 +139,8 @@ public class SubPlugin {
 
             update.close();
         } catch (SQLException | ClassNotFoundException e) {
-            Bukkit.getLogger().severe("Could not setup Database!");
-            e.printStackTrace();
+            Bukkit.getLogger().severe("Could not setup Database:");
+            Bukkit.getLogger().severe(e.getLocalizedMessage());
             sql = null;
         }
 
@@ -239,13 +239,12 @@ public class SubPlugin {
             e.printStackTrace();
             Bukkit.getLogger().warning(lprefix + "Config Not Saved: Preserved config from Invalid Changes.");
             Bukkit.getLogger().warning(lprefix + " Plugin Partially Disabled.");
-        } finally {
-            if (sql != null) {
-                try {
-                    sql.closeConnection();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+        }
+        if (sql != null) {
+            try {
+                sql.closeConnection();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -283,7 +282,7 @@ public class SubPlugin {
             @Override
             public void run() {
                 try {
-                    sql.closeConnection();
+                    if (sql != null) sql.closeConnection();
 
                     sql = new MySQL(config.getRawString("Settings.SQL.hostname"), Integer.toString(config.getInt("Settings.SQL.port")), config.getRawString("Settings.SQL.database"),
                             config.getRawString("Settings.SQL.username"), config.getRawString("Settings.SQL.password"));
@@ -296,20 +295,40 @@ public class SubPlugin {
                     update.executeUpdate("DELETE FROM `SubQueue`");
                     update.executeUpdate("CREATE TABLE IF NOT EXISTS `SubLang` (`Key` VARCHAR(64), `Value` VARCHAR(128))");
                     update.executeUpdate("DELETE FROM `SubLang`");
-
-                    for(Iterator<String> keys = lang.getConfigurationSection("Lang").getKeys(false).iterator(); keys.hasNext(); ) {
-                        String key = keys.next();
-                        for(Iterator<String> str = lang.getConfigurationSection("Lang." + key).getKeys(false).iterator(); str.hasNext(); ) {
-                            String item = str.next();
-                            update.executeUpdate("INSERT INTO `SubLang` (`Key`, `Value`) VALUES ('Lang."+ key +"."+ item +"', '"+ lang.getRawString("Lang."+ key +"."+ item) +"')");
+                    try {
+                        for (Iterator<String> keys = lang.getConfigurationSection("Lang").getKeys(false).iterator(); keys.hasNext(); ) {
+                            String key = keys.next();
+                            for (Iterator<String> str = lang.getConfigurationSection("Lang." + key).getKeys(false).iterator(); str.hasNext(); ) {
+                                String item = str.next();
+                                update.executeUpdate("INSERT INTO `SubLang` (`Key`, `Value`) VALUES ('Lang." + key + "." + item + "', '" + URLEncoder.encode(lang.getRawString("Lang." + key + "." + item), "UTF-8") + "')");
+                            }
                         }
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
                     }
 
                     update.close();
-                } catch (SQLException | ClassNotFoundException e) {
+                } catch (SQLException | ClassNotFoundException e1) {
                     Bukkit.getLogger().severe("Could not setup Database!");
-                    e.printStackTrace();
+                    Bukkit.getLogger().severe(e1.getLocalizedMessage());
                     sql = null;
+
+                    if (SubAPI.getSubServer(0).isRunning()) {
+                        try {
+                            SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy resetplugin");
+                            Thread.sleep(100);
+                            for (Iterator<String> keys = lang.getConfigurationSection("Lang").getKeys(false).iterator(); keys.hasNext(); ) {
+                                String key = keys.next();
+                                for (Iterator<String> str = lang.getConfigurationSection("Lang." + key).getKeys(false).iterator(); str.hasNext(); ) {
+                                    String item = str.next();
+                                    SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang." + key + "." + item + " " + URLEncoder.encode(lang.getRawString("Lang." + key + "." + item), "UTF-8"));
+                                    Thread.sleep(100);
+                                }
+                            }
+                        } catch (UnsupportedEncodingException | InterruptedException e2) {
+                            e2.printStackTrace();
+                        }
+                    }
                 }
 
                 int i = 0;
@@ -336,6 +355,13 @@ public class SubPlugin {
                             update.close();
                         } catch (SQLException e) {
                             Bukkit.getLogger().severe("Problem Syncing Database!");
+                            e.printStackTrace();
+                        }
+                    } else if (SubAPI.getSubServer(0).isRunning()) {
+                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver " + item + " " + config.getString("Settings.Server-IP") + " " + SubAPI.getSubServer(item).Port + " " + SubAPI.getSubServer(item).SharedChat);
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
