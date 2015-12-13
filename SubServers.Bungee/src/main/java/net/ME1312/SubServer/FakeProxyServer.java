@@ -33,7 +33,7 @@ public class FakeProxyServer extends BungeeCord {
     public String lprefix;
     public Configuration configuration;
     public HashMap<String, String> lang = new HashMap<String, String>();
-    public MySQL sql;
+    public List<MySQL> sql = new ArrayList<MySQL>();
     public Timer sqltimer = new Timer("SQL Refresh");
 
     private final PluginDescription Plugin;
@@ -45,7 +45,7 @@ public class FakeProxyServer extends BungeeCord {
         PluginDescription Plugin = new PluginDescription();
         Plugin.setName("SubServers");
         Plugin.setAuthor("ME1312");
-        Plugin.setVersion("1.8.9b");
+        Plugin.setVersion("1.8.9d");
         this.Plugin = Plugin;
 
         EnablePlugin();
@@ -59,15 +59,15 @@ public class FakeProxyServer extends BungeeCord {
             running = true;
             System.out.println("Enabled " + Plugin.getName() + " v" + Plugin.getVersion() + " by " + Plugin.getAuthor());
 
+            if (!(new File("./config.yml").exists())) copyFromJar("net/ME1312/SubServer/config.yml", "./config.yml");
             try {
                 configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File("./config.yml"));
-            } catch (IOException e) {
-                copyFromJar("net/ME1312/SubServer/config.yml", "./config.yml");
-                try {
-                    configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File("./config.yml"));
-                } catch (IOException e1) {
-                    e1.printStackTrace();
+                if (configuration.getString("stats").equalsIgnoreCase("")) {
+                    configuration.set("stats", UUID.randomUUID().toString());
+                    ConfigurationProvider.getProvider(YamlConfiguration.class).save(configuration, new File("./config.yml"));
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
             if (!(new File("./modules.yml").exists())) copyFromJar("net/ME1312/SubServer/modules.yml", "./modules.yml");
@@ -76,15 +76,25 @@ public class FakeProxyServer extends BungeeCord {
             if (!(new File("./sql.yml").exists())) copyFromJar("net/ME1312/SubServer/sql.yml", "./sql.yml");
             try {
                 Configuration config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File("./sql.yml"));
-                sql = new MySQL(config.getString("SQL.hostname"), Integer.toString(config.getInt("SQL.port")), config.getString("SQL.database"),
-                        config.getString("SQL.username"), config.getString("SQL.password"));
-                sql.openConnection();
+                Iterator iterator = config.get("SQL", Arrays.asList(new Map[]{new HashMap()})).iterator();
+                int i = 0;
+
+                while(iterator.hasNext()) {
+                    Map val = (Map) iterator.next();
+                    MySQL connection = null;
+                    i++;
+                    try {
+                        connection = new MySQL(getValueFromArray(config, "hostname", "127.0.0.1", val), Integer.toString(getValueFromArray(config, "port", 3306, val)), getValueFromArray(config, "database", "minecraft", val),
+                                getValueFromArray(config, "username", "root", val), getValueFromArray(config, "password", "", val));
+                        connection.openConnection();
+                        sql.add(connection);
+                    } catch (ClassNotFoundException | SQLException e) {
+                        System.out.println("Could not connect to Database #"+ i +":");
+                        System.out.println(e.getLocalizedMessage());
+                    }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
-            } catch (ClassNotFoundException | SQLException e) {
-                System.out.println("Could not connect to Database:");
-                System.out.println(e.getLocalizedMessage());
-                sql = null;
             }
 
             for (Iterator<String> str = configuration.getSection("servers").getKeys().iterator(); str.hasNext(); ) {
@@ -102,37 +112,13 @@ public class FakeProxyServer extends BungeeCord {
             if (!configuration.getStringList("disabled_commands").contains("/glist")) getPluginManager().registerCommand(null, new ListCMD(this, "glist"));
             if (!configuration.getStringList("disabled_commands").contains("/find")) getPluginManager().registerCommand(null, new FindCMD(this, "find"));
 
-            if (sql != null) {
+            if (!sql.isEmpty()) {
                 sqltimer.scheduleAtFixedRate(new TimerTask() {
                     @Override
                     public void run() {
                         try {
-                            Statement update = sql.getConnection().createStatement();
-                            ResultSet results = update.executeQuery("SELECT * FROM `SubServers`");
-                            for(Iterator<SubServerInfo> servers = ServerInfo.values().iterator(); servers.hasNext(); ) {
-                                servers.next().destroy();
-                            }
-                            ServerInfo.clear();
-                            for(Iterator<SubServerInfo> servers = PlayerServerInfo.values().iterator(); servers.hasNext(); ) {
-                                servers.next().destroy();
-                            }
-                            PlayerServerInfo.clear();
-                            while (results.next()) {
-                                if (!results.getString("Name").contains("!")) {
-                                    ServerInfo.put(results.getString("Name"), new SubServerInfo((BungeeServerInfo)constructServerInfo(results.getString("Name"),
-                                            new InetSocketAddress(results.getString("IP").split("\\:")[0], Integer.parseInt(results.getString("IP").split("\\:")[1])),
-                                            ((ConfigServers.keySet().contains(results.getString("Name")))?ConfigServers.get(results.getString("Name")).getMotd():"SubServer-" + results.getString("Name")), false),
-                                            results.getBoolean("Shared_Chat")));
-                                } else {
-                                    PlayerServerInfo.put(results.getString("Name").replace("!", ""), new SubServerInfo((BungeeServerInfo)constructServerInfo(results.getString("Name").replace("!", ""),
-                                            new InetSocketAddress(results.getString("IP").split("\\:")[0], Integer.parseInt(results.getString("IP").split("\\:")[1])),
-                                            ((ConfigServers.keySet().contains(results.getString("Name")))?ConfigServers.get(results.getString("Name")).getMotd():"SubServer-" + results.getString("Name").replace("!", "")), false),
-                                            results.getBoolean("Shared_Chat")));
-                                }
-                                SubServers.add(results.getString("Name"));
-                            }
-                            results.close();
-                            results = update.executeQuery("SELECT * FROM `SubLang`");
+                            Statement update = sql.get(0).getConnection().createStatement();
+                            ResultSet results = update.executeQuery("SELECT * FROM `SubLang`");
                             lang.clear();
                             try {
                                 while (results.next()) {
@@ -142,17 +128,48 @@ public class FakeProxyServer extends BungeeCord {
                                 e.printStackTrace();
                             }
                             results.close();
-                            results = update.executeQuery("SELECT * FROM `SubQueue` WHERE PID='-1'");
-                            while (results.next()) {
-                                if (results.getInt("Type") == 4) {
-                                    getPluginManager().dispatchCommand(getConsole(), results.getString("Args"));
-                                }
-                            }
-                            results.close();
-                            update.executeUpdate("DELETE FROM `SubQueue` WHERE PID='-1'");
                             update.close();
+
+                            for (Iterator<SubServerInfo> servers = ServerInfo.values().iterator(); servers.hasNext(); ) {
+                                servers.next().destroy();
+                            }
+                            ServerInfo.clear();
+                            for (Iterator<SubServerInfo> servers = PlayerServerInfo.values().iterator(); servers.hasNext(); ) {
+                                servers.next().destroy();
+                            }
+                            PlayerServerInfo.clear();
+
+                            for (Iterator<MySQL> connections = sql.iterator(); connections.hasNext(); ) {
+                                MySQL item = connections.next();
+                                update = item.getConnection().createStatement();
+                                results = update.executeQuery("SELECT * FROM `SubServers`");
+                                while (results.next()) {
+                                    if (!results.getString("Name").contains("!")) {
+                                        ServerInfo.put(results.getString("Name"), new SubServerInfo((BungeeServerInfo) constructServerInfo(results.getString("Name"),
+                                                new InetSocketAddress(results.getString("IP").split("\\:")[0], Integer.parseInt(results.getString("IP").split("\\:")[1])),
+                                                ((ConfigServers.keySet().contains(results.getString("Name"))) ? ConfigServers.get(results.getString("Name")).getMotd() : "SubServer-" + results.getString("Name")), false),
+                                                results.getBoolean("Shared_Chat")));
+                                    } else {
+                                        PlayerServerInfo.put(results.getString("Name").replace("!", ""), new SubServerInfo((BungeeServerInfo) constructServerInfo(results.getString("Name").replace("!", ""),
+                                                new InetSocketAddress(results.getString("IP").split("\\:")[0], Integer.parseInt(results.getString("IP").split("\\:")[1])),
+                                                ((ConfigServers.keySet().contains(results.getString("Name"))) ? ConfigServers.get(results.getString("Name")).getMotd() : "SubServer-" + results.getString("Name").replace("!", "")), false),
+                                                results.getBoolean("Shared_Chat")));
+                                    }
+                                    SubServers.add(results.getString("Name"));
+                                }
+                                results.close();
+                                results = update.executeQuery("SELECT * FROM `SubQueue` WHERE PID='-1'");
+                                while (results.next()) {
+                                    if (results.getInt("Type") == 4) {
+                                        getPluginManager().dispatchCommand(getConsole(), results.getString("Args"));
+                                    }
+                                }
+                                results.close();
+                                update.executeUpdate("DELETE FROM `SubQueue` WHERE PID='-1'");
+                                update.close();
+                            }
                         } catch (SQLException e) {
-                            System.out.println("Problem Syncing Database");
+                            System.out.println("Problem Syncing Database(s)!");
                             e.printStackTrace();
                         }
                     }
@@ -194,6 +211,28 @@ public class FakeProxyServer extends BungeeCord {
             resStreamIn.close();
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private <T> T getValueFromArray(Configuration config, String path, T def, Map submap) {
+        int index = path.indexOf(46);
+        if(index == -1) {
+            Object first1 = submap.get(path);
+            if(first1 == null && def != null) {
+                first1 = def;
+            }
+
+            return (T) first1;
+        } else {
+            String first = path.substring(0, index);
+            String second = path.substring(index + 1, path.length());
+            Object sub = (Map)submap.get(first);
+            if(sub == null) {
+                sub = new LinkedHashMap();
+                submap.put(first, sub);
+            }
+
+            return getValueFromArray(config, second, def, (Map)sub);
         }
     }
 

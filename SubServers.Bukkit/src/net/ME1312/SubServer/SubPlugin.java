@@ -105,6 +105,37 @@ public class SubPlugin {
                 e.printStackTrace();
             }
         }
+        if (!(new File(Plugin.getDataFolder(), "SubCreator").exists())) new File(Plugin.getDataFolder(), "SubCreator").mkdir();
+        if (!(new File(Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "build-subserver.sh").exists())) {
+            copyFromJar("build-subserver.sh", Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "build-subserver.sh");
+            Bukkit.getLogger().info(lprefix + "Created Build Script!");
+        } else {
+            try {
+                String Version = "null";
+                BufferedReader brText = new BufferedReader(new FileReader(new File(Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "build-subserver.sh")));
+                try {
+                     Version = brText.readLine().split("Version: ")[1];
+                } catch (NullPointerException e) {}
+                brText.close();
+
+                if (!Version.equalsIgnoreCase("1.8.9c+")) {
+                    Files.move(new File(Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "build-subserver.sh"), new File(Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "old-build-subserver." + Math.round(Math.random() * 100000) + ".sh"));
+                    copyFromJar("lang.yml", Plugin.getDataFolder() + File.separator + "lang.yml");
+                    Bukkit.getLogger().info(lprefix + "Updated Build Script!");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        if (!(new File(Plugin.getDataFolder(), "SubCreator" + File.separator + "Bukkit-Plugins").exists()))
+            new File(Plugin.getDataFolder(), "SubCreator" + File.separator + "Bukkit-Plugins").mkdir();
+        if (!(new File(Plugin.getDataFolder(), "SubCreator" + File.separator + "Spigot-Plugins").exists()))
+            new File(Plugin.getDataFolder(), "SubCreator" + File.separator + "Spigot-Plugins").mkdir();
+        if (!(new File(Plugin.getDataFolder(), "SubCreator" + File.separator + "Sponge-Mods").exists()))
+            new File(Plugin.getDataFolder(), "SubCreator" + File.separator + "Sponge-Mods").mkdir();
+        if (!(new File(Plugin.getDataFolder(), "SubCreator" + File.separator + "Sponge-Config").exists()))
+            new File(Plugin.getDataFolder(), "SubCreator" + File.separator + "Sponge-Config").mkdir();
+
 
         config = confmanager.getNewConfig("config.yml");
         lang = confmanager.getNewConfig("lang.yml");

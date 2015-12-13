@@ -1,3 +1,4 @@
+# Version: 1.8.9c+
 if [ -z "$1" ]
   then
     echo ERROR: No Build Version Supplied

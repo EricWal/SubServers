@@ -20,7 +20,7 @@ servers:
     motd: '&aJust another SubServer'
     address: localhost:25566
     restricted: false
-    use-shared-chat: false
+    use-shared-chat: true
 listeners:
 - query_port: 25577
   motd: '&1Another SubServer Proxy'
@@ -42,4 +42,4 @@ groups:
   ME1312:
   - admin
 connection_throttle: 4000
-stats: 9b8926b9-a8a1-453e-88d9-9c66384518f8
+stats: ''

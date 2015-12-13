@@ -407,6 +407,7 @@ public class SubGUI implements Listener {
     	inventory.setItem(6, invBlock);
     	inventory.setItem(7, invBlock);
     	inventory.setItem(8, invBlock);
+        player.closeInventory();
     	
     	new BukkitRunnable() {
     		@Override
@@ -414,68 +415,56 @@ public class SubGUI implements Listener {
 				do {
 					try {
 						Thread.sleep(125);
-						player.closeInventory();
 						inventory.setItem(0, Block);
 						player.openInventory(inventory);
 						if (stopLoader == false) {
 							Thread.sleep(75);
-							player.closeInventory();
 							inventory.setItem(1, Block);
 							player.openInventory(inventory);
 							if (stopLoader == false) {
 								Thread.sleep(75);
-								player.closeInventory();
 								inventory.setItem(2, Block);
 								player.openInventory(inventory);
 								if (stopLoader == false) {
 									Thread.sleep(75);
-									player.closeInventory();
 									inventory.setItem(0, invBlock);
 									inventory.setItem(3, Block);
 									player.openInventory(inventory);
 									if (stopLoader == false) {
 										Thread.sleep(75);
-										player.closeInventory();
 										inventory.setItem(1, invBlock);
 										inventory.setItem(4, Block);
 										player.openInventory(inventory);
 										if (stopLoader == false) {
 											Thread.sleep(75);
-											player.closeInventory();
 											inventory.setItem(2, invBlock);
 											inventory.setItem(5, Block);
 											player.openInventory(inventory);
 											if (stopLoader == false) {
 												Thread.sleep(75);
-												player.closeInventory();
 												inventory.setItem(3, invBlock);
 												inventory.setItem(6, Block);
 												player.openInventory(inventory);
 												if (stopLoader == false) {
 													Thread.sleep(75);
-													player.closeInventory();
 													inventory.setItem(4, invBlock);
 													inventory.setItem(7, Block);
 													player.openInventory(inventory);
 													if (stopLoader == false) {
 														Thread.sleep(75);
-														player.closeInventory();
 														inventory.setItem(5, invBlock);
 														inventory.setItem(8, Block);
 														player.openInventory(inventory);
 														if (stopLoader == false) {
 															Thread.sleep(75);
-															player.closeInventory();
 															inventory.setItem(6, invBlock);
 															player.openInventory(inventory);
 															if (stopLoader == false) {
 																Thread.sleep(75);
-																player.closeInventory();
 																inventory.setItem(7, invBlock);
 																player.openInventory(inventory);
 																if (stopLoader == false) {
 																	Thread.sleep(75);
-																	player.closeInventory();
 																	inventory.setItem(8, invBlock);
 																	player.openInventory(inventory);
 																	if (stopLoader == false) Thread.sleep(125);

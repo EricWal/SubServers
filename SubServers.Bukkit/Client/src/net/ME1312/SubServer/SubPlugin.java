@@ -146,6 +146,11 @@ public class SubPlugin {
          */
         Plugin.getCommand("subserver").setExecutor(new SubCMD(this));
         Plugin.getCommand("sub").setExecutor(new SubCMD(this));
+
+        /**
+         * ME1312.net Stats
+         */
+        new Metrics(3, Plugin);
     }
 
     protected void DisablePlugin() {

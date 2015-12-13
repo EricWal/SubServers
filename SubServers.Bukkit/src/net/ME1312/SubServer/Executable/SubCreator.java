@@ -65,7 +65,7 @@ public class SubCreator {
             this.Exec = new Executable("java -Xmx" + Memory + "M -Djline.terminal=jline.UnsupportedTerminal -Dcom.mojang.eula.agree=true -jar " + Jar);
 
             try {
-                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubServers.Bukkit.Client.jar").exists()) CopyClientJar();
+                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Spigot-Plugins").exists() && new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Bukkit-Plugins").exists()) CopyPlugins(ServerTypes.spigot);
                 GenerateSpigotYAML();
                 GenerateProperties();
             } catch (IOException e) {
@@ -77,7 +77,7 @@ public class SubCreator {
             this.Exec = new Executable("java -Xmx" + Memory + "M -Djline.terminal=jline.UnsupportedTerminal -jar " + Jar + " -o false");
 
             try {
-                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubServers.Bukkit.Client.jar").exists()) CopyClientJar();
+                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Bukkit-Plugins").exists()) CopyPlugins(ServerTypes.bukkit);
                 GenerateEULA();
                 GenerateProperties();
             } catch (IOException e) {
@@ -121,6 +121,7 @@ public class SubCreator {
                     }
                 }
 
+                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Mods").exists() && new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Config").exists()) CopyPlugins(ServerTypes.sponge);
                 this.Jar = "forge-" + mcfversion.toString() + "-universal.jar";
                 this.Exec = new Executable("java -Xmx" + Memory + "M -jar " + Jar);
                 this.Version = new Version(mcfversion.toString() + "::" + spversion.toString());
@@ -134,43 +135,21 @@ public class SubCreator {
         }
     }
 
-    private void CopyClientJar() throws IOException {
-        if (!new File(new File(Dir, "plugins"), "SubServersClient").exists()) new File(new File(Dir, "plugins"), "SubServersClient").mkdirs();
-
-        InputStream input = null;
-        OutputStream output = null;
-
-        input = new FileInputStream(new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubServers.Bukkit.Client.jar"));
-        output = new FileOutputStream(new File(new File(Dir, "plugins"), "SubServers.Bukkit.Client.jar"));
-        byte[] buf = new byte[1024];
-        int bytesRead;
-        while ((bytesRead = input.read(buf)) > 0) {
-            output.write(buf, 0, bytesRead);
-        }
-        input.close();
-        output.close();
-
-        PrintWriter writer = new PrintWriter(new File(new File(new File(Dir, "plugins"), "SubServersClient"), "config.yml"), "UTF-8");
-
-        writer.println("# SubServer Plugin Configuration");
-        writer.println("# This is The Main Config for this Plugin");
-        writer.println("#");
-        writer.println("# These are the Plugin Settings");
-        writer.println("Settings:");
-        writer.println("    config-version: 1.8.9a+");
-        writer.println("    GUI:");
-        writer.println("        Enabled: " + SubPlugin.config.getBoolean("Settings.GUI.Enabled"));
-        writer.println("        Trigger-Item: '" + SubPlugin.config.getRawString("Settings.GUI.Trigger-Item") + "'");
-        writer.println("    SQL:");
-        writer.println("        hostname: '" + SubPlugin.config.getRawString("Settings.SQL.hostname") + "'");
-        writer.println("        port: " + SubPlugin.config.getInt("Settings.SQL.port"));
-        writer.println("        username: '" + SubPlugin.config.getRawString("Settings.SQL.username") + "'");
-        writer.println("        password: '" + SubPlugin.config.getRawString("Settings.SQL.password") + "'");
-        writer.println("        database: '" + SubPlugin.config.getRawString("Settings.SQL.database") + "'");
-        writer.println("");
-
-        writer.close();
-
+    private void CopyPlugins(final ServerTypes type) throws IOException {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (type == ServerTypes.bukkit || type == ServerTypes.spigot) {
+                    copyFolder(new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Bukkit-Plugins"), new File(Dir, "plugins"));
+                    if (type == ServerTypes.spigot) {
+                        copyFolder(new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Spigot-Plugins"), new File(Dir, "plugins"));
+                    }
+                } else if (type == ServerTypes.sponge) {
+                    copyFolder(new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Mods"), new File(Dir, "mods"));
+                    copyFolder(new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Config"), new File(Dir, "config"));
+                }
+            }
+        }.runTaskAsynchronously(SubPlugin.Plugin);
     }
 
     private void GenerateEULA() throws FileNotFoundException, UnsupportedEncodingException {
@@ -526,7 +505,22 @@ public class SubCreator {
                     try {
                         if (System.getProperty("os.name").toLowerCase().indexOf("win") >= 0) {
                             String GitBash = new File(new File(SubPlugin.config.getRawString("Settings.Server-Creation.git-dir")), "bin" + File.separatorChar + "bash.exe").getAbsolutePath();
-                            SubPlugin.copyFromJar("build-subserver.sh", new File(Dir, "build-subserver.sh").getPath());
+                            InputStream input = null;
+                            OutputStream output = null;
+                            try {
+                                input = new FileInputStream(new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "build-subserver.sh"));
+                                output = new FileOutputStream(new File(Dir, "build-subserver.sh"));
+                                byte[] buf = new byte[1024];
+                                int bytesRead;
+                                while ((bytesRead = input.read(buf)) > 0) {
+                                    output.write(buf, 0, bytesRead);
+                                }
+                            } finally {
+                                if (input != null)
+                                    input.close();
+                                if (output != null)
+                                    output.close();
+                            }
 
                             if (!(new File(Dir, "build-subserver.sh").exists())) {
                                 Bukkit.getLogger().severe(SubPlugin.lprefix + "Problem Copying Script!");
@@ -575,7 +569,22 @@ public class SubCreator {
                                 }
                             }
                         } else {
-                            SubPlugin.copyFromJar("build-subserver.sh", new File(Dir, "build-subserver.sh").getPath());
+                            InputStream input = null;
+                            OutputStream output = null;
+                            try {
+                                input = new FileInputStream(new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "build-subserver.sh"));
+                                output = new FileOutputStream(new File(Dir, "build-subserver.sh"));
+                                byte[] buf = new byte[1024];
+                                int bytesRead;
+                                while ((bytesRead = input.read(buf)) > 0) {
+                                    output.write(buf, 0, bytesRead);
+                                }
+                            } finally {
+                                if (input != null)
+                                    input.close();
+                                if (output != null)
+                                    output.close();
+                            }
 
                             if (!(new File(Dir, "build-subserver.sh").exists())) {
                                 Bukkit.getLogger().severe(SubPlugin.lprefix + "Problem Copying Script!");
@@ -660,5 +669,49 @@ public class SubCreator {
             sb.append((char) cp);
         }
         return sb.toString();
+    }
+
+    private void copyFolder(File source, File destination) {
+        if (source.isDirectory()) {
+            if (!destination.exists()) {
+                destination.mkdirs();
+            }
+
+            String files[] = source.list();
+
+            for (String file : files) {
+                File srcFile = new File(source, file);
+                File destFile = new File(destination, file);
+
+                copyFolder(srcFile, destFile);
+            }
+        } else {
+            InputStream in = null;
+            OutputStream out = null;
+
+            try {
+                in = new FileInputStream(source);
+                out = new FileOutputStream(destination);
+
+                byte[] buffer = new byte[1024];
+
+                int length;
+                while ((length = in.read(buffer)) > 0) {
+                    out.write(buffer, 0, length);
+                }
+            } catch (Exception e) {
+                try {
+                    in.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+
+                try {
+                    out.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
     }
 }
