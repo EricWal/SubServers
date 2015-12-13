@@ -14,8 +14,10 @@
 # IntelliJ
 /out/
 /SubServers.Bukkit/out/
-/SubServers.Bungee/out/
-/SubServers.Sponge/out/
+/SubServers.Bungee/target/
+/SubServers.Sponge/target/
+/SubServers.Sponge/BetterGUI/target/
+/SubServers.Sponge/Client/target/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
@@ -36,3 +38,4 @@ README.md
 /SubServers.Sponge/
 /artifacts/SubServers.Sponge.jar
 /artifacts/SubServers.Sponge.BetterGUI.jar
+/artifacts/SubServers.Sponge.Client.jar
