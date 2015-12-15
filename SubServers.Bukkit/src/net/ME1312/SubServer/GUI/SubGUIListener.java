@@ -86,7 +86,6 @@ public class SubGUIListener implements Listener {
                 if ((ChatColor.DARK_GREEN.toString() + SubPlugin.lang.getString("Lang.GUI.Start")).equals(displayName)) {
                     if (player.hasPermission("SubServer.Command.start.*") || player.hasPermission("SubServer.Command.start." + event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, ""))) {
                         SubAPI.getSubServer(event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, "")).start((Player)event.getWhoClicked());
-                        player.closeInventory();
                         new SubGUI(SubPlugin).openLoader(player, event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, ""), "openServerWindow");
                         new BukkitRunnable() {
                             @Override
@@ -103,7 +102,6 @@ public class SubGUIListener implements Listener {
                 } else if ((ChatColor.RED.toString() + SubPlugin.lang.getString("Lang.GUI.Stop")).equals(displayName)) {
                     if (player.hasPermission("SubServer.Command.stop.*") || player.hasPermission("SubServer.Command.stop." + event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, ""))) {
                         final boolean stopped = SubAPI.getSubServer(event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, "")).stop((Player)event.getWhoClicked());
-                        player.closeInventory();
                         new SubGUI(SubPlugin).openLoader(player, event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, ""), "openServerWindow");
                         new BukkitRunnable() {
                             @Override
@@ -121,7 +119,6 @@ public class SubGUIListener implements Listener {
                 } else if ((ChatColor.DARK_RED.toString() + SubPlugin.lang.getString("Lang.GUI.Terminate")).equals(displayName)) {
                     if (player.hasPermission("SubServer.Command.kill.*") || player.hasPermission("SubServer.Command.kill." + event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, ""))) {
                         SubAPI.getSubServer(event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, "")).terminate((Player)event.getWhoClicked());
-                        player.closeInventory();
                         new BukkitRunnable() {
                             @Override
                             public void run() {
@@ -135,7 +132,6 @@ public class SubGUIListener implements Listener {
                         }.runTaskAsynchronously(SubPlugin.Plugin);
                     }
                 } else if ((ChatColor.YELLOW.toString() + SubPlugin.lang.getString("Lang.GUI.Back")).equals(displayName)) {
-                    player.closeInventory();
                     int i = (int) Math.floor(SubPlugin.SubServers.indexOf(event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, "")) / 18);
                     new SubGUI(player, i, null, SubPlugin);
                 } else if ((ChatColor.DARK_RED.toString() + SubPlugin.lang.getString("Lang.GUI.Exit")).equals(displayName)) {
@@ -182,7 +178,6 @@ public class SubGUIListener implements Listener {
         if (event.getInventory().getName().contains(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Success"))) {
             final Player player = (Player) event.getWhoClicked();
             if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR && event.getCurrentItem().hasItemMeta()) {
-                player.closeInventory();
                 new SubGUI(player, 0, event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Success") + ChatColor.YELLOW, ""), SubPlugin);
             }
             event.setCancelled(true);
@@ -316,7 +311,7 @@ public class SubGUIListener implements Listener {
         /**
          * Seecret Listener
          */
-        if (event.getInventory().getName().contains("E::")) {
+        if (event.getInventory().getName().contains(":S:")) {
             if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR) {
                 new SubGUI(SubPlugin).openSeecretWindow((Player) event.getWhoClicked());
                 event.setCancelled(true);
