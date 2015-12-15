@@ -71,7 +71,7 @@ Lang:
         'Not-Running': 'The Server is not yet Started'
         'Loading': 'Loading...'
         'Success': 'Success - '
-        'Enter-CMD': 'Enter Your Command In Chat (Without a \"/\")'
+        'Enter-CMD': 'Enter Your Command In Chat'
         'Server-Admin-Title': 'Admin - '
         'Removed': 'Removed Server'
         'OK': 'OK'

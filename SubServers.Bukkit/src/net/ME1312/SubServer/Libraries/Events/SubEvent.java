@@ -77,7 +77,6 @@ public class SubEvent {
 	 */
 	public static boolean RunEvent(SubPlugin SubPlugin, Events Event, Object... args)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-		
 		boolean EventStatus = true;
 		for(Iterator<List<SubListener>> List = SubPlugin.EventHandlers.values().iterator(); List.hasNext(); ) {
 			List<SubListener> item = List.next();

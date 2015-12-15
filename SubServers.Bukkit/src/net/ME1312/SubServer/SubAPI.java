@@ -297,7 +297,7 @@ public class SubAPI {
      *
      * @param Event The Event to Execute
      * @param Args The Args required to execute this event
-     * @return If the event was cancelled
+     * @return If the event was overridden
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
      * @throws InvocationTargetException

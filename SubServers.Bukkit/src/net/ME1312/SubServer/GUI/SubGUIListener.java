@@ -157,9 +157,11 @@ public class SubGUIListener implements Listener {
                                     e.printStackTrace();
                                 }
 
-                                SubAPI.getSubServer(event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, "")).sendCommand((Player)event.getWhoClicked(), chat.chatText);
-                                chat.chatText = "";
-                                new SubGUI(SubPlugin).openSentCommand(player, event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, ""));
+                                if (!chat.overridden) {
+                                    SubAPI.getSubServer(event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, "")).sendCommand((Player) event.getWhoClicked(), ((chat.chatText.startsWith("/")) ? chat.chatText.substring(1) : chat.chatText));
+                                    chat.chatText = "";
+                                    new SubGUI(SubPlugin).openSentCommand(player, event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, ""));
+                                }
                             }
                         }.runTaskAsynchronously(SubPlugin.Plugin);
                     }
@@ -234,24 +236,12 @@ public class SubGUIListener implements Listener {
                             e.printStackTrace();
                         }
 
-                        Version Version = new Version(chat.chatText);
-                        if (Version.compareTo(new Version("1.8")) < 0) {
-                            player.sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Version-Unsupported"));
-                        } else {
-                            player.sendMessage(ChatColor.YELLOW + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Name"));
-                            chat.chatEnabled = false;
-                            try {
-                                do {
-                                    Thread.sleep(25);
-                                } while (chat.chatEnabled == false);
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            String Name = chat.chatText;
-                            if (!StringUtils.isAlphanumericSpace(Name)) {
-                                player.sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Name-Alphanumeric"));
+                        if (!chat.overridden) {
+                            Version Version = new Version(chat.chatText);
+                            if (Version.compareTo(new Version("1.8")) < 0) {
+                                player.sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Version-Unsupported"));
                             } else {
-                                player.sendMessage(ChatColor.YELLOW + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Memory"));
+                                player.sendMessage(ChatColor.YELLOW + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Name"));
                                 chat.chatEnabled = false;
                                 try {
                                     do {
@@ -260,38 +250,58 @@ public class SubGUIListener implements Listener {
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
-
-                                int Memory = 0;
-                                try {
-                                    Memory = Integer.parseInt(chat.chatText);
-                                } catch (NumberFormatException e) {
-                                    player.sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Memory-Invalid"));
-                                }
-                                if (Memory == 0) {
-                                    player.sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Memory-Invalid"));
-                                } else {
-                                    chat.chatEnabled = false;
-                                    player.sendMessage(ChatColor.YELLOW + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Port"));
-                                    try {
-                                        do {
-                                            Thread.sleep(25);
-                                        } while (chat.chatEnabled == false);
-                                    } catch (InterruptedException e) {
-                                        e.printStackTrace();
-                                    }
-
-                                    int Port = 0;
-                                    try {
-                                        Port = Integer.parseInt(chat.chatText);
-                                    } catch (NumberFormatException e) {
-                                        player.sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Port-Invalid"));
-                                    }
-                                    if (Port == 0 || Port > 65535) {
-                                        player.sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Port-Invalid"));
+                                if (!chat.overridden) {
+                                    String Name = chat.chatText;
+                                    if (!StringUtils.isAlphanumericSpace(Name)) {
+                                        player.sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Name-Alphanumeric"));
                                     } else {
-                                        SubPlugin.ServerCreator = new SubCreator(Name, Port, new File("./" + Name), Type, Version, Memory, player, SubPlugin);
-                                        SubPlugin.ServerCreator.run();
-                                        new SubGUI(player, 0, null, SubPlugin);
+                                        player.sendMessage(ChatColor.YELLOW + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Memory"));
+                                        chat.chatEnabled = false;
+                                        try {
+                                            do {
+                                                Thread.sleep(25);
+                                            } while (chat.chatEnabled == false);
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+
+                                        if (!chat.overridden) {
+                                            int Memory = 0;
+                                            try {
+                                                Memory = Integer.parseInt(chat.chatText);
+                                            } catch (NumberFormatException e) {
+                                                player.sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Memory-Invalid"));
+                                            }
+                                            if (Memory == 0) {
+                                                player.sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Memory-Invalid"));
+                                            } else {
+                                                chat.chatEnabled = false;
+                                                player.sendMessage(ChatColor.YELLOW + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Port"));
+                                                try {
+                                                    do {
+                                                        Thread.sleep(25);
+                                                    } while (chat.chatEnabled == false);
+                                                } catch (InterruptedException e) {
+                                                    e.printStackTrace();
+                                                }
+
+                                                if (!chat.overridden) {
+                                                    int Port = 0;
+                                                    try {
+                                                        Port = Integer.parseInt(chat.chatText);
+                                                    } catch (NumberFormatException e) {
+                                                        player.sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Port-Invalid"));
+                                                    }
+                                                    if (Port == 0 || Port > 65535) {
+                                                        player.sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Port-Invalid"));
+                                                    } else {
+                                                        SubPlugin.ServerCreator = new SubCreator(Name, Port, new File("./" + Name), Type, Version, Memory, player, SubPlugin);
+                                                        SubPlugin.ServerCreator.run();
+                                                        new SubGUI(player, 0, null, SubPlugin);
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -301,6 +311,16 @@ public class SubGUIListener implements Listener {
 
             }
             event.setCancelled(true);
+        }
+
+        /**
+         * Seecret Listener
+         */
+        if (event.getInventory().getName().contains("E::")) {
+            if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR) {
+                new SubGUI(SubPlugin).openSeecretWindow((Player) event.getWhoClicked());
+                event.setCancelled(true);
+            }
         }
     }
 }
