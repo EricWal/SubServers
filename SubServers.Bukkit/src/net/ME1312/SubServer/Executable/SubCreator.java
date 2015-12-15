@@ -9,14 +9,16 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import net.ME1312.SubServer.Events.Libraries.EventType;
 import net.ME1312.SubServer.SubAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import net.ME1312.SubServer.SubPlugin;
-import net.ME1312.SubServer.Libraries.Events.SubEvent;
+import net.ME1312.SubServer.Events.Libraries.SubEvent;
 import net.ME1312.SubServer.Libraries.Version.Version;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -27,8 +29,13 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+/**
+ * SubServer Creator Class
+ *
+ * @author ME1312
+ */
 public class SubCreator {
-    public enum ServerTypes {
+    public enum ServerType {
         spigot,
         bukkit,
         vanilla,
@@ -43,12 +50,12 @@ public class SubCreator {
     private String Jar;
     private Version Version;
     private Player Player;
-    private ServerTypes Type;
+    private ServerType Type;
     private SubPlugin SubPlugin;
     private boolean Running;
     private Process Process;
 
-    public SubCreator(String Name, int Port, File Dir, ServerTypes Type, Version Version, int Memory, Player Player, SubPlugin SubPlugin) {
+    public SubCreator(String Name, int Port, File Dir, ServerType Type, Version Version, int Memory, Player Player, SubPlugin SubPlugin) {
         this.Name = Name;
         this.Port = Port;
         this.Dir = Dir;
@@ -60,31 +67,31 @@ public class SubCreator {
 
         if (!Dir.exists()) Dir.mkdirs();
 
-        if (Type == ServerTypes.spigot) {
+        if (Type == ServerType.spigot) {
             this.Jar = "Spigot.jar";
             this.Exec = new Executable("java -Xmx" + Memory + "M -Djline.terminal=jline.UnsupportedTerminal -Dcom.mojang.eula.agree=true -jar " + Jar);
 
             try {
-                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Spigot-Plugins").exists() && new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Bukkit-Plugins").exists()) CopyPlugins(ServerTypes.spigot);
+                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Spigot-Plugins").exists() && new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Bukkit-Plugins").exists()) CopyPlugins(ServerType.spigot);
                 GenerateSpigotYAML();
                 GenerateProperties();
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-        } else if (Type == ServerTypes.bukkit) {
+        } else if (Type == ServerType.bukkit) {
             this.Jar = "Craftbukkit.jar";
             this.Exec = new Executable("java -Xmx" + Memory + "M -Djline.terminal=jline.UnsupportedTerminal -jar " + Jar + " -o false");
 
             try {
-                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Bukkit-Plugins").exists()) CopyPlugins(ServerTypes.bukkit);
+                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Bukkit-Plugins").exists()) CopyPlugins(ServerType.bukkit);
                 GenerateEULA();
                 GenerateProperties();
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-        } else if (Type == ServerTypes.vanilla) {
+        } else if (Type == ServerType.vanilla) {
             this.Jar = "Vanilla.jar";
             this.Exec = new Executable("java -Xmx" + Memory + "M -jar " + Jar + " nogui");
 
@@ -94,7 +101,7 @@ public class SubCreator {
             } catch (FileNotFoundException | UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
-        } else if (Type == ServerTypes.sponge) {
+        } else if (Type == ServerType.sponge) {
             try {
                 Document spongexml = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(readAll(new BufferedReader(new InputStreamReader(new URL("http://files.minecraftforge.net/maven/org/spongepowered/spongeforge/maven-metadata.xml").openStream(), Charset.forName("UTF-8")))))));
                 Document forgexml = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(readAll(new BufferedReader(new InputStreamReader(new URL("http://files.minecraftforge.net/maven/net/minecraftforge/forge/maven-metadata.xml").openStream(), Charset.forName("UTF-8")))))));
@@ -121,7 +128,7 @@ public class SubCreator {
                     }
                 }
 
-                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Mods").exists() && new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Config").exists()) CopyPlugins(ServerTypes.sponge);
+                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Mods").exists() && new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Config").exists()) CopyPlugins(ServerType.sponge);
                 this.Jar = "forge-" + mcfversion.toString() + "-universal.jar";
                 this.Exec = new Executable("java -Xmx" + Memory + "M -jar " + Jar);
                 this.Version = new Version(mcfversion.toString() + "::" + spversion.toString());
@@ -135,16 +142,16 @@ public class SubCreator {
         }
     }
 
-    private void CopyPlugins(final ServerTypes type) throws IOException {
+    private void CopyPlugins(final ServerType type) throws IOException {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (type == ServerTypes.bukkit || type == ServerTypes.spigot) {
+                if (type == ServerType.bukkit || type == ServerType.spigot) {
                     copyFolder(new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Bukkit-Plugins"), new File(Dir, "plugins"));
-                    if (type == ServerTypes.spigot) {
+                    if (type == ServerType.spigot) {
                         copyFolder(new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Spigot-Plugins"), new File(Dir, "plugins"));
                     }
-                } else if (type == ServerTypes.sponge) {
+                } else if (type == ServerType.sponge) {
                     copyFolder(new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Mods"), new File(Dir, "mods"));
                     copyFolder(new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Config"), new File(Dir, "config"));
                 }
@@ -482,13 +489,13 @@ public class SubCreator {
 
     public boolean run() {
         try {
-            if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubCreateEvent, new SubServer(true, Name, -1, Port, true, true, Dir, Exec, false, false, SubPlugin), Player, Type)) {
+            if (SubAPI.executeEvent(EventType.SubCreateEvent, (OfflinePlayer) Player, Type)) {
                 run(true);
                 return true;
             } else {
                 return false;
             }
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+        } catch (IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
             e.printStackTrace();
             return false;
         }

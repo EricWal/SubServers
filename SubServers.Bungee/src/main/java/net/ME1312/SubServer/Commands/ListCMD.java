@@ -13,7 +13,7 @@ import net.md_5.bungee.api.plugin.Command;
 import java.util.*;
 
 /**
- * Created by ME1312 on 10/16/15.
+ * List Command Class
  */
 public class ListCMD extends Command {
     private FakeProxyServer FakeProxyServer;

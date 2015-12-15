@@ -23,7 +23,6 @@ import org.bukkit.scheduler.BukkitRunnable;
  * GUI Renderer Class
  * 
  * @author ME1312
- *
  */
 public class SubGUI implements Listener {
 	protected boolean closeWindow = false;
@@ -408,83 +407,97 @@ public class SubGUI implements Listener {
     	inventory.setItem(6, invBlock);
     	inventory.setItem(7, invBlock);
     	inventory.setItem(8, invBlock);
-    	
-    	new BukkitRunnable() {
-    		@Override
-			public void run() {
-				do {
-					try {
-						Thread.sleep(125);
-						inventory.setItem(0, Block);
-						player.openInventory(inventory);
-						if (stopLoader == false) {
-							Thread.sleep(75);
-							inventory.setItem(1, Block);
-							player.openInventory(inventory);
-							if (stopLoader == false) {
-								Thread.sleep(75);
-								inventory.setItem(2, Block);
-								player.openInventory(inventory);
-								if (stopLoader == false) {
-									Thread.sleep(75);
-									inventory.setItem(0, invBlock);
-									inventory.setItem(3, Block);
-									player.openInventory(inventory);
-									if (stopLoader == false) {
-										Thread.sleep(75);
-										inventory.setItem(1, invBlock);
-										inventory.setItem(4, Block);
-										player.openInventory(inventory);
-										if (stopLoader == false) {
-											Thread.sleep(75);
-											inventory.setItem(2, invBlock);
-											inventory.setItem(5, Block);
-											player.openInventory(inventory);
-											if (stopLoader == false) {
-												Thread.sleep(75);
-												inventory.setItem(3, invBlock);
-												inventory.setItem(6, Block);
-												player.openInventory(inventory);
-												if (stopLoader == false) {
-													Thread.sleep(75);
-													inventory.setItem(4, invBlock);
-													inventory.setItem(7, Block);
-													player.openInventory(inventory);
-													if (stopLoader == false) {
-														Thread.sleep(75);
-														inventory.setItem(5, invBlock);
-														inventory.setItem(8, Block);
-														player.openInventory(inventory);
-														if (stopLoader == false) {
-															Thread.sleep(75);
-															inventory.setItem(6, invBlock);
-															player.openInventory(inventory);
-															if (stopLoader == false) {
-																Thread.sleep(75);
-																inventory.setItem(7, invBlock);
-																player.openInventory(inventory);
-																if (stopLoader == false) {
-																	Thread.sleep(75);
-																	inventory.setItem(8, invBlock);
-																	player.openInventory(inventory);
-																	if (stopLoader == false) Thread.sleep(125);
-																}
-															}
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				} while (stopLoader == false);
-				
-				stopLoader = false;
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                do {
+                    try {
+                        Thread.sleep(125);
+                        player.closeInventory();
+                        inventory.setItem(0, Block);
+                        player.openInventory(inventory);
+                        if (stopLoader == false) {
+                            Thread.sleep(75);
+                            player.closeInventory();
+                            inventory.setItem(1, Block);
+                            player.openInventory(inventory);
+                            if (stopLoader == false) {
+                                Thread.sleep(75);
+                                player.closeInventory();
+                                inventory.setItem(2, Block);
+                                player.openInventory(inventory);
+                                if (stopLoader == false) {
+                                    Thread.sleep(75);
+                                    player.closeInventory();
+                                    inventory.setItem(0, invBlock);
+                                    inventory.setItem(3, Block);
+                                    player.openInventory(inventory);
+                                    if (stopLoader == false) {
+                                        Thread.sleep(75);
+                                        player.closeInventory();
+                                        inventory.setItem(1, invBlock);
+                                        inventory.setItem(4, Block);
+                                        player.openInventory(inventory);
+                                        if (stopLoader == false) {
+                                            Thread.sleep(75);
+                                            player.closeInventory();
+                                            inventory.setItem(2, invBlock);
+                                            inventory.setItem(5, Block);
+                                            player.openInventory(inventory);
+                                            if (stopLoader == false) {
+                                                Thread.sleep(75);
+                                                player.closeInventory();
+                                                inventory.setItem(3, invBlock);
+                                                inventory.setItem(6, Block);
+                                                player.openInventory(inventory);
+                                                if (stopLoader == false) {
+                                                    Thread.sleep(75);
+                                                    player.closeInventory();
+                                                    inventory.setItem(4, invBlock);
+                                                    inventory.setItem(7, Block);
+                                                    player.openInventory(inventory);
+                                                    if (stopLoader == false) {
+                                                        Thread.sleep(75);
+                                                        player.closeInventory();
+                                                        inventory.setItem(5, invBlock);
+                                                        inventory.setItem(8, Block);
+                                                        player.openInventory(inventory);
+                                                        if (stopLoader == false) {
+                                                            Thread.sleep(75);
+                                                            player.closeInventory();
+                                                            inventory.setItem(6, invBlock);
+                                                            player.openInventory(inventory);
+                                                            if (stopLoader == false) {
+                                                                Thread.sleep(75);
+                                                                player.closeInventory();
+                                                                inventory.setItem(7, invBlock);
+                                                                player.openInventory(inventory);
+                                                                if (stopLoader == false) {
+                                                                    Thread.sleep(75);
+                                                                    player.closeInventory();
+                                                                    inventory.setItem(8, invBlock);
+                                                                    player.openInventory(inventory);
+                                                                    if (stopLoader == false) Thread.sleep(125);
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } while (stopLoader == false);
+
+                stopLoader = false;
+                player.closeInventory();
+
 				if (done.equalsIgnoreCase("openServerWindow")) {
 					new SubGUI(player, 0, args, SubPlugin);
 				} else if (done.equalsIgnoreCase("openSelectionWindow")) {
@@ -497,7 +510,7 @@ public class SubGUI implements Listener {
 	}
 	
 	/**
-	 * 
+	 * Opens Success Window
 	 * 
 	 * @param player Player Opening GUI
 	 * @param server Server Name
@@ -519,7 +532,12 @@ public class SubGUI implements Listener {
 		blockMeta = null;
 		inv = null;
 	}
-	
+
+    /**
+     * Open Mojang Agreement Window
+     *
+     * @param player Player Opening GUI
+     */
 	@SuppressWarnings("deprecation")
 	protected void openMojangAgreement(Player player) {
 		inv = Bukkit.createInventory(null, 18, SubPlugin.lang.getString("Lang.Create-Server.Mojang-Agreement"));
@@ -565,7 +583,12 @@ public class SubGUI implements Listener {
 		player.openInventory(inv);
 		inv = null;
 	}
-	
+
+    /**
+     * Open Server Type Selector
+     *
+     * @param player Player Opening GUI
+     */
 	protected void openServerTypeSelector(Player player) {
 		inv = Bukkit.createInventory(null, 18, SubPlugin.lang.getString("Lang.Create-Server.Server-Type"));
 		block = new ItemStack(Material.WATER_BUCKET);
@@ -604,6 +627,11 @@ public class SubGUI implements Listener {
 		inv = null;
 	}
 
+    /**
+     * Open Seecret Window
+     *
+     * @param player Player Opening GUI
+     */
     protected void openSeecretWindow(Player player) {
         try {
             inv = Bukkit.createInventory(null, 27, randomString(new Random().nextInt(30), true));
@@ -612,12 +640,12 @@ public class SubGUI implements Listener {
             while (i != 0) {
                 block = new ItemStack(Material.values()[new Random().nextInt(Material.values().length)]);
                 blockMeta = block.getItemMeta();
-                blockMeta.setDisplayName(randomString(new Random().nextInt(64), false));
+                blockMeta.setDisplayName(randomString(new Random().nextInt(65), false));
                 int ii = new Random().nextInt(10);
                 String[] lore = new String[ii];
                 while (ii != 0) {
                     ii--;
-                    lore[ii] = randomString(new Random().nextInt(64), false);
+                    lore[ii] = randomString(new Random().nextInt(65), false);
                 }
                 blockMeta.setLore(Arrays.asList(lore));
                 block.setItemMeta(blockMeta);
@@ -636,7 +664,7 @@ public class SubGUI implements Listener {
 
     private String randomString(int count, boolean identifier) {
         StringBuilder builder = new StringBuilder();
-        String Char = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,./;'[]\\`=-<>?:\"{}|!@#$%^&*()\u00A1\u2122\u00A3\u00A2\u221E\u00A7\u00B6\u2022\u00AA\u00BA\u2013\u2260\u00AB\u2018\u201C\u03C0\u00F8\u02C6\u00A8\u2020\u00AE\u00B4\u2211\u0153\u00E5\u00DF\u2202\u0192\u00A9\u02D9\u2206\u02DA\u00AC\u2026\u00E6\u2265\u2264\u00B5\u02DC\u222B\u221A\u00E7\u2248\u03A9`\u00A1\u2122\u00A3\u00A2\u221E\u00A7\u00B6\u2022\u00AA\u00BA\u2013\u2260\u00AB\u2018\u201C\u220F\u00D8\u02C6\u00A8\u00C1\u2020\u00AE\u00B4\u2211\u0152\u00C5\u00CD\u00CE\u00CF\u00A9\u00D3\u00D4\u02DA\u00D2\u2026\u00C6\u2265\u2264\u00C2\u02DC\u0131\u221A\u00C7\u2248\u03A9";
+        String Char = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,./;'[]\\`=-<>?:\"{}|!@#$%^&*()\u00A1\u2122\u00A3\u00A2\u221E\u00A7\u00B6\u2022\u00AA\u00BA\u2013\u2260\u00AB\u2018\u201C\u03C0\u00F8\u02C6\u00A8\u2020\u00AE\u00B4\u2211\u0153\u00E5\u00DF\u2202\u0192\u00A9\u02D9\u2206\u02DA\u00AC\u2026\u00E6\u2265\u2264\u00B5\u02DC\u222B\u221A\u00E7\u2248\u03A9`\u00A1\u2122\u00A3\u00A2\u221E\u00A7\u00B6\u2022\u00AA\u00BA\u2013\u2260\u00AB\u2018\u201C\u220F\u00D8\u02C6\u00A8\u00C1\u2020\u00AE\u00B4\u2211\u0152\u00C5\u00CD\u00CE\u00CF\u00A9\u00D3\u00D4\u02DA\u00D2\u2026\u00C6\u2265\u2264\u00C2\u02DC\u0131\u221A\u00C7\u2248\u03A9";
         if (count > 4) {
             builder.append(ChatColor.values()[new Random().nextInt(ChatColor.values().length)]);
             builder.append(ChatColor.MAGIC);

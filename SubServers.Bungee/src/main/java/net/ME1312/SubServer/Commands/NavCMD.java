@@ -9,6 +9,9 @@ import net.ME1312.SubServer.FakeProxyServer;
 
 import java.util.Iterator;
 
+/**
+ * Server & Go Command Class
+ */
 public class NavCMD extends Command {
 	private FakeProxyServer FakeProxyServer;
 	

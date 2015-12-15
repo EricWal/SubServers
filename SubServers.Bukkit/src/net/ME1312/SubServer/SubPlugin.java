@@ -1,7 +1,6 @@
 package net.ME1312.SubServer;
 
 import java.io.*;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -12,6 +11,7 @@ import net.ME1312.SubServer.Libraries.SQL.MySQL;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -22,16 +22,18 @@ import net.ME1312.SubServer.Executable.Executable;
 import net.ME1312.SubServer.Executable.SubServer;
 import net.ME1312.SubServer.Libraries.Config.ConfigFile;
 import net.ME1312.SubServer.Libraries.Config.ConfigManager;
-import net.ME1312.SubServer.Libraries.Events.SubListener;
 import net.ME1312.SubServer.Libraries.Version.Version;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import javax.annotation.Nullable;
-
+/**
+ * SubServers' Main Class
+ *
+ * @author ME1312
+ */
 public class SubPlugin {
     public HashMap<Integer, SubServer> Servers = new HashMap<Integer, SubServer>();
     public HashMap<String, Integer> PIDs = new HashMap<String, Integer>();
-    public HashMap<JavaPlugin, List<SubListener>> EventHandlers = new HashMap<JavaPlugin, List<SubListener>>();
+    public HashMap<JavaPlugin, List<Listener>> Listeners = new HashMap<JavaPlugin, List<Listener>>();
     public List<String> SubServers = new ArrayList<String>();
     public JavaPlugin Plugin;
     public SubCreator ServerCreator;
@@ -170,7 +172,7 @@ public class SubPlugin {
 
             update.close();
         } catch (SQLException | ClassNotFoundException e) {
-            Bukkit.getLogger().severe("Could not setup Database:");
+            Bukkit.getLogger().severe(lprefix + "Could not setup Database:");
             Bukkit.getLogger().severe(e.getLocalizedMessage());
             sql = null;
         }
@@ -204,7 +206,7 @@ public class SubPlugin {
                             "('"+ item +"', '"+ config.getString("Settings.Server-IP")+":"+config.getInt("Servers." + item + ".port") +"', '" + i +"', '"+ ((config.getBoolean("Servers." + item + ".enabled"))?"1":"0") +"', '"+ ((config.getBoolean("Servers." + item + ".use-shared-chat"))?"1":"0") +"', '0', '0')");
                     update.close();
                 } catch (SQLException e) {
-                    Bukkit.getLogger().severe("Problem Syncing Database!");
+                    Bukkit.getLogger().severe(lprefix + "Problem Syncing Database!");
                     e.printStackTrace();
                 }
             }
@@ -280,7 +282,7 @@ public class SubPlugin {
         }
     }
 
-    public void ReloadPlugin(@Nullable final Player sender) {
+    public void ReloadPlugin(final Player sender) {
         if (!Servers.get(0).isRunning()) {
             Servers.get(0).destroy();
             Servers.remove(0);
@@ -340,7 +342,7 @@ public class SubPlugin {
 
                     update.close();
                 } catch (SQLException | ClassNotFoundException e1) {
-                    Bukkit.getLogger().severe("Could not setup Database!");
+                    Bukkit.getLogger().severe(lprefix + "Could not setup Database!");
                     Bukkit.getLogger().severe(e1.getLocalizedMessage());
                     sql = null;
 
@@ -385,7 +387,7 @@ public class SubPlugin {
                                     "('"+ item +"', '"+ config.getString("Settings.Server-IP")+":"+SubAPI.getSubServer(item).Port +"', '" + SubAPI.getSubServer(item).PID +"', '" + ((SubAPI.getSubServer(item).Enabled)?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).SharedChat)?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).Temporary)?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).isRunning())?"1":"0") +"')");
                             update.close();
                         } catch (SQLException e) {
-                            Bukkit.getLogger().severe("Problem Syncing Database!");
+                            Bukkit.getLogger().severe(lprefix + "Problem Syncing Database!");
                             e.printStackTrace();
                         }
                     } else if (SubAPI.getSubServer(0).isRunning()) {

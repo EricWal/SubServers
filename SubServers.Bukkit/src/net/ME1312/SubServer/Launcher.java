@@ -2,6 +2,11 @@ package net.ME1312.SubServer;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+/**
+ * SubServers Launcher
+ *
+ * @author ME1312
+ */
 public class Launcher extends JavaPlugin {
 	private SubPlugin SubPlugin;
 	

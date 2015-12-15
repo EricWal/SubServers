@@ -3,7 +3,7 @@ package net.ME1312.SubServer.GUI;
 import net.ME1312.SubServer.SubAPI;
 import net.ME1312.SubServer.SubPlugin;
 import net.ME1312.SubServer.Executable.SubCreator;
-import net.ME1312.SubServer.Executable.SubCreator.ServerTypes;
+import net.ME1312.SubServer.Executable.SubCreator.ServerType;
 import net.ME1312.SubServer.Libraries.Version.Version;
 
 import org.bukkit.Material;
@@ -25,7 +25,6 @@ import org.bukkit.scheduler.BukkitRunnable;
  * GUI Listener
  *
  * @author ME1312
- *
  */
 @SuppressWarnings("deprecation")
 public class SubGUIListener implements Listener {
@@ -177,12 +176,12 @@ public class SubGUIListener implements Listener {
          */
         if (event.getInventory().getName().contains(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Success"))) {
             final Player player = (Player) event.getWhoClicked();
-            if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR && event.getCurrentItem().hasItemMeta()) {
+            if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR && event.getCurrentItem().hasItemMeta() && event.getClickedInventory().contains(event.getCurrentItem())) {
                 new SubGUI(player, 0, event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Success") + ChatColor.YELLOW, ""), SubPlugin);
             }
             event.setCancelled(true);
         }
-        if (event.getInventory().getName().equals(SubPlugin.lang.getString("Lang.GUI.Loading"))) {
+        if (event.getInventory().getName().contains(SubPlugin.lang.getString("Lang.GUI.Loading"))) {
             event.setCancelled(true);
         }
 
@@ -212,8 +211,8 @@ public class SubGUIListener implements Listener {
 
         if (event.getInventory().getName().contains(SubPlugin.lang.getString("Lang.Create-Server.Server-Type"))) {
             final Player player = (Player) event.getWhoClicked();
-            if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR && event.getCurrentItem().hasItemMeta()) {
-                final ServerTypes Type = ServerTypes.valueOf(event.getCurrentItem().getItemMeta().getDisplayName().replace(ChatColor.GRAY.toString(), "").toLowerCase());
+            if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR && event.getCurrentItem().hasItemMeta() && event.getClickedInventory().contains(event.getCurrentItem())) {
+                final ServerType Type = ServerType.valueOf(event.getCurrentItem().getItemMeta().getDisplayName().replace(ChatColor.GRAY.toString(), "").toLowerCase());
                 player.closeInventory();
 
                 final SubGUIChat chat = new SubGUIChat(player, SubPlugin);
@@ -312,7 +311,7 @@ public class SubGUIListener implements Listener {
          * Seecret Listener
          */
         if (event.getInventory().getName().contains(":S:")) {
-            if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR) {
+            if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR && event.getClickedInventory().contains(event.getCurrentItem())) {
                 new SubGUI(SubPlugin).openSeecretWindow((Player) event.getWhoClicked());
                 event.setCancelled(true);
             }

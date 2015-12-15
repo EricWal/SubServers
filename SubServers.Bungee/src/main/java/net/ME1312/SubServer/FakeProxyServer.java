@@ -24,6 +24,9 @@ import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.ConfigurationProvider;
 import net.md_5.bungee.config.YamlConfiguration;
 
+/**
+ * Main Class & API Class
+ */
 public class FakeProxyServer extends BungeeCord {
     public List<String> SubServers = new ArrayList<String>();
     public HashMap<String, SubServerInfo> ConfigServers = new HashMap<String, SubServerInfo>();
@@ -45,7 +48,7 @@ public class FakeProxyServer extends BungeeCord {
         PluginDescription Plugin = new PluginDescription();
         Plugin.setName("SubServers");
         Plugin.setAuthor("ME1312");
-        Plugin.setVersion("1.8.9d");
+        Plugin.setVersion("1.8.9f");
         this.Plugin = Plugin;
 
         EnablePlugin();
@@ -238,15 +241,30 @@ public class FakeProxyServer extends BungeeCord {
 
     // API Methods
 
+    /**
+     * Gets name of Software
+     *
+     * @return Software name
+     */
     @Override
     public String getName() {
         return Plugin.getName() + "@BungeeCord";
     }
 
+    /**
+     * Gets SubServer plugin info
+     *
+     * @return Plugin info
+     */
     public PluginDescription getPluginInfo() {
         return Plugin;
     }
 
+    /**
+     * Gets Servers
+     *
+     * @return Servers (In Bungee Format)
+     */
     @Override
     public Map<String, ServerInfo> getServers() {
         HashMap<String, ServerInfo> map = new HashMap<String, ServerInfo>();
@@ -256,6 +274,11 @@ public class FakeProxyServer extends BungeeCord {
         return map;
     }
 
+    /**
+     * Gets Servers
+     *
+     * @return Servers (In SubServers Format)
+     */
     public HashMap<String, SubServerInfo> getSubServers() {
         HashMap<String, SubServerInfo> map = new HashMap<String, SubServerInfo>();
         map.putAll(ConfigServers);
@@ -264,29 +287,58 @@ public class FakeProxyServer extends BungeeCord {
         return map;
     }
 
+    /**
+     * Gets Info for a Specific Server
+     *
+     * @param server Server's Name
+     * @return Server Info (In Bungee Format)
+     */
     @Override
     public ServerInfo getServerInfo(String server) {
         return getServers().get(server);
     }
 
+    /**
+     * Gets Info for a Specific Server
+     *
+     * @param server Server's Name
+     * @return Server Info (In SubServers Format)
+     */
     public SubServerInfo getSubServerInfo(String server) {
         return getSubServers().get(server);
     }
 
+    /**
+     * Grabs a Lang value
+     *
+     * @param key Key to use
+     * @return Lang Value (or null if there's no such value)
+     */
     public String getLangValue(String key) {
         return lang.get(key);
     }
 
+    /**
+     * Get Lang Values in Hashmap form
+     *
+     * @return Lang Values
+     */
     public HashMap<String, String> getLang() {
         return lang;
     }
 
+    /**
+     * Stops BungeeCord
+     */
     @Override
     public void stop() {
         DisablePlugin();
         super.stop();
     }
 
+    /**
+     * Stops BungeeCord with a Message
+     */
     @Override
     public void stop(String reason) {
         DisablePlugin();

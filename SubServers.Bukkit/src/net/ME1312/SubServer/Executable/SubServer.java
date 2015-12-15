@@ -12,11 +12,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import net.ME1312.SubServer.Events.Libraries.EventType;
 import net.ME1312.SubServer.Libraries.ServerPing;
 import net.ME1312.SubServer.Libraries.Version.Version;
 import net.ME1312.SubServer.SubAPI;
 import net.ME1312.SubServer.SubPlugin;
-import net.ME1312.SubServer.Libraries.Events.SubEvent;
+import net.ME1312.SubServer.Events.Libraries.SubEvent;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -24,10 +25,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 /**
- * Subserver Creator Class
+ * Subserver Object Class
  * 
  * @author ME1312
- *
  */
 @SuppressWarnings("serial")
 public class SubServer implements Serializable {
@@ -218,10 +218,10 @@ public class SubServer implements Serializable {
                             }
 							try {
 								Process.waitFor();
-								SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubShellExitEvent, Server);
+								SubAPI.executeEvent(EventType.SubShellExitEvent, Server);
 							} catch (InterruptedException e) {
 								e.printStackTrace();
-							} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+							} catch (IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
 								e.printStackTrace();
 							}
 						} catch (IOException e) {
@@ -290,10 +290,10 @@ public class SubServer implements Serializable {
 							}.runTaskAsynchronously(SubPlugin.Plugin);
 							try {
 								Process.waitFor();
-								SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubShellExitEvent, Server);
+								SubAPI.executeEvent(EventType.SubShellExitEvent, Server);
 							} catch (InterruptedException e) {
 								e.printStackTrace();
-							} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+							} catch (IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
 								e.printStackTrace();
 							}
 						} catch (IOException e) {
@@ -353,13 +353,13 @@ public class SubServer implements Serializable {
 	 */
 	public boolean start() {
 		try {
-			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubStartEvent, this, null)) {
+			if (SubAPI.executeEvent(EventType.SubStartEvent, this, null)) {
 				start(true);
 				return true;
 			} else {
 				return false;
 			}
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException | IllegalStateException e) {
+		} catch (IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException | IllegalStateException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -372,13 +372,13 @@ public class SubServer implements Serializable {
 	 */
 	public boolean start(final OfflinePlayer sender) {
 		try {
-			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubStartEvent, this, sender)) {
+			if (SubAPI.executeEvent(EventType.SubStartEvent, this, sender)) {
 				start(true);
 				return true;
 			} else {
 				return false;
 			}
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+		} catch (IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -390,13 +390,13 @@ public class SubServer implements Serializable {
 	 */
 	public boolean sendCommand(String cmd) {
 		try {
-			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubRunCommandEvent, this, null, cmd)) {
+			if (SubAPI.executeEvent(EventType.SubRunCommandEvent, this, null, cmd)) {
 				StdIn = cmd;
 				return true;
 			} else {
 				return false;
 			}
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+		} catch (IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -409,13 +409,13 @@ public class SubServer implements Serializable {
 	 */
 	public boolean sendCommand(OfflinePlayer sender, String cmd) {
 		try {
-			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubRunCommandEvent, this, sender, cmd)) {
+			if (SubAPI.executeEvent(EventType.SubRunCommandEvent, this, sender, cmd)) {
 				StdIn = cmd;
 				return true;
 			} else {
 				return false;
 			}
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+		} catch (IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -434,7 +434,7 @@ public class SubServer implements Serializable {
 	 */
 	public boolean stop() {
 		try {
-			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubStopEvent, this, null)) {
+			if (SubAPI.executeEvent(EventType.SubStopEvent, this, null)) {
 				if (Name.equalsIgnoreCase("~Proxy")) {
 					StdIn = "end";
 				} else {
@@ -460,7 +460,7 @@ public class SubServer implements Serializable {
 			} else {
 				return false;
 			}
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+		} catch (IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -472,7 +472,7 @@ public class SubServer implements Serializable {
 	 */
 	public boolean stop(OfflinePlayer sender) {
 		try {
-			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubStopEvent, this, sender)) {
+			if (SubAPI.executeEvent(EventType.SubStopEvent, this, sender)) {
 				if (Name.equalsIgnoreCase("~Proxy")) {
 					StdIn = "end";
 				} else {
@@ -498,7 +498,7 @@ public class SubServer implements Serializable {
 			} else {
 				return false;
 			}
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+		} catch (IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -509,7 +509,7 @@ public class SubServer implements Serializable {
 	 */
 	public boolean terminate() {
 		try {
-			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubStopEvent, this, null)) {
+			if (SubAPI.executeEvent(EventType.SubStopEvent, this, null)) {
 				Process.destroy();
 
                 if (AutoRestart) {
@@ -530,7 +530,7 @@ public class SubServer implements Serializable {
 			} else {
 				return false;
 			}
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+		} catch (IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -542,7 +542,7 @@ public class SubServer implements Serializable {
 	 */
 	public boolean terminate(OfflinePlayer sender) {
 		try {
-			if (SubEvent.RunEvent(SubPlugin, SubEvent.Events.SubStopEvent, this, sender)) {
+			if (SubAPI.executeEvent(EventType.SubStopEvent, this, sender)) {
 				Process.destroy();
 
                 if (AutoRestart) {
@@ -563,7 +563,7 @@ public class SubServer implements Serializable {
 			} else {
 				return false;
 			}
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+		} catch (IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
 			e.printStackTrace();
 			return false;
 		}

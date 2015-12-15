@@ -9,7 +9,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
 /**
- * Created by ME1312 on 10/17/15.
+ * Find Command Class
  */
 public class FindCMD extends Command {
     private FakeProxyServer FakeProxyServer;

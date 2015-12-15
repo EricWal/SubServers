@@ -18,7 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by ME1312 on 9/23/15.
+ * Listener Class
  */
 public class PlayerListener implements Listener {
     FakeProxyServer FakeProxyServer;
@@ -27,6 +27,10 @@ public class PlayerListener implements Listener {
         this.FakeProxyServer = FakeProxyServer;
     }
 
+    /**
+     * Kick Listener
+     * @param event
+     */
     @EventHandler
     public void onServerKick(ServerKickEvent event) {
         ServerInfo kickedFrom = null;
@@ -53,6 +57,10 @@ public class PlayerListener implements Listener {
         }
     }
 
+    /**
+     * Shared Chat Listener
+     * @param event
+     */
     @EventHandler
     public void onMessageSend(ChatEvent event) {
         if (!event.isCancelled() && (event.getSender() instanceof ProxiedPlayer) && !event.getMessage().startsWith("/") && ((SubServerInfo) FakeProxyServer.getServerInfo(((ProxiedPlayer) event.getSender()).getServer().getInfo().getName())).isSharedChat()) {

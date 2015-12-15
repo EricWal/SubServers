@@ -2,22 +2,26 @@ package net.ME1312.SubServer;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
 
+import net.ME1312.SubServer.Events.*;
+import net.ME1312.SubServer.Events.Libraries.EventType;
+import net.ME1312.SubServer.Events.Libraries.SubEventHandler;
+import net.ME1312.SubServer.Executable.SubCreator;
 import net.ME1312.SubServer.Libraries.Config.ConfigFile;
-import net.ME1312.SubServer.Libraries.Events.SubEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import net.ME1312.SubServer.Executable.Executable;
 import net.ME1312.SubServer.Executable.SubServer;
-import net.ME1312.SubServer.Libraries.Events.SubListener;
 import net.ME1312.SubServer.Libraries.Version.Version;
 
 /**
@@ -28,7 +32,7 @@ import net.ME1312.SubServer.Libraries.Version.Version;
  *   Methods can be Requested<br>
  *
  * @author ME1312
- * @version 1.8.8s+
+ * @version 1.8.9f+
  *
  */
 @SuppressWarnings("static-access")
@@ -254,37 +258,31 @@ public class SubAPI {
     }
 
     /**
-     * Adds your Listener to Bukkit and/or Subservers
+     * Adds your Listener Class to Subservers
      *
-     * @param Listener the Object that implements SubListener
+     * @param Listener The Class that contains SubEvents
      * @param Plugin The Plugin calling this SubListener
-     * @param RegisterBukkit Register listener with Bukkit? (true/false)
      */
-    public static void registerListener(SubListener Listener, JavaPlugin Plugin, boolean RegisterBukkit) {
-        if (RegisterBukkit) Bukkit.getServer().getPluginManager().registerEvents(Listener, Plugin);
-
-        List<SubListener> listeners = new ArrayList<SubListener>();
-        if (SubPlugin.EventHandlers.keySet().contains(Plugin)) listeners.addAll(SubPlugin.EventHandlers.get(Plugin));
+    public static void registerListener(Listener Listener, JavaPlugin Plugin) {
+        List<Listener> listeners = new ArrayList<Listener>();
+        if (SubPlugin.Listeners.keySet().contains(Plugin)) listeners.addAll(SubPlugin.Listeners.get(Plugin));
         listeners.add(Listener);
-        SubPlugin.EventHandlers.put(Plugin, listeners);
-
+        SubPlugin.Listeners.put(Plugin, listeners);
     }
 
     /**
-     * Adds your Listener to Bukkit and Subservers
+     * Removes a Listener Class from SubServers
      *
-     * @param Listener the Object that implements SubListener
-     * @param Plugin The Plugin calling this SubListener
+     * @param Listener The Class that contains SubEvents (Must be the same object)
+     * @param Plugin The Plugin to remove the SubListener from
      */
-    public static void registerListener(SubListener Listener, JavaPlugin Plugin) {
-        Bukkit.getServer().getPluginManager().registerEvents(Listener, Plugin);
-
-        List<SubListener> listeners = new ArrayList<SubListener>();
-        if (SubPlugin.EventHandlers.keySet().contains(Plugin)) listeners.addAll(SubPlugin.EventHandlers.get(Plugin));
-        listeners.add(Listener);
-        SubPlugin.EventHandlers.put(Plugin, listeners);
-
+    public static void unRegisterListener(Listener Listener, JavaPlugin Plugin) {
+        List<Listener> listeners = new ArrayList<Listener>();
+        if (SubPlugin.Listeners.keySet().contains(Plugin)) listeners.addAll(SubPlugin.Listeners.get(Plugin));
+        listeners.remove(Listener);
+        SubPlugin.Listeners.put(Plugin, listeners);
     }
+
     /**
      * Gets the Lang File
      *
@@ -296,7 +294,7 @@ public class SubAPI {
     /**
      *
      * @param Event The Event to Execute
-     * @param Args The Args required to execute this event
+     * @param args The Args required to execute this event (Usually they Mirror their Constructor)
      * @return If the event was overridden
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
@@ -304,8 +302,111 @@ public class SubAPI {
      * @throws NoSuchMethodException
      * @throws SecurityException
      */
-    public static boolean executeEvent(SubEvent.Events Event, Object... Args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
-        return SubEvent.RunEvent(SubPlugin, Event, Args);
+    public static boolean executeEvent(EventType Event, Object... args) throws IllegalAccessException, IllegalArgumentException, NoSuchMethodException, SecurityException {
+        boolean Continue = true;
+
+        for (Iterator<EventPriority> Priorities = Arrays.<EventPriority>asList(EventPriority.values()).iterator(); Priorities.hasNext(); ) {
+            EventPriority priority = Priorities.next();
+            for (Iterator<JavaPlugin> Plugins = SubPlugin.Listeners.keySet().iterator(); Plugins.hasNext(); ) {
+                JavaPlugin plugin = Plugins.next();
+                for (Iterator<Listener> Listeners = SubPlugin.Listeners.get(plugin).iterator(); Listeners.hasNext(); ) {
+                    Listener listener = Listeners.next();
+                    for (Iterator<Method> Methods = Arrays.<Method>asList(listener.getClass().getMethods()).iterator(); Methods.hasNext(); ) {
+                        Method method = Methods.next();
+                        if (method.isAnnotationPresent(SubEventHandler.class)) {
+                            if (method.getAnnotation(SubEventHandler.class).priority() == priority) {
+                                if (method.getParameterTypes().length == 1) {
+                                    switch (method.getParameterTypes()[0].getSimpleName()) {
+                                        case "SubCreateEvent":
+                                            if (Event.toString().equals("SubCreateEvent")) {
+                                                SubCreateEvent event = new SubCreateEvent((OfflinePlayer) args[0], (SubCreator.ServerType) args[1]);
+                                                try {
+                                                    method.invoke(listener, event);
+                                                    if (event.isCancelled()) Continue = false;
+                                                } catch (InvocationTargetException e) {
+                                                    Bukkit.getLogger().severe(SubPlugin.lprefix + "Method \"" + method.getName() + "\" in Class \"" + listener.getClass().getCanonicalName() + "\" for Plugin \"" + plugin.getName() + "\"");
+                                                    Bukkit.getLogger().severe("had the following Unhandled Exception while running SubEvents:");
+                                                    e.getTargetException().printStackTrace();
+                                                    Bukkit.getLogger().severe("");
+                                                }
+                                            }
+                                            break;
+                                        case "SubStartEvent":
+                                            if (Event.toString().equals("SubStartEvent")) {
+                                                SubStartEvent event = new SubStartEvent((SubServer) args[0], (OfflinePlayer) args[1]);
+                                                try {
+                                                    method.invoke(listener, event);
+                                                    if (event.isCancelled()) Continue = false;
+                                                } catch (InvocationTargetException e) {
+                                                    Bukkit.getLogger().severe(SubPlugin.lprefix + "Method \"" + method.getName() + "\" in Class \"" + listener.getClass().getCanonicalName() + "\" for Plugin \"" + plugin.getName() + "\"");
+                                                    Bukkit.getLogger().severe("had the following Unhandled Exception while running SubEvents:");
+                                                    e.getTargetException().printStackTrace();
+                                                    Bukkit.getLogger().severe("");
+                                                }
+                                            }
+                                            break;
+                                        case "SubStopEvent":
+                                            if (Event.toString().equals("SubStopEvent")) {
+                                                SubStopEvent event = new SubStopEvent((SubServer) args[0], (OfflinePlayer) args[1]);
+                                                try {
+                                                    method.invoke(listener, event);
+                                                    if (event.isCancelled()) Continue = false;
+                                                } catch (InvocationTargetException e) {
+                                                    Bukkit.getLogger().severe(SubPlugin.lprefix + "Method \"" + method.getName() + "\" in Class \"" + listener.getClass().getCanonicalName() + "\" for Plugin \"" + plugin.getName() + "\"");
+                                                    Bukkit.getLogger().severe("had the following Unhandled Exception while running SubEvents:");
+                                                    e.getTargetException().printStackTrace();
+                                                    Bukkit.getLogger().severe("");
+                                                }
+                                            }
+                                            break;
+                                        case "SubShellExitEvent":
+                                            if (Event.toString().equals("SubShellExitEvent")) {
+                                                SubShellExitEvent event = new SubShellExitEvent((SubServer) args[0]);
+                                                try {
+                                                    method.invoke(listener, event);
+                                                } catch (InvocationTargetException e) {
+                                                    Bukkit.getLogger().severe(SubPlugin.lprefix + "Method \"" + method.getName() + "\" in Class \"" + listener.getClass().getCanonicalName() + "\" for Plugin \"" + plugin.getName() + "\"");
+                                                    Bukkit.getLogger().severe("had the following Unhandled Exception while running SubEvents:");
+                                                    e.getTargetException().printStackTrace();
+                                                    Bukkit.getLogger().severe("");
+                                                }
+                                            }
+                                            break;
+                                        case "SubRunCommandEvent":
+                                            if (Event.toString().equals("SubRunCommandEvent")) {
+                                                SubRunCommandEvent event = new SubRunCommandEvent((SubServer) args[0], (OfflinePlayer) args[1], (String) args[2]);
+                                                try {
+                                                    method.invoke(listener, event);
+                                                    if (event.isCancelled()) Continue = false;
+                                                } catch (InvocationTargetException e) {
+                                                    Bukkit.getLogger().severe(SubPlugin.lprefix + "Method \"" + method.getName() + "\" in Class \"" + listener.getClass().getCanonicalName() + "\" for Plugin \"" + plugin.getName() + "\"");
+                                                    Bukkit.getLogger().severe("had the following Unhandled Exception while running SubEvents:");
+                                                    e.getTargetException().printStackTrace();
+                                                    Bukkit.getLogger().severe("");
+                                                }
+                                            }
+                                            break;
+                                        default:
+                                            Bukkit.getLogger().severe(SubPlugin.lprefix + "Method \"" + method.getName() + "\" in Class \"" + listener.getClass().getCanonicalName() + "\" for Plugin \"" + plugin.getName() + "\"");
+                                            Bukkit.getLogger().severe("is tagged as a SubEvent, but isn't! Please Notify the developer(s)");
+                                            Bukkit.getLogger().severe("Caused by: Invalid Event Class \"" + method.getParameterTypes()[0].getCanonicalName() + "\"");
+                                            Bukkit.getLogger().severe("");
+                                            break;
+                                    }
+                                } else {
+                                    Bukkit.getLogger().severe(SubPlugin.lprefix + "Method \"" + method.getName() + "\" in Class \"" + listener.getClass().getCanonicalName() + "\" for Plugin \"" + plugin.getName() + "\"");
+                                    Bukkit.getLogger().severe("is tagged as a SubEvent, but isn't! Please Notify the developer(s)");
+                                    Bukkit.getLogger().severe("Caused by: Too many Parameters for SubEvent to be Executed");
+                                    Bukkit.getLogger().severe("");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return Continue;
     }
 
     /**

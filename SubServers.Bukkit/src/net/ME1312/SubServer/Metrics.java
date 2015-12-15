@@ -13,6 +13,11 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.UUID;
 
+/**
+ * ME1312.net Metrics
+ *
+ * @author ME1312
+ */
 public class Metrics {
     private String BaseURL;
     private JavaPlugin Plugin;

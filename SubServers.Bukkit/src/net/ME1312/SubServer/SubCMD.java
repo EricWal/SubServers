@@ -14,6 +14,11 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+/**
+ * SubServer Command Parser
+ *
+ * @author ME1312
+ */
 public class SubCMD implements CommandExecutor {
 	SubPlugin SubPlugin;
 	
