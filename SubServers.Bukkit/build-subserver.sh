@@ -1,4 +1,4 @@
-# Version: 1.8.9c+
+# Version: 1.8.9h+
 if [ -z "$1" ]
   then
     echo ERROR: No Build Version Supplied
@@ -117,11 +117,12 @@ else
                 if [ $retvalh -eq 0 ]; then
                     mkdir ./mods
                     echo Downloading SpongeForge
-                    curl -o mods/spongeforge-$sversion.jar http://files.minecraftforge.net/maven/org/spongepowered/spongeforge/$sversion/spongeforge-$sversion.jar; retvali=$?
+                    curl -o mods/Sponge.jar http://files.minecraftforge.net/maven/org/spongepowered/spongeforge/$sversion/spongeforge-$sversion.jar; retvali=$?
                     if [ $retvali -eq 0 ]; then
                         echo Cleaning Up...
                         rm -Rf forge-${version[0]}-installer.jar
                         rm -Rf forge-${version[0]}-installer.jar.log
+                        mv -f forge-${version[0]}-universal.jar Forge.jar
                         echo ---------- END SERVER BUILD ----------
                         rm -Rf build-subserver.sh
                         exit 0
@@ -129,6 +130,7 @@ else
                         echo ERROR: Failed Downloading Jarfile. Is MinecraftForge.net down?
                         rm -Rf forge-${version[0]}-installer.jar
                         rm -Rf forge-${version[0]}-installer.jar.log
+                        rm -Rf forge-${version[0]}-universal.jar
                         rm -Rf build-subserver.sh
                         exit 1
                     fi

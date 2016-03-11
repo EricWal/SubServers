@@ -3,6 +3,11 @@ package net.ME1312.SubServer.Executable;
 import java.io.File;
 import java.io.Serializable;
 
+/**
+ * Executable Variable Class
+ *
+ * @author ME1312
+ */
 @SuppressWarnings("serial")
 public class Executable implements Serializable {
 	public boolean isFile;

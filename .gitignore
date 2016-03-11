@@ -39,3 +39,6 @@ README.md
 /artifacts/SubServers.Sponge.jar
 /artifacts/SubServers.Sponge.BetterGUI.jar
 /artifacts/SubServers.Sponge.Client.jar
+
+# Hide Others
+/artifacts/SubServers.Test.jar

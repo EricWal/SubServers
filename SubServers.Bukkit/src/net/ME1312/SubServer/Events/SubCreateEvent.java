@@ -1,19 +1,29 @@
 package net.ME1312.SubServer.Events;
 
+import net.ME1312.SubServer.Events.Libraries.Event;
+import net.ME1312.SubServer.Events.Libraries.EventType;
 import net.ME1312.SubServer.Executable.SubCreator;
+import net.ME1312.SubServer.SubPlugin;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.event.Event.Result;
 
 /**
  * The Event for a Player Creating a SubServer
  *
  * @author ME1312
  */
-public class SubCreateEvent {
+public class SubCreateEvent extends Event {
     private SubCreator.ServerType Type;
-    private boolean cancelled;
+    protected Result Cancelled;
 
-    public SubCreateEvent(OfflinePlayer Player, SubCreator.ServerType Type) {
-        super();
+    /**
+     * SubServer Create Event
+     *
+     * @param Player Player Creating
+     * @param Type Type of Server
+     */
+    public SubCreateEvent(SubPlugin SubPlugin, OfflinePlayer Player, SubCreator.ServerType Type) {
+        super(SubPlugin, EventType.SubCreateEvent);
         this.Type = Type;
     }
 
@@ -24,17 +34,19 @@ public class SubCreateEvent {
     public SubCreator.ServerType getType() { return Type; }
 
     /**
-     * Gets the player that Triggered the Event
-     * @return The Player that triggered this Event or Null if Console
+     * Gets if you have cancelled this event
+     * @return if You've cancelled this event
      */
-    public boolean isCancelled() {
-        return cancelled;
-    }
+    public Result getStatus() { return Cancelled; }
 
     /**
      * Cancel/Uncancel this event
      */
-    public void setCancelled(boolean value) {
-        cancelled = value;
+    public void setStatus(boolean value) {
+        if (value) {
+            Cancelled = org.bukkit.event.Event.Result.ALLOW;
+        } else {
+            Cancelled = org.bukkit.event.Event.Result.DENY;
+        }
     }
 }

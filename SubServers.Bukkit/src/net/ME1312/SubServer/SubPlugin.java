@@ -1,16 +1,20 @@
 package net.ME1312.SubServer;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
 
+import net.ME1312.SubServer.Events.Libraries.EventType;
+import net.ME1312.SubServer.Executable.SubProxy;
 import net.ME1312.SubServer.GUI.SubGUIListener;
 import net.ME1312.SubServer.Libraries.SQL.MySQL;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -26,14 +30,15 @@ import net.ME1312.SubServer.Libraries.Version.Version;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
- * SubServers' Main Class
+ * SubServers' Main Class &amp; Internal database<br><br>
+ * You should only mess with this if you know what you're doing, and the code in here is likely to change.
  *
  * @author ME1312
  */
 public class SubPlugin {
     public HashMap<Integer, SubServer> Servers = new HashMap<Integer, SubServer>();
     public HashMap<String, Integer> PIDs = new HashMap<String, Integer>();
-    public HashMap<JavaPlugin, List<Listener>> Listeners = new HashMap<JavaPlugin, List<Listener>>();
+    public HashMap<JavaPlugin, HashMap<Listener, HashMap<EventType, HashMap<EventPriority, List<Method>>>>> Listeners = new HashMap<JavaPlugin, HashMap<Listener, HashMap<EventType, HashMap<EventPriority, List<Method>>>>>();
     public List<String> SubServers = new ArrayList<String>();
     public JavaPlugin Plugin;
     public SubCreator ServerCreator;
@@ -98,7 +103,7 @@ public class SubPlugin {
         if (!(new File(Plugin.getDataFolder() + File.separator + "lang.yml").exists())) {
             copyFromJar("lang.yml", Plugin.getDataFolder() + File.separator + "lang.yml");
             Bukkit.getLogger().info(lprefix + "Created Lang.yml!");
-        } else if (!confmanager.getNewConfig("lang.yml").getString("config-version").equalsIgnoreCase("1.8.8j+")) {
+        } else if (!confmanager.getNewConfig("lang.yml").getString("config-version").equalsIgnoreCase("1.8.9h+")) {
             try {
                 Files.move(new File(Plugin.getDataFolder() + File.separator + "lang.yml"), new File(Plugin.getDataFolder() + File.separator + "old-lang." + Math.round(Math.random() * 100000) + ".yml"));
                 copyFromJar("lang.yml", Plugin.getDataFolder() + File.separator + "lang.yml");
@@ -120,7 +125,7 @@ public class SubPlugin {
                 } catch (NullPointerException e) {}
                 brText.close();
 
-                if (!Version.equalsIgnoreCase("1.8.9c+")) {
+                if (!Version.equalsIgnoreCase("1.8.9h+")) {
                     Files.move(new File(Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "build-subserver.sh"), new File(Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "old-build-subserver." + Math.round(Math.random() * 100000) + ".sh"));
                     copyFromJar("lang.yml", Plugin.getDataFolder() + File.separator + "lang.yml");
                     Bukkit.getLogger().info(lprefix + "Updated Build Script!");
@@ -137,7 +142,6 @@ public class SubPlugin {
             new File(Plugin.getDataFolder(), "SubCreator" + File.separator + "Sponge-Mods").mkdir();
         if (!(new File(Plugin.getDataFolder(), "SubCreator" + File.separator + "Sponge-Config").exists()))
             new File(Plugin.getDataFolder(), "SubCreator" + File.separator + "Sponge-Config").mkdir();
-
 
         config = confmanager.getNewConfig("config.yml");
         lang = confmanager.getNewConfig("lang.yml");
@@ -188,8 +192,8 @@ public class SubPlugin {
          * Registers PIDs & Shells
          */
         PIDs.put("~Proxy", 0);
-        Servers.put(0, new SubServer(config.getBoolean("Proxy.enabled"), "~Proxy", 0, 25565, config.getBoolean("Proxy.log"), false, new File(config.getRawString("Proxy.dir")),
-                new Executable(config.getRawString("Proxy.exec")), config.getBoolean("Proxy.auto-restart"), false, this));
+        Servers.put(0, new SubProxy(config.getBoolean("Proxy.enabled"), config.getBoolean("Proxy.log"), new File(config.getRawString("Proxy.dir")),
+                new Executable(config.getRawString("Proxy.exec")), config.getBoolean("Proxy.auto-restart"), this));
 
         int i = 0;
         for(Iterator<String> str = SubServers.iterator(); str.hasNext(); ) {
@@ -287,17 +291,14 @@ public class SubPlugin {
             Servers.get(0).destroy();
             Servers.remove(0);
         }
-
-        int i = 0;
         List<String> SubServersStore = new ArrayList<String>();
         SubServersStore.addAll(SubServers);
 
         for(Iterator<String> str = SubServersStore.iterator(); str.hasNext(); ) {
             String item = str.next();
-            i++;
-            if (!Servers.get(i).isRunning()) {
-                Servers.get(i).destroy();
-                Servers.remove(i);
+            if (!SubAPI.getSubServer(item).isRunning()) {
+                SubAPI.getSubServer(item).destroy();
+                Servers.remove(SubAPI.getSubServer(item).PID);
                 PIDs.remove(item);
                 SubServers.remove(item);
             }
@@ -307,8 +308,8 @@ public class SubPlugin {
         lang.reloadConfig();
 
         if (Servers.get(0) == null) {
-            Servers.put(0, new SubServer(config.getBoolean("Proxy.enabled"), "~Proxy", 0, 25565, config.getBoolean("Proxy.log"), false, new File(config.getRawString("Proxy.dir")),
-                    new Executable(config.getRawString("Proxy.exec")), config.getBoolean("Proxy.auto-restart"), false, this));
+            Servers.put(0, new SubProxy(config.getBoolean("Proxy.enabled"), config.getBoolean("Proxy.log"), new File(config.getRawString("Proxy.dir")),
+                    new Executable(config.getRawString("Proxy.exec")), config.getBoolean("Proxy.auto-restart"), this));
         }
 
         new BukkitRunnable() {
@@ -371,11 +372,13 @@ public class SubPlugin {
                         i++;
                     } while (Servers.keySet().contains((Object)i));
 
-                    SubServers.add(item);
-                    PIDs.put(item, i);
-                    Servers.put(i, new SubServer(config.getBoolean("Servers." + item + ".enabled"), item, i, config.getInt("Servers." + item + ".port"),
-                            config.getBoolean("Servers." + item + ".log"), config.getBoolean("Servers." + item + ".use-shared-chat"), new File(config.getRawString("Servers." + item + ".dir")),
-                            new Executable(config.getRawString("Servers." + item + ".exec")), config.getBoolean("Servers." + item + ".auto-restart"), false, instance));
+                    if (!SubServers.contains(item)) {
+                        SubServers.add(item);
+                        PIDs.put(item, i);
+                        Servers.put(i, new SubServer(config.getBoolean("Servers." + item + ".enabled"), item, i, config.getInt("Servers." + item + ".port"),
+                                config.getBoolean("Servers." + item + ".log"), config.getBoolean("Servers." + item + ".use-shared-chat"), new File(config.getRawString("Servers." + item + ".dir")),
+                                new Executable(config.getRawString("Servers." + item + ".exec")), config.getBoolean("Servers." + item + ".auto-restart"), false, instance));
+                    }
                 }
 
                 for(Iterator<String> str = SubServers.iterator(); str.hasNext(); ) {

@@ -76,7 +76,7 @@ public class SubServer implements Serializable {
 		this.Exec = Exec;
 		this.AutoRestart = AutoRestart;
 		this.SubPlugin = SubPlugin;
-
+        /*
         if (SubPlugin.MCVersion.compareTo(new Version("1.8")) >= 0) {
             tasks.add(new BukkitRunnable() {
                 @Override
@@ -89,7 +89,7 @@ public class SubServer implements Serializable {
                         }
                 }
             }.runTaskTimerAsynchronously(SubPlugin.Plugin, 20 * 10, 20 * 10));
-        }
+        } */
         if (SubPlugin.sql != null) {
             tasks.add(new BukkitRunnable() {
                 @Override

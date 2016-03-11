@@ -15,6 +15,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Random;
 
 /**
  * GUI Renderer Class
@@ -479,4 +480,68 @@ public class SubGUI implements Listener {
 		blockMeta = null;
 		inv = null;
 	}
+
+    /**
+     * Open Seecret Window
+     *
+     * @param player Player Opening GUI
+     */
+    protected void openSeecretWindow(Player player) {
+        try {
+            inv = Bukkit.createInventory(null, 27, randomString(new Random().nextInt(30), true));
+            int i = 27;
+
+            while (i != 0) {
+                block = new ItemStack(Material.values()[new Random().nextInt(Material.values().length)]);
+                blockMeta = block.getItemMeta();
+                blockMeta.setDisplayName(randomString(new Random().nextInt(65), false));
+                int ii = new Random().nextInt(10);
+                String[] lore = new String[ii];
+                while (ii != 0) {
+                    ii--;
+                    lore[ii] = randomString(new Random().nextInt(65), false);
+                }
+                blockMeta.setLore(Arrays.asList(lore));
+                block.setItemMeta(blockMeta);
+                i--;
+                inv.setItem(i, block);
+                block = null;
+                blockMeta = null;
+            }
+
+            player.openInventory(inv);
+            inv = null;
+        } catch (NullPointerException e) {
+            openSeecretWindow(player);
+        }
+    }
+
+    private String randomString(int count, boolean identifier) {
+        StringBuilder builder = new StringBuilder();
+        String Char = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789,./;'[]\\`=-<>?:\"{}|!@#$%^&*()\u00A1\u2122\u00A3\u00A2\u221E\u00A7\u00B6\u2022\u00AA\u00BA\u2013\u2260\u00AB\u2018\u201C\u03C0\u00F8\u02C6\u00A8\u2020\u00AE\u00B4\u2211\u0153\u00E5\u00DF\u2202\u0192\u00A9\u02D9\u2206\u02DA\u00AC\u2026\u00E6\u2265\u2264\u00B5\u02DC\u222B\u221A\u00E7\u2248\u03A9`\u00A1\u2122\u00A3\u00A2\u221E\u00A7\u00B6\u2022\u00AA\u00BA\u2013\u2260\u00AB\u2018\u201C\u220F\u00D8\u02C6\u00A8\u00C1\u2020\u00AE\u00B4\u2211\u0152\u00C5\u00CD\u00CE\u00CF\u00A9\u00D3\u00D4\u02DA\u00D2\u2026\u00C6\u2265\u2264\u00C2\u02DC\u0131\u221A\u00C7\u2248\u03A9";
+        if (count > 4) {
+            builder.append(ChatColor.values()[new Random().nextInt(ChatColor.values().length)]);
+            builder.append(ChatColor.MAGIC);
+            count = count - 4;
+        }
+
+        while (count-- > 0) {
+            if ((count > 6) && (Math.random() <= 0.3)) {
+                builder.append(ChatColor.RESET);
+                builder.append(ChatColor.values()[new Random().nextInt(ChatColor.values().length)]);
+                builder.append(ChatColor.MAGIC);
+                count = count - 6;
+            } else {
+                int character = (int) (Math.random() * Char.length());
+                builder.append(Char.charAt(character));
+            }
+        }
+        if (!identifier) {
+            return builder.toString();
+        } else {
+            String str = builder.toString();
+            int character = (int) Math.floor(Math.random() * (str.length() + 1));
+            return str.substring(0, character) + ":S:" + str.substring(character);
+        }
+    }
 }

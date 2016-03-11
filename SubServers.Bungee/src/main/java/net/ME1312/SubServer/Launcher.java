@@ -12,6 +12,9 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.command.ConsoleCommandSender;
 
+/**
+ * SubServers Launcher &amp; BungeeCord Wrapper
+ */
 public class Launcher {
 
     public static void main(String[] args) throws Exception {

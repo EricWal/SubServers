@@ -8,7 +8,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 /**
- * GUI Chat Listener & Parser
+ * GUI Chat Listener &amp; Parser
  */
 @SuppressWarnings("deprecation")
 public class SubGUIChat implements Listener {
@@ -43,6 +43,9 @@ public class SubGUIChat implements Listener {
         }
     }
 
+    /**
+     * Command Listener
+     */
     @EventHandler
     public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
         if (!chatEnabled && event.getPlayer() == Player) {

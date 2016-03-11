@@ -3,9 +3,11 @@
 Lang:
     Commands:
         'Proxy-Start': 'Please allow a minute for the proxy to start.'
-        'Proxy-Start-Error': 'Config Error: Proxy Disabled!'
+        'Proxy-Start-Running-Error': 'Error: Proxy already Running!'
+        'Proxy-Start-Disabled-Error': 'Error: Proxy Disabled!'
         'Server-Start': 'Please allow a minute for the server to start.'
-        'Server-Start-Error': 'Config Error: Server Disabled!'
+        'Server-Start-Running-Error': 'Error: Server already Running!'
+        'Server-Start-Disabled-Error': 'Error: Server Disabled!'
         'Start-Permission-Error': 'You do not have permission to start this subserver.'
         'Start-Config-Error': 'Error: Invalid Server'
         'Send-Command-Proxy': 'Sending Command...'
@@ -91,4 +93,4 @@ Lang:
         'Config-Reload-Warn': 'Reloading Config... This may take some time...'
         'Config-Reload': 'Config Reloaded!'
 # Language File Version If invalid, this will Regenerate
-config-version: 1.8.8j+
+config-version: 1.8.9h+

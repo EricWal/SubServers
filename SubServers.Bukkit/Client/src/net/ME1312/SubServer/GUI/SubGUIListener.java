@@ -178,5 +178,15 @@ public class SubGUIListener implements Listener {
         if (event.getInventory().getName().equals(SubPlugin.lang.get("Lang.GUI.Loading"))) {
             event.setCancelled(true);
         }
+
+        /**
+         * Seecret Listener
+         */
+        if (event.getInventory().getName().contains(":S:")) {
+            if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR && event.getClickedInventory().contains(event.getCurrentItem())) {
+                new SubGUI(SubPlugin).openSeecretWindow((Player) event.getWhoClicked());
+                event.setCancelled(true);
+            }
+        }
     }
 }

@@ -55,6 +55,17 @@ public class SubCreator {
     private boolean Running;
     private Process Process;
 
+    /**
+     * SubCreator Init
+     *
+     * @param Name Name of Server
+     * @param Port Port of Server
+     * @param Dir Directory for Server
+     * @param Type Type of Server
+     * @param Version Server Version
+     * @param Memory RAM Amount
+     * @param Player Player Creating Server
+     */
     public SubCreator(String Name, int Port, File Dir, ServerType Type, Version Version, int Memory, Player Player, SubPlugin SubPlugin) {
         this.Name = Name;
         this.Port = Port;
@@ -129,7 +140,7 @@ public class SubCreator {
                 }
 
                 if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Mods").exists() && new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Config").exists()) CopyPlugins(ServerType.sponge);
-                this.Jar = "forge-" + mcfversion.toString() + "-universal.jar";
+                this.Jar = "Forge.jar";
                 this.Exec = new Executable("java -Xmx" + Memory + "M -jar " + Jar);
                 this.Version = new Version(mcfversion.toString() + "::" + spversion.toString());
 
@@ -661,10 +672,20 @@ public class SubCreator {
         }
     }
 
+    /**
+     * Wait for process to finish
+     *
+     * @throws InterruptedException
+     */
     public void waitFor() throws InterruptedException {
         Process.waitFor();
     }
 
+    /**
+     * Tests if SubCreator is Running
+     *
+     * @return if SubCreator is Running
+     */
     public boolean isRunning() {
         return Running;
     }

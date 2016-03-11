@@ -9,6 +9,8 @@ import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
+import net.md_5.bungee.api.event.PlayerDisconnectEvent;
+import net.md_5.bungee.api.event.ServerDisconnectEvent;
 import net.md_5.bungee.api.event.ServerKickEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
@@ -32,7 +34,7 @@ public class PlayerListener implements Listener {
      * @param event
      */
     @EventHandler
-    public void onServerKick(ServerKickEvent event) {
+    public void onServerKick(ServerDisconnectEvent event) {
         ServerInfo kickedFrom = null;
         if (event.getPlayer().getServer() != null) {
             kickedFrom = event.getPlayer().getServer().getInfo();
@@ -51,8 +53,6 @@ public class PlayerListener implements Listener {
             ServerInfo kickTo = FakeProxyServer.getServers().get(server);
             if (kickedFrom != null && !kickedFrom.equals(kickTo)) {
                 event.getPlayer().setReconnectServer(kickTo);
-                event.setCancelled(true);
-                event.getPlayer().sendMessage(new TextComponent(ChatColor.GRAY.toString() + ChatColor.BOLD.toString() + "Connection Lost: " + ChatColor.RESET.toString() + event.getKickReasonComponent()[0].toLegacyText()));
             }
         }
     }

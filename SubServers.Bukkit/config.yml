@@ -11,7 +11,6 @@ Settings:
         Enabled: true
         Trigger-Item: '129'
     Server-IP: '127.0.0.1'
-    Lobby-Port: 25565
     SQL:
         hostname: '127.0.0.1'
         port: 3306

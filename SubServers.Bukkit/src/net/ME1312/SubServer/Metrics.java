@@ -32,6 +32,12 @@ public class Metrics {
     private String OperatingSystem;
     private Version OperatingSystemVersion;
 
+    /**
+     * Initialise ME1312.net Metrics
+     *
+     * @param ID ID of your plugin (Make sure the ID you're using isn't in use)
+     * @param Plugin Your Plugin
+     */
     public Metrics(int ID, JavaPlugin Plugin) {
         //Set Main Variables
         this.BaseURL = "http://src.ME1312.net/Stats/?submit&type=1&id=" + ID + "&rev=2";

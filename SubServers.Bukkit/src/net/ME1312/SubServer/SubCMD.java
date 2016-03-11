@@ -1,7 +1,5 @@
 package net.ME1312.SubServer;
 
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Iterator;
 
@@ -39,11 +37,17 @@ public class SubCMD implements CommandExecutor {
 								} else {
 									SubAPI.getSubServer(args[1]).start();
 								}
-							} else {
+							} else if (!SubPlugin.config.getBoolean("Proxy.enabled")) {
+                                if (sender instanceof Player) {
+                                    ((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Proxy-Start-Running-Error"));
+                                } else {
+                                    Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Proxy-Start-Running-Error"));
+                                }
+                            } else {
 								if (sender instanceof Player) {
-									((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Proxy-Start-Error"));
+									((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Proxy-Start-Disabled-Error"));
 								} else {
-									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Proxy-Start-Error"));
+									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Proxy-Start-Disabled-Error"));
 								}
 							}
 						} else if (SubPlugin.config.getBoolean("Servers." + args[1] + ".enabled") == true && !SubAPI.getSubServer(args[1]).isRunning()) {
@@ -54,16 +58,22 @@ public class SubCMD implements CommandExecutor {
 								SubAPI.getSubServer(args[1]).start();
 							}
 						} else if (!SubPlugin.SubServers.contains(args[1])) {
-							if (sender instanceof Player) {
-								((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Start-Config-Error"));
-							} else {
-								Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Start-Config-Error"));
-							}
+                            if (sender instanceof Player) {
+                                ((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Start-Config-Error"));
+                            } else {
+                                Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Start-Config-Error"));
+                            }
+                        } else if (!SubPlugin.config.getBoolean("Servers." + args[1] + ".enabled")) {
+                            if (sender instanceof Player) {
+                                ((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Server-Start-Running-Error"));
+                            } else {
+                                Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Server-Start-Running-Error"));
+                            }
 						} else {
 							if (sender instanceof Player) {
-								((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Server-Start-Error"));
+								((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Server-Start-Disabled-Error"));
 							} else {
-								Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Server-Start-Error"));
+								Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Server-Start-Disabled-Error"));
 							}
 						}
 					} else if (sender instanceof Player) {
@@ -272,27 +282,9 @@ public class SubCMD implements CommandExecutor {
                         }
                     } else {
                         if (args[1].equalsIgnoreCase("~Lobby")) {
-                            if (SubPlugin.sql != null) {
-                                try {
-                                    Statement update = SubPlugin.sql.getConnection().createStatement();
-                                    update.executeUpdate("INSERT INTO `SubQueue` (`PID`, `Type`, `Args`) VALUES ('-1', '4', 'go ~Lobby "+ args[2] +"')");
-                                    update.close();
-                                } catch (SQLException e) {
-                                    Bukkit.getLogger().severe("Problem Syncing Database!");
-                                    e.printStackTrace();
-                                }
-                            } else if (SubAPI.getSubServer(0).isRunning()) SubAPI.getSubServer(0).sendCommandSilently("go ~Lobby "+ args[2]);
+                            SubAPI.getProxy().sendPlayer("~Lobby", Bukkit.getOfflinePlayer(args[2]));
                         } else {
-                            if (SubPlugin.sql != null) {
-                                try {
-                                    Statement update = SubPlugin.sql.getConnection().createStatement();
-                                    update.executeUpdate("INSERT INTO `SubQueue` (`PID`, `Type`, `Args`) VALUES ('-1', '4', 'go " + args[1] + " " + args[2] + "')");
-                                    update.close();
-                                } catch (SQLException e) {
-                                    Bukkit.getLogger().severe("Problem Syncing Database!");
-                                    e.printStackTrace();
-                                }
-                            } else if (SubAPI.getSubServer(0).isRunning()) SubAPI.getSubServer(0).sendCommandSilently("go " + args[1] + " " + args[2]);
+                            SubAPI.getProxy().sendPlayer(args[1], Bukkit.getOfflinePlayer(args[2]));
                         }
                     }
                 } else if (args.length == 2) {
@@ -322,27 +314,9 @@ public class SubCMD implements CommandExecutor {
                         }
                     } else {
                         if (args[1].equalsIgnoreCase("~Lobby")) {
-                            if (SubPlugin.sql != null) {
-                                try {
-                                    Statement update = SubPlugin.sql.getConnection().createStatement();
-                                    update.executeUpdate("INSERT INTO `SubQueue` (`PID`, `Type`, `Args`) VALUES ('-1', '4', 'go ~Lobby "+ ((Player) sender).getName() +"')");
-                                    update.close();
-                                } catch (SQLException e) {
-                                    Bukkit.getLogger().severe("Problem Syncing Database!");
-                                    e.printStackTrace();
-                                }
-                            } else if (SubAPI.getSubServer(0).isRunning()) SubAPI.getSubServer(0).sendCommandSilently("go ~Lobby "+ ((Player) sender).getName());
+                            SubAPI.getProxy().sendPlayer("~Lobby", (Player) sender);
                         } else {
-                            if (SubPlugin.sql != null) {
-                                try {
-                                    Statement update = SubPlugin.sql.getConnection().createStatement();
-                                    update.executeUpdate("INSERT INTO `SubQueue` (`PID`, `Type`, `Args`) VALUES ('-1', '4', 'go "+ args[1] +" "+ ((Player) sender).getName() +"')");
-                                    update.close();
-                                } catch (SQLException e) {
-                                    Bukkit.getLogger().severe("Problem Syncing Database!");
-                                    e.printStackTrace();
-                                }
-                            } else if (SubAPI.getSubServer(0).isRunning()) SubAPI.getSubServer(0).sendCommandSilently("go "+ args[1] +" "+ ((Player) sender).getName());
+                            SubAPI.getProxy().sendPlayer(args[1], (Player) sender);
                         }
                     }
                 } else if (sender instanceof Player) {
