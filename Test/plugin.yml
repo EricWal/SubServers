@@ -1,4 +1,0 @@
-name: 'SubServersTest'
-main: 'net.ME1312.SubTestAPI.Main'
-version: '1.9a'
-depend: ['SubServers']
