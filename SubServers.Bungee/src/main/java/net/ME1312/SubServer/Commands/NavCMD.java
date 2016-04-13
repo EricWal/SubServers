@@ -54,16 +54,16 @@ public class NavCMD extends Command {
                     }
                 }
             }
-			if (FakeProxyServer.PlayerServerInfo.keySet().size() > 0) {
+			if (FakeProxyServer.HiddenServerInfo.keySet().size() > 0) {
                 int ponline = 0;
-                for (Iterator<String> servers = FakeProxyServer.PlayerServerInfo.keySet().iterator(); servers.hasNext(); ) {
+                for (Iterator<String> servers = FakeProxyServer.HiddenServerInfo.keySet().iterator(); servers.hasNext(); ) {
                     String server = servers.next();
-                    if (FakeProxyServer.PlayerServerInfo.get(server).isOnline()) {
+                    if (FakeProxyServer.HiddenServerInfo.get(server).isOnline()) {
                         ponline++;
                         online++;
                     }
                 }
-                String.addExtra(FakeProxyServer.lang.get("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[2].replace("$int$", Integer.toString(ponline)));
+                String.addExtra(ChatColor.DARK_AQUA.toString() + FakeProxyServer.lang.get("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[2].replace("$int$", Integer.toString(ponline)));
             }
 
 			if (FakeProxyServer.getPlayer(sender.getName()) != null) {
@@ -126,7 +126,7 @@ public class NavCMD extends Command {
 				FakeProxyServer.getPlayer(sender.getName()).sendMessage(ChatColor.AQUA + FakeProxyServer.lprefix + FakeProxyServer.lang.get("Lang.Commands.Teleport"));
 				FakeProxyServer.getPlayer(sender.getName()).connect(FakeProxyServer.ServerInfo.get(args[0]));
 			}
-		} else if (args[0].contains("!") && FakeProxyServer.PlayerServerInfo.keySet().contains(args[0].replace("!", ""))) {
+		} else if (args[0].contains("!") && FakeProxyServer.HiddenServerInfo.keySet().contains(args[0].replace("!", ""))) {
 			if (args.length > 1) {
 				if (FakeProxyServer.getPlayer(sender.getName()) == null || FakeProxyServer.getPlayer(sender.getName()).hasPermission("bungeecord.command.send") || FakeProxyServer.getPlayer(sender.getName()).hasPermission("SubServers.Teleport.Others")) {
 					if (FakeProxyServer.getPlayer(args[1]) == null) {
@@ -142,14 +142,14 @@ public class NavCMD extends Command {
 							FakeProxyServer.getPlayer(sender.getName()).sendMessage(ChatColor.AQUA + FakeProxyServer.lprefix + FakeProxyServer.lang.get("Lang.Commands.Teleport"));
 						}
 						FakeProxyServer.getPlayer(args[1]).sendMessage(ChatColor.AQUA + FakeProxyServer.lprefix + FakeProxyServer.lang.get("Lang.Commands.Teleport"));
-						FakeProxyServer.getPlayer(args[1]).connect(FakeProxyServer.PlayerServerInfo.get(args[0].replace("!", "")));
+						FakeProxyServer.getPlayer(args[1]).connect(FakeProxyServer.HiddenServerInfo.get(args[0].replace("!", "")));
 					}
 				} else {
 					FakeProxyServer.getPlayer(sender.getName()).sendMessage(ChatColor.RED + FakeProxyServer.lprefix + FakeProxyServer.lang.get("Lang.Commands.Teleport-Permission-Error"));
 				}
 			} else {
 				FakeProxyServer.getPlayer(sender.getName()).sendMessage(ChatColor.AQUA + FakeProxyServer.lprefix + FakeProxyServer.lang.get("Lang.Commands.Teleport"));
-				FakeProxyServer.getPlayer(sender.getName()).connect(FakeProxyServer.PlayerServerInfo.get(args[0].replace("!", "")));
+				FakeProxyServer.getPlayer(sender.getName()).connect(FakeProxyServer.HiddenServerInfo.get(args[0].replace("!", "")));
 			}
 		} else {
 			FakeProxyServer.getPlayer(sender.getName()).sendMessage(ChatColor.RED + FakeProxyServer.lang.get("Lang.Commands.Teleport-Config-Error"));

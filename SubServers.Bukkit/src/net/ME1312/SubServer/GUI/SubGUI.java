@@ -57,9 +57,9 @@ public class SubGUI implements Listener {
 			blockMeta = null;
 			for(Iterator<String> str = SubPlugin.SubServers.iterator(); str.hasNext(); ) {
 			    String item = str.next();
-			    if (SubAPI.getSubServer(item).Enabled) {
+			    if (SubAPI.getSubServer(item).isEnabled()) {
 			    	if (SubPlugin.SubServers.indexOf(item) >= min && SubPlugin.SubServers.indexOf(item) <= max) {
-			    		if (SubAPI.getSubServer(item).Temporary) {
+			    		if (SubAPI.getSubServer(item).isTemporary()) {
 			    			block = new ItemStack(289);
 			    			blockMeta = block.getItemMeta();
 			    			blockMeta.setDisplayName(ChatColor.YELLOW + item);
@@ -228,7 +228,7 @@ public class SubGUI implements Listener {
 		    	block = null;
 		    	blockMeta = null;
 		    	
-		    	if (!SubAPI.getSubServer(server).Temporary) {
+		    	if (!SubAPI.getSubServer(server).isTemporary()) {
 		    		block = new ItemStack(Material.GLOWSTONE_DUST);
 		    		blockMeta = block.getItemMeta();
 		    		blockMeta.setDisplayName(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Online"));
@@ -254,7 +254,7 @@ public class SubGUI implements Listener {
 		    		blockMeta = null;
 		    	}
 			} else {
-				if (!SubAPI.getSubServer(server).Temporary) {
+				if (!SubAPI.getSubServer(server).isTemporary()) {
 					block = new ItemStack(Material.EMERALD_BLOCK);
 					blockMeta = block.getItemMeta();
 					blockMeta.setDisplayName(ChatColor.DARK_GREEN + SubPlugin.lang.getString("Lang.GUI.Start"));
@@ -319,7 +319,7 @@ public class SubGUI implements Listener {
 	    		block = null;
 	    		blockMeta = null;
 	    		
-		    	if (!SubAPI.getSubServer(server).Temporary) {
+		    	if (!SubAPI.getSubServer(server).isTemporary()) {
 		    		block = new ItemStack(Material.REDSTONE);
 		    		blockMeta = block.getItemMeta();
 		    		blockMeta.setDisplayName(ChatColor.DARK_RED + SubPlugin.lang.getString("Lang.GUI.Offline"));

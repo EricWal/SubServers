@@ -28,7 +28,7 @@ public class FakeProxyServer extends BungeeCord {
     public List<String> SubServers = new ArrayList<String>();
     public HashMap<String, SubServerInfo> ConfigServers = new HashMap<String, SubServerInfo>();
     public HashMap<String, SubServerInfo> ServerInfo = new HashMap<String, SubServerInfo>();
-    public HashMap<String, SubServerInfo> PlayerServerInfo = new HashMap<String, SubServerInfo>();
+    public HashMap<String, SubServerInfo> HiddenServerInfo = new HashMap<String, SubServerInfo>();
     
     public String lprefix;
     public Configuration configuration;
@@ -45,7 +45,7 @@ public class FakeProxyServer extends BungeeCord {
         PluginDescription Plugin = new PluginDescription();
         Plugin.setName("SubServers");
         Plugin.setAuthor("ME1312");
-        Plugin.setVersion("1.9a");
+        Plugin.setVersion("1.9.2b");
         this.Plugin = Plugin;
 
         EnablePlugin();
@@ -131,14 +131,7 @@ public class FakeProxyServer extends BungeeCord {
                             results.close();
                             update.close();
 
-                            for (Iterator<SubServerInfo> servers = ServerInfo.values().iterator(); servers.hasNext(); ) {
-                                servers.next().destroy();
-                            }
-                            ServerInfo.clear();
-                            for (Iterator<SubServerInfo> servers = PlayerServerInfo.values().iterator(); servers.hasNext(); ) {
-                                servers.next().destroy();
-                            }
-                            PlayerServerInfo.clear();
+                            List<String> uservers = new ArrayList<String>();
 
                             for (Iterator<MySQL> connections = sql.iterator(); connections.hasNext(); ) {
                                 MySQL item = connections.next();
@@ -146,17 +139,23 @@ public class FakeProxyServer extends BungeeCord {
                                 results = update.executeQuery("SELECT * FROM `SubServers`");
                                 while (results.next()) {
                                     if (!results.getString("Name").contains("!")) {
-                                        ServerInfo.put(results.getString("Name"), new SubServerInfo((BungeeServerInfo) constructServerInfo(results.getString("Name"),
-                                                new InetSocketAddress(results.getString("IP").split("\\:")[0], Integer.parseInt(results.getString("IP").split("\\:")[1])),
-                                                ((ConfigServers.keySet().contains(results.getString("Name"))) ? ConfigServers.get(results.getString("Name")).getMotd() : "SubServer-" + results.getString("Name")), false),
-                                                results.getBoolean("Shared_Chat")));
+                                        if (!(ServerInfo.keySet().contains(results.getString("Name")) || ConfigServers.keySet().contains(results.getString("Name")))) {
+                                            ServerInfo.put(results.getString("Name"), new SubServerInfo((BungeeServerInfo) constructServerInfo(results.getString("Name"),
+                                                    new InetSocketAddress(results.getString("IP").split("\\:")[0], Integer.parseInt(results.getString("IP").split("\\:")[1])),
+                                                    ((ConfigServers.keySet().contains(results.getString("Name"))) ? ConfigServers.get(results.getString("Name")).getMotd() : "SubServer-" + results.getString("Name")), false),
+                                                    results.getBoolean("Shared_Chat")));
+                                            SubServers.add(results.getString("Name"));
+                                        }
                                     } else {
-                                        PlayerServerInfo.put(results.getString("Name").replace("!", ""), new SubServerInfo((BungeeServerInfo) constructServerInfo(results.getString("Name").replace("!", ""),
-                                                new InetSocketAddress(results.getString("IP").split("\\:")[0], Integer.parseInt(results.getString("IP").split("\\:")[1])),
-                                                ((ConfigServers.keySet().contains(results.getString("Name"))) ? ConfigServers.get(results.getString("Name")).getMotd() : "SubServer-" + results.getString("Name").replace("!", "")), false),
-                                                results.getBoolean("Shared_Chat")));
+                                        if (!(HiddenServerInfo.keySet().contains(results.getString("Name").replace("!", "")) || ConfigServers.keySet().contains(results.getString("Name")))) {
+                                            HiddenServerInfo.put(results.getString("Name").replace("!", ""), new SubServerInfo((BungeeServerInfo) constructServerInfo(results.getString("Name").replace("!", ""),
+                                                    new InetSocketAddress(results.getString("IP").split("\\:")[0], Integer.parseInt(results.getString("IP").split("\\:")[1])),
+                                                    ((ConfigServers.keySet().contains(results.getString("Name"))) ? ConfigServers.get(results.getString("Name")).getMotd() : "SubServer-" + results.getString("Name").replace("!", "")), false),
+                                                    results.getBoolean("Shared_Chat")));
+                                            SubServers.add(results.getString("Name"));
+                                        }
                                     }
-                                    SubServers.add(results.getString("Name"));
+                                    uservers.add(results.getString("Name"));
                                 }
                                 results.close();
                                 results = update.executeQuery("SELECT * FROM `SubQueue` WHERE PID='-1'");
@@ -168,6 +167,21 @@ public class FakeProxyServer extends BungeeCord {
                                 results.close();
                                 update.executeUpdate("DELETE FROM `SubQueue` WHERE PID='-1'");
                                 update.close();
+                            }
+
+                            List<String> oservers = new ArrayList<String>();
+                            oservers.addAll(SubServers);
+                            for (String server : oservers) {
+                                if (!ConfigServers.keySet().contains(server) && !uservers.contains(server)) {
+                                    if (!server.contains("!")) {
+                                        ServerInfo.get(server).destroy();
+                                        ServerInfo.remove(server);
+                                    } else {
+                                        HiddenServerInfo.get(server.replace("!", "")).destroy();
+                                        HiddenServerInfo.remove(server.replace("!", ""));
+                                    }
+                                    SubServers.remove(server);
+                                }
                             }
                         } catch (SQLException e) {
                             System.out.println("Problem Syncing Database(s)!");
@@ -189,7 +203,7 @@ public class FakeProxyServer extends BungeeCord {
                 servers.next().destroy();
             }
 
-            for(Iterator<SubServerInfo> servers = PlayerServerInfo.values().iterator(); servers.hasNext(); ) {
+            for(Iterator<SubServerInfo> servers = HiddenServerInfo.values().iterator(); servers.hasNext(); ) {
                 servers.next().destroy();
             }
             sqltimer.cancel();
@@ -250,11 +264,20 @@ public class FakeProxyServer extends BungeeCord {
     }
 
     /**
+     * Gets the SubServers Proxy Version
+     *
+     * @return The Version as a String
+     */
+    public String getWrapperVersion() {
+        return Plugin.getVersion();
+    }
+
+    /**
      * Gets SubServer plugin info
      *
      * @return Plugin info
      */
-    public PluginDescription getPluginInfo() {
+    public PluginDescription getWrapperInfo() {
         return Plugin;
     }
 
@@ -268,7 +291,7 @@ public class FakeProxyServer extends BungeeCord {
         HashMap<String, ServerInfo> map = new HashMap<String, ServerInfo>();
         map.putAll(ConfigServers);
         map.putAll(ServerInfo);
-        map.putAll(PlayerServerInfo);
+        map.putAll(HiddenServerInfo);
         return map;
     }
 
@@ -281,7 +304,7 @@ public class FakeProxyServer extends BungeeCord {
         HashMap<String, SubServerInfo> map = new HashMap<String, SubServerInfo>();
         map.putAll(ConfigServers);
         map.putAll(ServerInfo);
-        map.putAll(PlayerServerInfo);
+        map.putAll(HiddenServerInfo);
         return map;
     }
 
@@ -304,6 +327,33 @@ public class FakeProxyServer extends BungeeCord {
      */
     public SubServerInfo getSubServerInfo(String server) {
         return getSubServers().get(server);
+    }
+
+    /**
+     * Adds a Server to BungeeCord
+     *
+     * @param info Server Info to add
+     */
+    public void addServerInfo(SubServerInfo info) {
+        if (!info.getName().contains("!")) {
+            ServerInfo.put(info.getName(), info);
+        } else {
+            HiddenServerInfo.put(info.getName().replace("!", ""), info);
+        }
+    }
+
+    /**
+     * Adds a Server to BungeeCord
+     *
+     * @param name Key Name
+     * @param info Server Info to add
+     */
+    public void addServerInfo(String name, SubServerInfo info) {
+        if (!name.contains("!")) {
+            ServerInfo.put(name, info);
+        } else {
+            HiddenServerInfo.put(name.replace("!", ""), info);
+        }
     }
 
     /**

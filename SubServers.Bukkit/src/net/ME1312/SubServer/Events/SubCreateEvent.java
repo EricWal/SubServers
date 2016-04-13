@@ -4,7 +4,7 @@ import net.ME1312.SubServer.Events.Libraries.Event;
 import net.ME1312.SubServer.Events.Libraries.EventType;
 import net.ME1312.SubServer.Executable.SubCreator;
 import net.ME1312.SubServer.SubPlugin;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 
 /**
@@ -14,6 +14,7 @@ import org.bukkit.event.Event.Result;
  */
 public class SubCreateEvent extends Event {
     private SubCreator.ServerType Type;
+    private Player Player;
     protected Result Cancelled;
 
     /**
@@ -22,9 +23,19 @@ public class SubCreateEvent extends Event {
      * @param Player Player Creating
      * @param Type Type of Server
      */
-    public SubCreateEvent(SubPlugin SubPlugin, OfflinePlayer Player, SubCreator.ServerType Type) {
+    public SubCreateEvent(SubPlugin SubPlugin, Player Player, SubCreator.ServerType Type) {
         super(SubPlugin, EventType.SubCreateEvent);
+        this.Player = Player;
         this.Type = Type;
+    }
+
+    /**
+     * Gets the Player creating this Server
+     *
+     * @return The Player
+     */
+    public Player getPlayer() {
+        return Player;
     }
 
     /**

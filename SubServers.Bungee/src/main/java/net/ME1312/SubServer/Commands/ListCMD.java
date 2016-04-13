@@ -43,18 +43,20 @@ public class ListCMD extends Command {
             total = total + server.getPlayers().size();
         }
 
-        if (!FakeProxyServer.PlayerServerInfo.isEmpty()) {
+        if (!FakeProxyServer.HiddenServerInfo.isEmpty()) {
             List<ProxiedPlayer> pslist = new ArrayList<ProxiedPlayer>();
+            FakeProxyServer.getLogger().info("MPS - " + FakeProxyServer.HiddenServerInfo.toString());
 
-            for (Iterator<SubServerInfo> servers = FakeProxyServer.PlayerServerInfo.values().iterator(); servers.hasNext(); ) {
+            for (Iterator<SubServerInfo> servers = FakeProxyServer.HiddenServerInfo.values().iterator(); servers.hasNext(); ) {
                 ServerInfo server = servers.next();
+                FakeProxyServer.getLogger().info(server.getName() + " - " + server.getPlayers().toString());
                 pslist.addAll(server.getPlayers());
-                if (!playerlist.keySet().contains("!PlayerServers")) playerlist.put("!PlayerServers", 0);
-                playerlist.put("!PlayerServers", (playerlist.get("!PlayerServers") + server.getPlayers().size()));
+                if (!playerlist.keySet().contains("!Hidden")) playerlist.put("!Hidden", 0);
+                playerlist.put("!Hidden", (playerlist.get("!Hidden") + server.getPlayers().size()));
                 total = total + server.getPlayers().size();
             }
 
-            players.put("!PlayerServers", pslist);
+            players.put("!Hidden", pslist);
         }
 
         if (sender instanceof ProxiedPlayer) {

@@ -1,13 +1,13 @@
 package net.ME1312.SubServer.Executable;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 
 import net.ME1312.SubServer.Events.Libraries.EventType;
 import net.ME1312.SubServer.SubAPI;
@@ -18,7 +18,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import net.ME1312.SubServer.SubPlugin;
-import net.ME1312.SubServer.Events.Libraries.SubEvent;
 import net.ME1312.SubServer.Libraries.Version.Version;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -36,10 +35,10 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class SubCreator {
     public enum ServerType {
-        spigot,
-        bukkit,
-        vanilla,
-        sponge,
+        SPIGOT,
+        BUKKIT,
+        VANILLA,
+        SPONGE,
     }
 
     private String Name;
@@ -47,12 +46,12 @@ public class SubCreator {
     private File Dir;
     private Executable Exec;
     private int Memory;
-    private String Jar;
     private Version Version;
     private Player Player;
     private ServerType Type;
     private SubPlugin SubPlugin;
     private boolean Running;
+    private boolean Initialized;
     private Process Process;
 
     /**
@@ -78,32 +77,33 @@ public class SubCreator {
 
         if (!Dir.exists()) Dir.mkdirs();
 
-        if (Type == ServerType.spigot) {
-            this.Jar = "Spigot.jar";
+        String Jar;
+        if (Type == ServerType.SPIGOT) {
+            Jar = "Spigot.jar";
             this.Exec = new Executable("java -Xmx" + Memory + "M -Djline.terminal=jline.UnsupportedTerminal -Dcom.mojang.eula.agree=true -jar " + Jar);
 
             try {
-                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Spigot-Plugins").exists() && new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Bukkit-Plugins").exists()) CopyPlugins(ServerType.spigot);
+                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Spigot-Plugins").exists() && new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Bukkit-Plugins").exists()) CopyPlugins(ServerType.SPIGOT);
                 GenerateSpigotYAML();
                 GenerateProperties();
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-        } else if (Type == ServerType.bukkit) {
-            this.Jar = "Craftbukkit.jar";
+        } else if (Type == ServerType.BUKKIT) {
+            Jar = "Craftbukkit.jar";
             this.Exec = new Executable("java -Xmx" + Memory + "M -Djline.terminal=jline.UnsupportedTerminal -jar " + Jar + " -o false");
 
             try {
-                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Bukkit-Plugins").exists()) CopyPlugins(ServerType.bukkit);
+                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Bukkit-Plugins").exists()) CopyPlugins(ServerType.BUKKIT);
                 GenerateEULA();
                 GenerateProperties();
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
-        } else if (Type == ServerType.vanilla) {
-            this.Jar = "Vanilla.jar";
+        } else if (Type == ServerType.VANILLA) {
+            Jar = "Vanilla.jar";
             this.Exec = new Executable("java -Xmx" + Memory + "M -jar " + Jar + " nogui");
 
             try {
@@ -112,7 +112,7 @@ public class SubCreator {
             } catch (FileNotFoundException | UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
-        } else if (Type == ServerType.sponge) {
+        } else if (Type == ServerType.SPONGE) {
             try {
                 Document spongexml = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(readAll(new BufferedReader(new InputStreamReader(new URL("http://files.minecraftforge.net/maven/org/spongepowered/spongeforge/maven-metadata.xml").openStream(), Charset.forName("UTF-8")))))));
                 Document forgexml = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(readAll(new BufferedReader(new InputStreamReader(new URL("http://files.minecraftforge.net/maven/net/minecraftforge/forge/maven-metadata.xml").openStream(), Charset.forName("UTF-8")))))));
@@ -122,7 +122,7 @@ public class SubCreator {
                 for (int i = 0; i < spnodeList.getLength(); i++) {
                     Node node = spnodeList.item(i);
                     if (node.getNodeType() == Node.ELEMENT_NODE) {
-                        if (node.getTextContent().contains(Version.toString()) && (spversion == null || new Version(node.getTextContent()).compareTo(spversion) >= 0)) {
+                        if (node.getTextContent().startsWith(Version.toString() + '-') && (spversion == null || new Version(node.getTextContent()).compareTo(spversion) >= 0)) {
                             spversion = new Version(node.getTextContent());
                         }
                     }
@@ -139,8 +139,8 @@ public class SubCreator {
                     }
                 }
 
-                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Mods").exists() && new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Config").exists()) CopyPlugins(ServerType.sponge);
-                this.Jar = "Forge.jar";
+                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Mods").exists() && new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Config").exists()) CopyPlugins(ServerType.SPONGE);
+                Jar = "Forge.jar";
                 this.Exec = new Executable("java -Xmx" + Memory + "M -jar " + Jar);
                 this.Version = new Version(mcfversion.toString() + "::" + spversion.toString());
 
@@ -157,12 +157,12 @@ public class SubCreator {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (type == ServerType.bukkit || type == ServerType.spigot) {
+                if (type == ServerType.BUKKIT || type == ServerType.SPIGOT) {
                     copyFolder(new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Bukkit-Plugins"), new File(Dir, "plugins"));
-                    if (type == ServerType.spigot) {
+                    if (type == ServerType.SPIGOT) {
                         copyFolder(new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Spigot-Plugins"), new File(Dir, "plugins"));
                     }
-                } else if (type == ServerType.sponge) {
+                } else if (type == ServerType.SPONGE) {
                     copyFolder(new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Mods"), new File(Dir, "mods"));
                     copyFolder(new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Sponge-Config"), new File(Dir, "config"));
                 }
@@ -499,16 +499,21 @@ public class SubCreator {
     }
 
     public boolean run() {
-        try {
-            if (SubAPI.executeEvent(EventType.SubCreateEvent, (OfflinePlayer) Player, Type)) {
-                run(true);
-                return true;
-            } else {
+        if (!Initialized) {
+            try {
+                if (SubAPI.executeEvent(EventType.SubCreateEvent, (OfflinePlayer) Player, Type)) {
+                    Initialized = true;
+                    run(true);
+                    return true;
+                } else {
+                    return false;
+                }
+            } catch (IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
+                e.printStackTrace();
                 return false;
             }
-        } catch (IllegalAccessException | IllegalArgumentException | NoSuchMethodException | SecurityException e) {
-            e.printStackTrace();
-            return false;
+        } else {
+            throw new IllegalStateException("This SubCreator instance has already been used!");
         }
     }
 
@@ -519,7 +524,7 @@ public class SubCreator {
 
                 @Override
                 public void run() {
-                    Player.sendMessage(ChatColor.GOLD + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Create-Loading"));
+                    if (Player != null) Player.sendMessage(ChatColor.GOLD + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Create-Loading"));
                     try {
                         if (System.getProperty("os.name").toLowerCase().indexOf("win") >= 0) {
                             String GitBash = new File(new File(SubPlugin.config.getRawString("Settings.Server-Creation.git-dir")), "bin" + File.separatorChar + "bash.exe").getAbsolutePath();
@@ -543,7 +548,7 @@ public class SubCreator {
                             if (!(new File(Dir, "build-subserver.sh").exists())) {
                                 Bukkit.getLogger().severe(SubPlugin.lprefix + "Problem Copying Script!");
                             } else {
-                                Process = Runtime.getRuntime().exec("\"" + GitBash + "\" --login -i -c \"bash build-subserver.sh " + Version.toString() + " " + Type.toString() + "\"", null, Dir);
+                                Process = Runtime.getRuntime().exec("\"" + GitBash + "\" --login -i -c \"bash build-subserver.sh " + Version.toString() + " " + Type.toString().toLowerCase(Locale.ENGLISH) + "\"", null, Dir);
                                 SubConsole read = new SubConsole(Process.getInputStream(), "OUTPUT", SubPlugin.config.getBoolean("Settings.Server-Creation.log"), new File(Dir, "SubCreator-" + Type.toString() + "-" + Version.toString().replace("::", "@") + ".log"), SubPlugin.lang.getString("Lang.Create-Server.Log-Prefix") + Name, SubPlugin);
                                 read.start();
                                 try {
@@ -554,7 +559,7 @@ public class SubCreator {
                                 }
 
                                 if (Process.exitValue() == 0) {
-                                    Player.sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Create-Done"));
+                                    if (Player != null) Player.sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Create-Done"));
                                     final int PID = (SubPlugin.SubServers.size() + 1);
                                     SubPlugin.Servers.put(PID, new SubServer(true, Name, PID, Port, true, true, Dir, Exec, false, false, SubPlugin));
                                     SubPlugin.PIDs.put(Name, PID);
@@ -619,7 +624,7 @@ public class SubCreator {
                                     Bukkit.getLogger().warning("This may cause errors in the Build Process");
                                 }
 
-                                Process = Runtime.getRuntime().exec("bash build-subserver.sh " + Version.toString() + " " + Type.toString() + " " + System.getProperty("user.home"), null, Dir);
+                                Process = Runtime.getRuntime().exec("bash build-subserver.sh " + Version.toString() + " " + Type.toString().toLowerCase(Locale.ENGLISH) + " " + System.getProperty("user.home"), null, Dir);
                                 SubConsole read = new SubConsole(Process.getInputStream(), "OUTPUT", SubPlugin.config.getBoolean("Settings.Server-Creation.log"), new File(Dir, "SubCreator-" + Type.toString() + "-" + Version.toString().replace("::", "@") + ".log"), SubPlugin.lang.getString("Lang.Create-Server.Log-Prefix") + Name, SubPlugin);
                                 read.start();
                                 try {
@@ -630,7 +635,7 @@ public class SubCreator {
                                 }
 
                                 if (Process.exitValue() == 0) {
-                                    Player.sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Create-Done").replace("$Server$", Name));
+                                    if (Player != null) Player.sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Create-Done").replace("$Server$", Name));
                                     final int PID = (SubPlugin.SubServers.size() + 1);
                                     SubPlugin.Servers.put(PID, new SubServer(true, Name, PID, Port, true, true, Dir, Exec, false, false, SubPlugin));
                                     SubPlugin.PIDs.put(Name, PID);
@@ -688,6 +693,69 @@ public class SubCreator {
      */
     public boolean isRunning() {
         return Running;
+    }
+
+    /**
+     * Gets the name of the Server
+     *
+     * @return String name
+     */
+    public String getName() {
+        return Name;
+    }
+
+    /**
+     * Gets the port of the server
+     *
+     * @return Port number
+     */
+    public int getPort() {
+        return Port;
+    }
+
+    /**
+     * Gets the directory of the server
+     *
+     * @return
+     */
+    public File getDir() {
+        return Dir;
+    }
+
+    /**
+     * Gets the memory to be allocated
+     *
+     * @return Memory amount (in megabytes)
+     */
+    public int getMemory() {
+        return Memory;
+    }
+
+    /**
+     * Gets the requested server version
+     *
+     * @return Server's Version
+     */
+    public net.ME1312.SubServer.Libraries.Version.Version getVersion() {
+        return Version;
+    }
+
+    /**
+     * Gets the player that requested this Server to be made
+     *
+     * @return Player Requesting (or null)
+     */
+    public org.bukkit.entity.Player getPlayer() {
+        return Player;
+    }
+
+    /**
+     * Gets the type of Server to be made
+     *
+     * @return Server Type
+     */
+    public ServerType getType() {
+        return Type;
     }
 
     private String readAll(Reader rd) throws IOException {

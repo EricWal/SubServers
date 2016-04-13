@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import java.io.File;
+import java.util.Locale;
 
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.ChatColor;
@@ -212,7 +213,7 @@ public class SubGUIListener implements Listener {
         if (event.getInventory().getName().contains(SubPlugin.lang.getString("Lang.Create-Server.Server-Type"))) {
             final Player player = (Player) event.getWhoClicked();
             if (event.getCurrentItem() != null && event.getCurrentItem().getType() != Material.AIR && event.getCurrentItem().hasItemMeta() && event.getClickedInventory().contains(event.getCurrentItem())) {
-                final ServerType Type = ServerType.valueOf(event.getCurrentItem().getItemMeta().getDisplayName().replace(ChatColor.GRAY.toString(), "").toLowerCase());
+                final ServerType Type = ServerType.valueOf(event.getCurrentItem().getItemMeta().getDisplayName().replace(ChatColor.GRAY.toString(), "").toUpperCase(Locale.ENGLISH));
                 player.closeInventory();
 
                 final SubGUIChat chat = new SubGUIChat(player, SubPlugin);

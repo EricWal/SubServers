@@ -21,11 +21,11 @@ public class ProxyCMD extends Command {
     @Override
     public void execute(CommandSender sender, String[] args) throws ArrayIndexOutOfBoundsException {
         if (sender instanceof ProxiedPlayer) {
-            sender.sendMessage(ChatColor.GREEN.toString() + ChatColor.BOLD.toString() + " " + FakeProxyServer.getPluginInfo().getName() + " v" + FakeProxyServer.getPluginInfo().getVersion() + ChatColor.GREEN + ChatColor.ITALIC + " © ME1312 EPIC 2015");
+            sender.sendMessage(ChatColor.GREEN.toString() + ChatColor.BOLD.toString() + " " + FakeProxyServer.getWrapperInfo().getName() + " Proxy v" + FakeProxyServer.getWrapperInfo().getVersion() + ChatColor.GREEN + ChatColor.ITALIC + " © ME1312 EPIC 2015");
             sender.sendMessage(" ");
             sender.sendMessage(ChatColor.AQUA + " Project Page:" + ChatColor.ITALIC + " https://www.spigotmc.org/resources/subservers.11264/");
         } else {
-            sender.sendMessage(" " + FakeProxyServer.getPluginInfo().getName() + " v" + FakeProxyServer.getPluginInfo().getVersion() + " © ME1312 EPIC 2015");
+            sender.sendMessage(" " + FakeProxyServer.getWrapperInfo().getName() + " v" + FakeProxyServer.getWrapperInfo().getVersion() + " © ME1312 EPIC 2015");
             sender.sendMessage(" ");
             sender.sendMessage(" Project Page: https://www.spigotmc.org/resources/subservers.11264/");
         }

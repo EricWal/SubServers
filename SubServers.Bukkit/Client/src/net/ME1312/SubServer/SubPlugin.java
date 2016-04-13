@@ -155,8 +155,8 @@ public class SubPlugin {
 
     protected void DisablePlugin() {
 
-        sqltimer.cancel();
         if (sql != null) {
+            sqltimer.cancel();
             try {
                 sql.closeConnection();
             } catch (SQLException e) {

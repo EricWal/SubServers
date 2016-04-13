@@ -79,8 +79,8 @@ public class SubPlugin {
         try {
             MCVersion = new Version(Bukkit.getServer().getVersion().split("\\(MC\\: ")[1].split("\\)")[0]);
         } catch (ArrayIndexOutOfBoundsException e) {
-            Bukkit.getLogger().warning(lprefix + "Problem grabbing Minecraft Version! Assuming 1.8!");
-            MCVersion = new Version("1.8");
+            Bukkit.getLogger().warning(lprefix + "Problem grabbing Minecraft Version! Assuming 1.9!");
+            MCVersion = new Version("1.9");
         }
 
         Bukkit.getLogger().info(lprefix + "Loading Libraries for " + MCVersion);
@@ -246,7 +246,7 @@ public class SubPlugin {
             }
 
             if (SubAPI.getSubServer(0).isRunning()) {
-                Servers.get(0).AutoRestart = false;
+                Servers.get(0).setAutoRestart(false);
                 Servers.get(0).stop();
                 Servers.get(0).waitFor();
                 Thread.sleep(1000);
@@ -259,10 +259,10 @@ public class SubPlugin {
             for(Iterator<String> str = SubServersStore.iterator(); str.hasNext(); ) {
                 String item = str.next();
                 if (SubAPI.getSubServer(item).isRunning()) {
-                    SubAPI.getSubServer(item).AutoRestart = false;
+                    SubAPI.getSubServer(item).setAutoRestart(false);
                     SubAPI.getSubServer(item).stop();
                     SubAPI.getSubServer(item).waitFor();
-                    if (SubAPI.getSubServer(item).Temporary) {
+                    if (SubAPI.getSubServer(item).isTemporary()) {
                         Thread.sleep(500);
                     }
                     Thread.sleep(1000);
@@ -298,7 +298,7 @@ public class SubPlugin {
             String item = str.next();
             if (!SubAPI.getSubServer(item).isRunning()) {
                 SubAPI.getSubServer(item).destroy();
-                Servers.remove(SubAPI.getSubServer(item).PID);
+                Servers.remove(SubAPI.getSubServer(item).getPID());
                 PIDs.remove(item);
                 SubServers.remove(item);
             }
@@ -387,14 +387,14 @@ public class SubPlugin {
                         try {
                             Statement update = sql.getConnection().createStatement();
                             update.executeUpdate("INSERT INTO `SubServers` (`Name`, `IP`, `PID`, `Enabled`, `Shared_Chat`, `Temp`, `Running`) VALUES " +
-                                    "('"+ item +"', '"+ config.getString("Settings.Server-IP")+":"+SubAPI.getSubServer(item).Port +"', '" + SubAPI.getSubServer(item).PID +"', '" + ((SubAPI.getSubServer(item).Enabled)?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).SharedChat)?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).Temporary)?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).isRunning())?"1":"0") +"')");
+                                    "('"+ item +"', '"+ config.getString("Settings.Server-IP")+":"+SubAPI.getSubServer(item).getPID() +"', '" + SubAPI.getSubServer(item).getPID() +"', '" + ((SubAPI.getSubServer(item).usesSharedChat())?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).usesSharedChat())?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).isTemporary())?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).isRunning())?"1":"0") +"')");
                             update.close();
                         } catch (SQLException e) {
                             Bukkit.getLogger().severe(lprefix + "Problem Syncing Database!");
                             e.printStackTrace();
                         }
                     } else if (SubAPI.getSubServer(0).isRunning()) {
-                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver " + item + " " + config.getString("Settings.Server-IP") + " " + SubAPI.getSubServer(item).Port + " " + SubAPI.getSubServer(item).SharedChat);
+                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver " + item + " " + config.getString("Settings.Server-IP") + " " + SubAPI.getSubServer(item).getPID() + " " + SubAPI.getSubServer(item).usesSharedChat());
                         try {
                             Thread.sleep(100);
                         } catch (InterruptedException e) {

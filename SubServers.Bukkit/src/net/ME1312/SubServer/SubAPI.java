@@ -17,6 +17,7 @@ import net.ME1312.SubServer.Executable.SubProxy;
 import net.ME1312.SubServer.Libraries.Config.ConfigFile;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -35,7 +36,7 @@ import net.ME1312.SubServer.Libraries.Version.Version;
  *   Methods can be Requested<br>
  *
  * @author ME1312
- * @version 1.8.9g+
+ * @version 1.9.2a+
  *
  */
 @SuppressWarnings("static-access")
@@ -139,7 +140,7 @@ public class SubAPI {
     }
 
     /**
-     * Creates a SubServer
+     * Defines a SubServer
      *
      * @param Name Name of SubServer
      * @param Port Port of SubServer
@@ -149,8 +150,9 @@ public class SubAPI {
      * @param Exec Executable String or File
      * @param AutoRestart AutoRestarts Server
      * @param Temporary Toggles Temporary Server actions
+     * @return The SubServer
      */
-    public static void addServer(final String Name, int Port, boolean Log, boolean SharedChat, File Dir, Executable Exec, boolean AutoRestart, boolean Temporary) {
+    public static SubServer addServer(final String Name, int Port, boolean Log, boolean SharedChat, File Dir, Executable Exec, boolean AutoRestart, boolean Temporary) {
         final int PID = (SubPlugin.SubServers.size() + 1);
         if (Temporary) {
             SubPlugin.Servers.put(PID, new SubServer(true, Name, PID, Port, Log, SharedChat, Dir, Exec, false, true, SubPlugin));
@@ -200,16 +202,18 @@ public class SubAPI {
                         }
                     } else if (getSubServer(0).isRunning()) getSubServer(0).sendCommandSilently("subconf@proxy removeserver " + Name);
 
+                    SubPlugin.Servers.get(PID).destroy();
                     SubPlugin.Servers.remove(PID);
                     SubPlugin.PIDs.remove(Name);
                     SubPlugin.SubServers.remove(Name);
                 }
             }.runTaskAsynchronously(SubPlugin.Plugin);
         }
+        return SubPlugin.Servers.get(PID);
     }
 
     /**
-     * Creates a SubServer
+     * Defines a SubServer
      *
      * @param Sender The player who sent this Command
      * @param Name Name of SubServer
@@ -220,8 +224,9 @@ public class SubAPI {
      * @param Exec Executable String or File
      * @param AutoRestart AutoRestarts Server
      * @param Temporary Toggles Temporary Server actions
+     * @return The SubServer
      */
-    public static void addServer(OfflinePlayer Sender, final String Name, int Port, boolean Log, boolean SharedChat, File Dir, Executable Exec, boolean AutoRestart, boolean Temporary) {
+    public static SubServer addServer(OfflinePlayer Sender, final String Name, int Port, boolean Log, boolean SharedChat, File Dir, Executable Exec, boolean AutoRestart, boolean Temporary) {
         final int PID = (SubPlugin.SubServers.size() + 1);
         if (Temporary) {
             SubPlugin.Servers.put(PID, new SubServer(true, Name, PID, Port, Log, SharedChat, Dir, Exec, false, true, SubPlugin));
@@ -268,11 +273,55 @@ public class SubAPI {
                         }
                     } else if (getSubServer(0).isRunning()) getSubServer(0).sendCommandSilently("subconf@proxy removeserver " + Name);
 
+                    SubPlugin.Servers.get(PID).destroy();
                     SubPlugin.Servers.remove(PID);
                     SubPlugin.PIDs.remove(Name);
                     SubPlugin.SubServers.remove(Name);
                 }
             }.runTaskAsynchronously(SubPlugin.Plugin);
+        }
+
+        return SubPlugin.Servers.get(PID);
+    }
+
+    /**
+     * Creates a SubServer
+     *
+     * @param Name Name of SubServer
+     * @param Port Port of SubServer
+     * @param Dir Directory for SubServer
+     * @param Type Type of SubServer
+     * @param Version Version of SubServer
+     * @param Memory Memory for SubServer
+     * @return The SubCreator for this SubServer
+     * @throws IllegalStateException when SubCreator is already running
+     */
+    public static SubCreator createServer(String Name, int Port, File Dir, SubCreator.ServerType Type, Version Version, int Memory) throws IllegalStateException {
+        if (SubPlugin.ServerCreator == null) {
+            return SubPlugin.ServerCreator = new SubCreator(Name, Port, Dir, Type, Version, Memory, null, SubPlugin);
+        } else {
+            throw new IllegalStateException("SubCreator Already Running!");
+        }
+    }
+
+    /**
+     * Creates a SubServer
+     *
+     * @param Player Player Creating this SubServer
+     * @param Name Name of SubServer
+     * @param Port Port of SubServer
+     * @param Dir Directory for SubServer
+     * @param Type Type of SubServer
+     * @param Version Version of SubServer
+     * @param Memory Memory for SubServer
+     * @return The SubCreator for this SubServer
+     * @throws IllegalStateException when SubCreator is already running
+     */
+    public static SubCreator createServer(Player Player, String Name, int Port, File Dir, SubCreator.ServerType Type, Version Version, int Memory) throws IllegalStateException {
+        if (SubPlugin.ServerCreator == null) {
+            return SubPlugin.ServerCreator = new SubCreator(Name, Port, Dir, Type, Version, Memory, Player, SubPlugin);
+        } else {
+            throw new IllegalStateException("SubCreator Already Running!");
         }
     }
 
@@ -363,7 +412,7 @@ public class SubAPI {
      * @throws NoSuchMethodException
      * @throws SecurityException
      */
-    public static boolean executeEvent(EventType Event, Object ... args) throws IllegalAccessException, IllegalArgumentException, NoSuchMethodException, SecurityException {
+    public static boolean executeEvent(EventType Event, Object... args) throws IllegalAccessException, IllegalArgumentException, NoSuchMethodException, SecurityException {
         Result Cancelled = Result.ALLOW;
         for (EventPriority priority : Arrays.asList(EventPriority.values())) {
             for (JavaPlugin plugin : SubAPI.SubPlugin.Listeners.keySet()) {
@@ -372,7 +421,7 @@ public class SubAPI {
                     for (Method method : SubAPI.SubPlugin.Listeners.get((Object)plugin).get((Object)listener).get((Object)Event).get((Object)priority)) {
                         Event event;
                         if (Event == EventType.SubCreateEvent) {
-                            event = new SubCreateEvent(SubPlugin, (OfflinePlayer)args[0], (SubCreator.ServerType)((Object)args[1]));
+                            event = new SubCreateEvent(SubPlugin, (Player)args[0], (SubCreator.ServerType)((Object)args[1]));
                             try {
                                 method.invoke((Object)listener, event);
                                 if (event.getStatus() != Result.DENY && (!((SubEventHandler)method.getAnnotation(SubEventHandler.class)).override() || event.getStatus() == Result.DEFAULT)) continue;

@@ -1,8 +1,6 @@
 package net.ME1312.SubServer.Executable;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.net.InetSocketAddress;
 import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,11 +11,8 @@ import java.util.List;
 import java.util.UUID;
 
 import net.ME1312.SubServer.Events.Libraries.EventType;
-import net.ME1312.SubServer.Libraries.ServerPing;
-import net.ME1312.SubServer.Libraries.Version.Version;
 import net.ME1312.SubServer.SubAPI;
 import net.ME1312.SubServer.SubPlugin;
-import net.ME1312.SubServer.Events.Libraries.SubEvent;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -31,21 +26,19 @@ import org.bukkit.scheduler.BukkitTask;
  */
 @SuppressWarnings("serial")
 public class SubServer implements Serializable {
-	public String Name;
-	public int PID;
-	public boolean Log;
-    public boolean SharedChat;
-	public boolean Temporary;
-	public boolean Enabled;
-	public int Port;
-    public boolean AutoRestart;
-	
-	protected SubPlugin SubPlugin;
-	protected File Dir;
-	protected Executable Exec;
+    protected SubPlugin SubPlugin;
+    protected Executable Exec;
 
+	private String Name;
+    private int PID;
+    private boolean Log;
+    private boolean SharedChat;
+    private boolean Temporary;
+    private int Port;
+    private File Dir;
+    private boolean Enabled;
+    private boolean AutoRestart;
     private List<BukkitTask> tasks = new ArrayList<BukkitTask>();
-    private ServerPing.StatusResponse query;
 	private Process Process;
 	private String StdIn;
 	private SubServer Server = this;
@@ -76,20 +69,6 @@ public class SubServer implements Serializable {
 		this.Exec = Exec;
 		this.AutoRestart = AutoRestart;
 		this.SubPlugin = SubPlugin;
-        /*
-        if (SubPlugin.MCVersion.compareTo(new Version("1.8")) >= 0) {
-            tasks.add(new BukkitRunnable() {
-                @Override
-                public void run() {
-                    if (isRunning() && PID != 0)
-                        try {
-                            query = new ServerPing(new InetSocketAddress(SubPlugin.config.getString("Settings.Server-IP"), Port)).fetchData();
-                        } catch (NullPointerException | IOException e) {
-                            query = null;
-                        }
-                }
-            }.runTaskTimerAsynchronously(SubPlugin.Plugin, 20 * 10, 20 * 10));
-        } */
         if (SubPlugin.sql != null) {
             tasks.add(new BukkitRunnable() {
                 @Override
@@ -603,15 +582,6 @@ public class SubServer implements Serializable {
 	}
 
     /**
-     * Get the Server's Query
-     *
-     * @return the query or null if offline.
-     */
-    public ServerPing.StatusResponse getServer() {
-        return query;
-    }
-
-    /**
      * Cleanup method for a SubServer
      *
      * @return success value
@@ -626,5 +596,104 @@ public class SubServer implements Serializable {
         } else {
             return false;
         }
+    }
+
+    /**
+     * Gets the name of the SubServer
+     *
+     * @return SubServer's Name
+     */
+    public String getName() {
+        return Name;
+    }
+
+    /**
+     * Gets the PID of the SubServer
+     *
+     * @return SubServer's PID
+     */
+    public int getPID() {
+        return PID;
+    }
+
+    /**
+     * Gets if the SubServer is Logging to console
+     *
+     * @return Logging Status
+     */
+    public boolean isLogging() {
+        return Log;
+    }
+
+    /**
+     * Gets if the SubServer uses Shared Chat
+     *
+     * @return Shared Chat Status
+     */
+    public boolean usesSharedChat() {
+        return SharedChat;
+    }
+
+    /**
+     * Gets if this server is Temporary
+     *
+     * @return Temporary Status
+     */
+    public boolean isTemporary() {
+        return Temporary;
+    }
+
+    /**
+     * Gets the Port of the SubServer
+     *
+     * @return The SubServer's Port Number
+     */
+    public int getPort() {
+        return Port;
+    }
+
+    /**
+     * Gets the Directory of the SubServer
+     *
+     * @return The SubServer's Directory
+     */
+    public File getDir() {
+        return Dir;
+    }
+
+    /**
+     * Gets if the SubServer is Enabled
+     *
+     * @return SubServer's Status
+     */
+    public boolean isEnabled() {
+        return Enabled;
+    }
+
+    /**
+     * Sets if the SubServer is Enabled
+     *
+     * @param value Enabled Value
+     */
+    public void setEnabled(boolean value) {
+        Enabled = value;
+    }
+
+    /**
+     * Gets if the SubServer will restart automatically
+     *
+     * @return AutoRestart Status
+     */
+    public boolean willAutoRestart() {
+        return AutoRestart;
+    }
+
+    /**
+     * Sets if the SubServer will restart automatically
+     *
+     * @param value AutoRestart Status
+     */
+    public void setAutoRestart(boolean value) {
+        AutoRestart = value;
     }
 }

@@ -28,7 +28,7 @@ public class SubDebugCMD extends Command {
                 FakeProxyServer.ServerInfo.put(args[1],
                         new SubServerInfo((BungeeServerInfo)FakeProxyServer.constructServerInfo(args[1], new InetSocketAddress(args[2], Integer.parseInt(args[3])), ((FakeProxyServer.ConfigServers.keySet().contains(args[1]))?FakeProxyServer.ConfigServers.get(args[1]).getMotd():"SubServer-" + args[1]), false), Boolean.parseBoolean(args[4])));
             } else if (args[1].contains("!")) {
-                FakeProxyServer.PlayerServerInfo.put(args[1].replace("!", ""),
+                FakeProxyServer.HiddenServerInfo.put(args[1].replace("!", ""),
                         new SubServerInfo((BungeeServerInfo)FakeProxyServer.constructServerInfo(args[1].replace("!", ""), new InetSocketAddress(args[2], Integer.parseInt(args[3])), ((FakeProxyServer.ConfigServers.keySet().contains(args[1]))?FakeProxyServer.ConfigServers.get(args[1]).getMotd():"PlayerServer-" + args[1].replace("!", "")), false), Boolean.parseBoolean(args[4])));
             }
 
@@ -36,8 +36,8 @@ public class SubDebugCMD extends Command {
             FakeProxyServer.getLogger().info(FakeProxyServer.lang.get("Lang.Proxy.Register-Server") + args[1]);
         } else if (args[0].equalsIgnoreCase("sendplayer")) {
             if (FakeProxyServer.getPlayer(args[1]) != null) {
-                if (args[2].contains("!") && FakeProxyServer.PlayerServerInfo.keySet().contains(args[2].replace("!", ""))) {
-                    FakeProxyServer.getPlayer(args[1]).connect(FakeProxyServer.PlayerServerInfo.get(
+                if (args[2].contains("!") && FakeProxyServer.HiddenServerInfo.keySet().contains(args[2].replace("!", ""))) {
+                    FakeProxyServer.getPlayer(args[1]).connect(FakeProxyServer.HiddenServerInfo.get(
                             args[2].replace("!", "")));
                 } else {
                     FakeProxyServer.getPlayer(args[1]).connect(FakeProxyServer.ServerInfo.get(args[2]));
@@ -45,8 +45,13 @@ public class SubDebugCMD extends Command {
                 FakeProxyServer.getLogger().info(FakeProxyServer.lang.get("Lang.Proxy.Teleport").replace("$Player$", args[1]).replace("$Server$", args[2]));
             }
         } else if (args[0].equalsIgnoreCase("removeserver")) {
-            FakeProxyServer.ServerInfo.remove(args[1]);
-            FakeProxyServer.PlayerServerInfo.remove(args[1].replace("!", ""));
+            if (!args[1].contains("!")) {
+                FakeProxyServer.ServerInfo.get(args[1]).destroy();
+                FakeProxyServer.ServerInfo.remove(args[1]);
+            } else {
+                FakeProxyServer.HiddenServerInfo.get(args[1].replace("!", "")).destroy();
+                FakeProxyServer.HiddenServerInfo.remove(args[1].replace("!", ""));
+            }
             FakeProxyServer.SubServers.remove(args[1]);
             FakeProxyServer.getLogger().info(FakeProxyServer.lang.get("Lang.Proxy.Remove-Server") + args[1]);
         } else if (args[0].equalsIgnoreCase("resetplugin")) {
@@ -59,9 +64,9 @@ public class SubDebugCMD extends Command {
                     FakeProxyServer.ServerInfo.get(item).destroy();
                     FakeProxyServer.ServerInfo.remove(item);
                 }
-                if (FakeProxyServer.PlayerServerInfo.keySet().contains(item)) {
-                    FakeProxyServer.PlayerServerInfo.get(item).destroy();
-                    FakeProxyServer.PlayerServerInfo.remove(item.replace("!", ""));
+                if (FakeProxyServer.HiddenServerInfo.keySet().contains(item)) {
+                    FakeProxyServer.HiddenServerInfo.get(item).destroy();
+                    FakeProxyServer.HiddenServerInfo.remove(item.replace("!", ""));
                 }
             }
             String str = FakeProxyServer.lang.get("Lang.Proxy.Reset-Storage");

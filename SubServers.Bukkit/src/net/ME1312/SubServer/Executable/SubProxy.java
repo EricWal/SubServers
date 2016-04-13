@@ -30,13 +30,13 @@ public class SubProxy extends SubServer {
         if (SubPlugin.sql != null) {
             try {
                 Statement update = SubPlugin.sql.getConnection().createStatement();
-                update.executeUpdate("INSERT INTO `SubQueue` (`PID`, `Type`, `Args`) VALUES ('-1', '4', 'go "+ server.Name +" "+ player.getName() +"')");
+                update.executeUpdate("INSERT INTO `SubQueue` (`PID`, `Type`, `Args`) VALUES ('-1', '4', 'go "+ server.getName() +" "+ player.getName() +"')");
                 update.close();
             } catch (SQLException e) {
                 Bukkit.getLogger().severe("Problem Syncing Database!");
                 e.printStackTrace();
             }
-        } else if (isRunning()) sendCommandSilently("go " + server.Name + " " + player.getName());
+        } else if (isRunning()) sendCommandSilently("go " + server.getName() + " " + player.getName());
     }
 
     public void sendPlayer(String server, OfflinePlayer player) {
