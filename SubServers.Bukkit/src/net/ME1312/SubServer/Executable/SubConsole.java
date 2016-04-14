@@ -3,6 +3,8 @@ package net.ME1312.SubServer.Executable;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.ME1312.SubServer.SubPlugin;
 import org.bukkit.Bukkit;
@@ -38,17 +40,36 @@ public class SubConsole extends Thread {
             BufferedReader br = new BufferedReader(isr);
             String line = null;
             while ((line = br.readLine()) != null) {
-                if (id.equalsIgnoreCase("~Proxy")) {
-                    if (log && !line.startsWith(">") && !line.contains("subconf@")) {
-                        Bukkit.getLogger().info(SubPlugin.lang.getString("Lang.Debug.Server-Logging-Prefix").replace("$Server$", "Proxy") +
-                                line.replace(new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) + " ", ""));
+                if (log && !line.startsWith(">") && !line.contains("subconf@")) {
+                    String msg = line;
+                    // REGEX Formatting
+                    String type = "INFO";
+                    Matcher matcher = Pattern.compile("^((?:\\s*\\[?[0-9]{2}:[0-9]{2}:[0-9]{2}]?)?\\s*(?:\\[|\\[.*\\/)?(INFO|WARN|WARNING|ERROR|ERR|SEVERE)\\]:?\\s*)").matcher(msg);
+                    while (matcher.find()) {
+                        type = matcher.group(2);
                     }
-                } else {
-                    if (log && !line.startsWith(">") && !line.contains("subconf@")) {
-                        Bukkit.getLogger().info(SubPlugin.lang.getString("Lang.Debug.Server-Logging-Prefix").replace("$Server$", id) + line
-                                .replace("[" + new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) + " ", "[")
-                                .replace("[" + new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) + "] [Server thread/", "[")
-                                .replace("[" + new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime()) + "] ", ""));
+                    msg = msg.replaceAll("^((?:\\s*\\[?[0-9]{2}:[0-9]{2}:[0-9]{2}]?)?\\s*(?:\\[|\\[.*\\/)?(INFO|WARN|WARNING|ERROR|ERR|SEVERE)\\]:?\\s*)", "");
+
+                    // Log Level
+                    msg = SubPlugin.lang.getString("Lang.Debug.Server-Logging-Prefix").replace("$Server$", "Proxy") + msg;
+                    switch (type) {
+                        case "INFO":
+                            Bukkit.getLogger().info(msg);
+                            break;
+                        case "WARNING":
+                        case "WARN":
+                            Bukkit.getLogger().warning(msg);
+                            break;
+                        case "SEVERE":
+                        case "ERROR":
+                        case "ERR":
+                            Bukkit.getLogger().severe(msg);
+                            break;
+                    }
+
+                    if (writer != null) {
+                        writer.println(line);
+                        writer.flush();
                     }
                 }
                 if (writer != null) {
