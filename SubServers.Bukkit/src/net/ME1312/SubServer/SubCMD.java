@@ -208,7 +208,7 @@ public class SubCMD implements CommandExecutor {
 						Bukkit.getLogger().info("/SubServer Stop <Server>");
 					}
 				}
-			} else if (args[0].equalsIgnoreCase("kill")) {
+			} else if (args[0].equalsIgnoreCase("kill") || args[0].equalsIgnoreCase("terminate")) {
 				if (args.length == 2) {
 					if (!(sender instanceof Player) || (((Player) sender).hasPermission("SubServer.Command.Kill." + args[1])) || ((Player) sender).hasPermission("SubServer.Command.Kill.*")) {
 						if (args[1].equals("~Proxy")) {
@@ -347,7 +347,7 @@ public class SubCMD implements CommandExecutor {
                         }
                     } catch (ClassNotFoundException e) {}
 
-                    if (!(Spigot && ((Player) sender).hasPermission("subserver.command"))) {
+                    if (!Spigot || !((Player) sender).hasPermission("subserver.command")) {
                         ((Player) sender).sendMessage(new String[]{
                                 ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Teleport-Server-List").split("\\|\\|\\|")[1].replace("$online$", Integer.toString(SubPlugin.SubServers.size())),
                                 SubPlugin.SubServers.toString().replace("[", ChatColor.DARK_AQUA.toString()).replace(", ", ", " + ChatColor.DARK_AQUA).replace("]", "")
@@ -425,11 +425,11 @@ public class SubCMD implements CommandExecutor {
                 ((isPlayer) ? ChatColor.AQUA.toString() : "") + "Reload Plugin: /SubServer Reload",
                 ((isPlayer) ? ChatColor.AQUA.toString() : "") + "List Servers: /SubServer List",
                 ((isPlayer) ? ChatColor.AQUA.toString() : "") + "Plugin Version: /SubServer Version",
+                ((isPlayer) ? ChatColor.AQUA.toString() : "") + "Start Server: /SubServer Start <Server>",
                 ((isPlayer) ? ChatColor.AQUA.toString() : "") + "Stop Server: /SubServer Stop <Server>",
                 ((isPlayer) ? ChatColor.AQUA.toString() : "") + "Kill Server: /SubServer Kill <Server>",
-                ((isPlayer) ? ChatColor.AQUA.toString() : "") + "Start Server: /SubServer Start <Server>",
                 ((isPlayer) ? ChatColor.AQUA.toString() : "") + "Send Command: /SubServer Cmd <Server> <Command> " + ((isPlayer) ? ChatColor.ITALIC.toString() : "") + "[Args...]",
-                ((isPlayer) ? ChatColor.AQUA + "Teleport: /Go <Server> [Player]" : "Teleport: /Sub TP <Server> <Player>"),
+                ((isPlayer) ? ChatColor.AQUA + "Teleport: /Go <Server> [Player]" : "Teleport: /SubServer TP <Server> <Player>"),
         };
     }
 }

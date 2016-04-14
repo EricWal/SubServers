@@ -41,5 +41,6 @@ README.md
 /artifacts/SubServers.Sponge.Client.jar
 
 # Hide Others
+/SubServers.Vanilla/
 /SubServers.Bukkit/Test/
 /artifacts/SubServers.Test.jar

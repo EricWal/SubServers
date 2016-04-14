@@ -387,14 +387,14 @@ public class SubPlugin {
                         try {
                             Statement update = sql.getConnection().createStatement();
                             update.executeUpdate("INSERT INTO `SubServers` (`Name`, `IP`, `PID`, `Enabled`, `Shared_Chat`, `Temp`, `Running`) VALUES " +
-                                    "('"+ item +"', '"+ config.getString("Settings.Server-IP")+":"+SubAPI.getSubServer(item).getPID() +"', '" + SubAPI.getSubServer(item).getPID() +"', '" + ((SubAPI.getSubServer(item).usesSharedChat())?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).usesSharedChat())?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).isTemporary())?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).isRunning())?"1":"0") +"')");
+                                    "('"+ item +"', '"+ config.getString("Settings.Server-IP")+":"+SubAPI.getSubServer(item).getPort() +"', '" + SubAPI.getSubServer(item).getPID() +"', '" + ((SubAPI.getSubServer(item).isEnabled())?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).usesSharedChat())?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).isTemporary())?"1":"0") +"', '"+ ((SubAPI.getSubServer(item).isRunning())?"1":"0") +"')");
                             update.close();
                         } catch (SQLException e) {
                             Bukkit.getLogger().severe(lprefix + "Problem Syncing Database!");
                             e.printStackTrace();
                         }
                     } else if (SubAPI.getSubServer(0).isRunning()) {
-                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver " + item + " " + config.getString("Settings.Server-IP") + " " + SubAPI.getSubServer(item).getPID() + " " + SubAPI.getSubServer(item).usesSharedChat());
+                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy addserver " + item + " " + config.getString("Settings.Server-IP") + " " + SubAPI.getSubServer(item).getPort() + " " + SubAPI.getSubServer(item).usesSharedChat());
                         try {
                             Thread.sleep(100);
                         } catch (InterruptedException e) {
