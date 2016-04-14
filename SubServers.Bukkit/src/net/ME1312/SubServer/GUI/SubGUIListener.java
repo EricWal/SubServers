@@ -267,7 +267,7 @@ public class SubGUIListener implements Listener {
                                             } catch (NumberFormatException e) {
                                                 player.sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Memory-Invalid"));
                                             }
-                                            if (Memory == 0) {
+                                            if (Memory < 250) {
                                                 player.sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Create-Server.Server-Memory-Invalid"));
                                             } else {
                                                 chat.chatEnabled = false;
