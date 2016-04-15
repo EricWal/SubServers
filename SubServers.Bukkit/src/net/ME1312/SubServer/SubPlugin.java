@@ -103,7 +103,7 @@ public class SubPlugin {
         if (!(new File(Plugin.getDataFolder() + File.separator + "lang.yml").exists())) {
             copyFromJar("lang.yml", Plugin.getDataFolder() + File.separator + "lang.yml");
             Bukkit.getLogger().info(lprefix + "Created Lang.yml!");
-        } else if (!confmanager.getNewConfig("lang.yml").getString("config-version").equalsIgnoreCase("1.8.9h+")) {
+        } else if (!confmanager.getNewConfig("lang.yml").getString("config-version").equalsIgnoreCase("1.9.2a+")) {
             try {
                 Files.move(new File(Plugin.getDataFolder() + File.separator + "lang.yml"), new File(Plugin.getDataFolder() + File.separator + "old-lang." + Math.round(Math.random() * 100000) + ".yml"));
                 copyFromJar("lang.yml", Plugin.getDataFolder() + File.separator + "lang.yml");

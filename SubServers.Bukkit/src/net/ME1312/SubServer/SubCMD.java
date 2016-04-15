@@ -102,11 +102,11 @@ public class SubCMD implements CommandExecutor {
 									} while ((i + 1) != args.length);
 								}
 								if (sender instanceof Player) {
-									SubAPI.getSubServer(args[1]).sendCommand((Player) sender, str);
+                                    SubAPI.getSubServer(args[1]).sendCommand((Player) sender, str);
 									((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Send-Command-Proxy"));
 								} else {
-									SubAPI.getSubServer(args[1]).sendCommand(str);
-								}
+                                    SubAPI.getSubServer(args[1]).sendCommand(str);
+                                }
 							} else {
 								if (sender instanceof Player) {
 									((Player) sender).sendMessage(ChatColor.RED + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Send-Command-Proxy-Error"));
@@ -114,7 +114,22 @@ public class SubCMD implements CommandExecutor {
 									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Send-Command-Proxy-Error"));
 								}
 							}
-						} else if (SubPlugin.SubServers.contains(args[1])) {
+						} else if (args[1].equals("~All")) {
+                            int i = 2;
+                            String str = args[2];
+                            if (args.length != 3) {
+                                do {
+                                    i++;
+                                    str = str + " " + args[i];
+                                } while ((i + 1) != args.length);
+                            }
+                            if (sender instanceof Player) {
+                                SubAPI.sendCommandToAll((Player) sender, str);
+                                ((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Commands.Send-Command-Server"));
+                            } else {
+                                SubAPI.sendCommandToAll(str);
+                            }
+                        } else if (SubPlugin.SubServers.contains(args[1])) {
 							if (SubAPI.getSubServer(args[1]).isRunning()) {
 								int i = 2;
 								String str = args[2];

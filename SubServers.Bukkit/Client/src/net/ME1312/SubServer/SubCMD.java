@@ -98,7 +98,22 @@ public class SubCMD implements CommandExecutor {
 									Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Send-Command-Proxy-Error"));
 								}
 							}
-						} else if (SubPlugin.SubServers.contains(args[1])) {
+						} else if (args[1].equals("~All")) {
+                            int i = 2;
+                            String str = args[2];
+                            if (args.length != 3) {
+                                do {
+                                    i++;
+                                    str = str + " " + args[i];
+                                } while ((i + 1) != args.length);
+                            }
+                            if (sender instanceof Player) {
+                                SubAPI.sendCommandToAll((Player) sender, str);
+                                ((Player) sender).sendMessage(ChatColor.AQUA + SubPlugin.lprefix + SubPlugin.lang.get("Lang.Commands.Send-Command-Server"));
+                            } else {
+                                SubAPI.sendCommandToAll(str);
+                            }
+                        } else if (SubPlugin.SubServers.contains(args[1])) {
 							if (SubAPI.getSubServer(args[1]).isRunning()) {
 								int i = 2;
 								String str = args[2];

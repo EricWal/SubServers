@@ -43,6 +43,7 @@ Lang:
         'Mojang-Agreement-Link-Message': 'Click the Hyperlink below to view Mojang\u0027s End User License Agreement'
         'Mojang-Agreement-Decline-Message': 'Sorry, You Have to agree to the EULA to make a Server.'
         'Server-Type': 'Choose the Server Type'
+        'Server-Type-Invalid': 'Invalid Server Type'
         'Server-Version': 'Please Input the Server Version (Example: \"1.9.2\")'
         'Server-Version-Unsupported': 'Unsupported Server Version. Please try again.'
         'Server-Name': 'What is The name for this Server?'
@@ -52,6 +53,7 @@ Lang:
         'Server-Port': 'Which Port Will The Server Run On? (Example: \"25565\")'
         'Server-Port-Invalid': 'Invalid Port Value Inputted. Please try again.'
         'Server-Create-Loading': 'Creating Server... This may take some time...'
+        'Server-Create-Running': 'SubCreator is already running!'
         'Server-Create-Done': 'Server $Server$ was Created Successfully!'
         'Log-Prefix': 'SubCreator - '
     GUI:
@@ -90,7 +92,10 @@ Lang:
         'Server-Logging-Start': 'Running: \"$Shell$\" for $Server$'
         'Server-Logging-End': 'Terminated $Server$'
         'Server-Logging-Start-Error': 'Error: Invalid Server Config'
+        'Command-Sudo': 'Now Controlling $server$'
+        'Command-Sudo-Invalid': 'Invalid Target: \"$server$\"'
+        'Command-Offline': 'Command not sent: Server is Offline!'
         'Config-Reload-Warn': 'Reloading Config... This may take some time...'
         'Config-Reload': 'Config Reloaded!'
 # Language File Version If invalid, this will Regenerate
-config-version: 1.8.9h+
+config-version: 1.9.2a+

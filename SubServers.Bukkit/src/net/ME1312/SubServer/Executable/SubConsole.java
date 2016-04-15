@@ -51,7 +51,7 @@ public class SubConsole extends Thread {
                     msg = msg.replaceAll("^((?:\\s*\\[?[0-9]{2}:[0-9]{2}:[0-9]{2}]?)?\\s*(?:\\[|\\[.*\\/)?(INFO|WARN|WARNING|ERROR|ERR|SEVERE)\\]:?\\s*)", "");
 
                     // Log Level
-                    msg = SubPlugin.lang.getString("Lang.Debug.Server-Logging-Prefix").replace("$Server$", "Proxy") + msg;
+                    msg = SubPlugin.lang.getString("Lang.Debug.Server-Logging-Prefix").replace("$Server$", id) + msg;
                     switch (type) {
                         case "INFO":
                             Bukkit.getLogger().info(msg);
