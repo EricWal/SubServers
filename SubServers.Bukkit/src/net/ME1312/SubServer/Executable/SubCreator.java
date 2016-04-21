@@ -35,6 +35,7 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class SubCreator {
     public enum ServerType {
+        PAPER_SPIGOT,
         SPIGOT,
         BUKKIT,
         VANILLA,
@@ -78,7 +79,20 @@ public class SubCreator {
         if (!Dir.exists()) Dir.mkdirs();
 
         String Jar;
-        if (Type == ServerType.SPIGOT) {
+
+        if (Type == ServerType.PAPER_SPIGOT) {
+            Jar = "PaperSpigot.jar";
+            this.Exec = new Executable("java -Xmx" + Memory + "M -Djline.terminal=jline.UnsupportedTerminal -Dcom.mojang.eula.agree=true -jar " + Jar);
+
+            try {
+                if (new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Spigot-Plugins").exists() && new File(SubPlugin.Plugin.getDataFolder() + File.separator + "SubCreator" + File.separator + "Bukkit-Plugins").exists()) CopyPlugins(ServerType.SPIGOT);
+                GenerateSpigotYAML();
+                GenerateProperties();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            //TODO Add Version Generator
+        } else if (Type == ServerType.SPIGOT) {
             Jar = "Spigot.jar";
             this.Exec = new Executable("java -Xmx" + Memory + "M -Djline.terminal=jline.UnsupportedTerminal -Dcom.mojang.eula.agree=true -jar " + Jar);
 
@@ -200,7 +214,7 @@ public class SubCreator {
         writer.println("level-seed=");
         writer.println("force-gamemode=false");
         writer.println("server-ip=" + SubPlugin.config.getString("Settings.Server-IP"));
-        writer.println("network-compression-threshold=256");
+        writer.println("network-compression-threshold=-1");
         writer.println("max-build-height=256");
         writer.println("spawn-npcs=true");
         writer.println("white-list=false");
