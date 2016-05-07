@@ -162,6 +162,7 @@ public class SubServer implements Serializable {
 											  }
 								              StdIn = null;
 										}
+                                        SubPlugin.sync(2);
 									} while (read.isAlive() == true);
 								};
 							}.runTaskAsynchronously(SubPlugin.Plugin);
@@ -264,6 +265,7 @@ public class SubServer implements Serializable {
 											}
 							              StdIn = null;
 										}
+                                        SubPlugin.sync(2);
 									} while (read.isAlive() == true);
 								};
 							}.runTaskAsynchronously(SubPlugin.Plugin);
