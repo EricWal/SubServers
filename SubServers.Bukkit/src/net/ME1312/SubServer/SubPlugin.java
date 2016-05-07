@@ -6,6 +6,7 @@ import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import net.ME1312.SubServer.Events.Libraries.EventType;
 import net.ME1312.SubServer.Executable.SubProxy;
@@ -79,8 +80,8 @@ public class SubPlugin {
         try {
             MCVersion = new Version(Bukkit.getServer().getVersion().split("\\(MC\\: ")[1].split("\\)")[0]);
         } catch (ArrayIndexOutOfBoundsException e) {
-            Bukkit.getLogger().warning(lprefix + "Problem grabbing Minecraft Version! Assuming 1.9!");
-            MCVersion = new Version("1.9");
+            Bukkit.getLogger().warning(lprefix + "Problem grabbing Minecraft Version! Assuming " + PluginVersion.toString().substring(0, PluginVersion.toString().length() - 1) + "!");
+            MCVersion = new Version(PluginVersion.toString().substring(0, PluginVersion.toString().length() - 1));
         }
 
         Bukkit.getLogger().info(lprefix + "Loading Libraries for " + MCVersion);
