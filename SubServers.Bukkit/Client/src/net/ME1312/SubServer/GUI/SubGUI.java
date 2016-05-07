@@ -335,41 +335,41 @@ public class SubGUI implements Listener {
 		}
 	}
 	
-	protected static boolean stopLoader = false;
+	protected boolean stopLoader = false;
 	@SuppressWarnings("deprecation")
 	private static ItemStack invBlock = new ItemStack(168, 1, (short) 1);
-	
-	/**
-	 * Opens Loader Animation
-	 * 
-	 * NOTE: Set stopLoader to false to stop loading.
-	 * 
-	 * @param player Player opening the GUI
-	 * @param done Callback Method Name
-	 */
-	@SuppressWarnings("deprecation")
-	protected void openLoader(final Player player, final String args, final String done) {
-		final Inventory inventory = Bukkit.createInventory(null, 9, SubPlugin.lang.get("Lang.GUI.Loading"));
-		
-		if (SubPlugin.MCVersion.compareTo(new Version("1.8")) < 0) invBlock = new ItemStack(35, 1, (short) 9);
-    	ItemMeta invBlockMeta = invBlock.getItemMeta();
-    	invBlockMeta.setDisplayName("");
-    	invBlock.setItemMeta(invBlockMeta);
-    	
-		final ItemStack Block = new ItemStack(Material.DIAMOND_BLOCK);
-    	ItemMeta BlockMeta = Block.getItemMeta();
-    	BlockMeta.setDisplayName("");
-    	Block.setItemMeta(BlockMeta);
-    	
-    	inventory.setItem(0, invBlock);
-    	inventory.setItem(1, invBlock);
-    	inventory.setItem(2, invBlock);
-    	inventory.setItem(3, invBlock);
-    	inventory.setItem(4, invBlock);
-    	inventory.setItem(5, invBlock);
-    	inventory.setItem(6, invBlock);
-    	inventory.setItem(7, invBlock);
-    	inventory.setItem(8, invBlock);
+
+    /**
+     * Opens Loader Animation
+     *
+     * NOTE: Set stopLoader to false to stop loading.
+     *
+     * @param player Player opening the GUI
+     * @param done Callback Method Name
+     */
+    @SuppressWarnings("deprecation")
+    protected void openLoader(final Player player, final String args, final String done) {
+        final Inventory inventory = Bukkit.createInventory(null, 9, SubPlugin.lang.get("Lang.GUI.Loading"));
+
+        if (SubPlugin.MCVersion.compareTo(new Version("1.8")) < 0) invBlock = new ItemStack(35, 1, (short) 9);
+        ItemMeta invBlockMeta = invBlock.getItemMeta();
+        invBlockMeta.setDisplayName("");
+        invBlock.setItemMeta(invBlockMeta);
+
+        final ItemStack Block = new ItemStack(Material.DIAMOND_BLOCK);
+        ItemMeta BlockMeta = Block.getItemMeta();
+        BlockMeta.setDisplayName("");
+        Block.setItemMeta(BlockMeta);
+
+        inventory.setItem(0, invBlock);
+        inventory.setItem(1, invBlock);
+        inventory.setItem(2, invBlock);
+        inventory.setItem(3, invBlock);
+        inventory.setItem(4, invBlock);
+        inventory.setItem(5, invBlock);
+        inventory.setItem(6, invBlock);
+        inventory.setItem(7, invBlock);
+        inventory.setItem(8, invBlock);
 
         new BukkitRunnable() {
             @Override
@@ -377,56 +377,68 @@ public class SubGUI implements Listener {
                 do {
                     try {
                         Thread.sleep(125);
+                        player.closeInventory();
                         inventory.setItem(0, Block);
                         player.openInventory(inventory);
                         if (stopLoader == false) {
                             Thread.sleep(75);
+                            player.closeInventory();
                             inventory.setItem(1, Block);
                             player.openInventory(inventory);
                             if (stopLoader == false) {
                                 Thread.sleep(75);
+                                player.closeInventory();
                                 inventory.setItem(2, Block);
                                 player.openInventory(inventory);
                                 if (stopLoader == false) {
                                     Thread.sleep(75);
+                                    player.closeInventory();
                                     inventory.setItem(0, invBlock);
                                     inventory.setItem(3, Block);
                                     player.openInventory(inventory);
                                     if (stopLoader == false) {
                                         Thread.sleep(75);
+                                        player.closeInventory();
                                         inventory.setItem(1, invBlock);
                                         inventory.setItem(4, Block);
                                         player.openInventory(inventory);
                                         if (stopLoader == false) {
                                             Thread.sleep(75);
+                                            player.closeInventory();
                                             inventory.setItem(2, invBlock);
                                             inventory.setItem(5, Block);
                                             player.openInventory(inventory);
                                             if (stopLoader == false) {
                                                 Thread.sleep(75);
+                                                player.closeInventory();
                                                 inventory.setItem(3, invBlock);
                                                 inventory.setItem(6, Block);
                                                 player.openInventory(inventory);
                                                 if (stopLoader == false) {
                                                     Thread.sleep(75);
+                                                    player.closeInventory();
                                                     inventory.setItem(4, invBlock);
                                                     inventory.setItem(7, Block);
                                                     player.openInventory(inventory);
                                                     if (stopLoader == false) {
                                                         Thread.sleep(75);
+                                                        player.closeInventory();
                                                         inventory.setItem(5, invBlock);
                                                         inventory.setItem(8, Block);
                                                         player.openInventory(inventory);
                                                         if (stopLoader == false) {
                                                             Thread.sleep(75);
+                                                            player.closeInventory();
                                                             inventory.setItem(6, invBlock);
                                                             player.openInventory(inventory);
                                                             if (stopLoader == false) {
                                                                 Thread.sleep(75);
+                                                                player.closeInventory();
                                                                 inventory.setItem(7, invBlock);
                                                                 player.openInventory(inventory);
                                                                 if (stopLoader == false) {
                                                                     Thread.sleep(75);
+                                                                    player.closeInventory();
                                                                     inventory.setItem(8, invBlock);
                                                                     player.openInventory(inventory);
                                                                     if (stopLoader == false) Thread.sleep(125);
@@ -448,14 +460,17 @@ public class SubGUI implements Listener {
 
                 stopLoader = false;
                 player.closeInventory();
+
                 if (done.equalsIgnoreCase("openServerWindow")) {
                     new SubGUI(player, 0, args, SubPlugin);
                 } else if (done.equalsIgnoreCase("openSelectionWindow")) {
                     new SubGUI(player, Integer.parseInt(args), null, SubPlugin);
+                } else {
+                    player.closeInventory();
                 }
             }
         }.runTaskAsynchronously(SubPlugin.Plugin);
-	}
+    }
 	
 	/**
 	 * 

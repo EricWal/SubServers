@@ -74,8 +74,8 @@ public class SubGUIListener implements Listener {
                 if ((ChatColor.DARK_GREEN.toString() + SubPlugin.lang.get("Lang.GUI.Start")).equals(displayName)) {
                     if (player.hasPermission("SubServer.Command.start.*") || player.hasPermission("SubServer.Command.start." + event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.get("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, ""))) {
                         SubAPI.getSubServer(event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.get("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, "")).start((Player)event.getWhoClicked());
-                        player.closeInventory();
-                        new SubGUI(SubPlugin).openLoader(player, event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.get("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, ""), "openServerWindow");
+                        final SubGUI SubGUI;
+                        (SubGUI = new SubGUI(SubPlugin)).openLoader(player, event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.get("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, ""), "openServerWindow");
                         new BukkitRunnable() {
                             @Override
                             public void run() {
@@ -92,8 +92,8 @@ public class SubGUIListener implements Listener {
                 } else if ((ChatColor.RED.toString() + SubPlugin.lang.get("Lang.GUI.Stop")).equals(displayName)) {
                     if (player.hasPermission("SubServer.Command.stop.*") || player.hasPermission("SubServer.Command.stop." + event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.get("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, ""))) {
                         SubAPI.getSubServer(event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.get("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, "")).stop((Player)event.getWhoClicked());
-                        player.closeInventory();
-                        new SubGUI(SubPlugin).openLoader(player, event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.get("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, ""), "openServerWindow");
+                        final SubGUI SubGUI;
+                        (SubGUI = new SubGUI(SubPlugin)).openLoader(player, event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.get("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, ""), "openServerWindow");
                         new BukkitRunnable() {
                             @Override
                             public void run() {
@@ -110,7 +110,8 @@ public class SubGUIListener implements Listener {
                 } else if ((ChatColor.DARK_RED.toString() + SubPlugin.lang.get("Lang.GUI.Terminate")).equals(displayName)) {
                     if (player.hasPermission("SubServer.Command.kill.*") || player.hasPermission("SubServer.Command.kill." + event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.get("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, ""))) {
                         SubAPI.getSubServer(event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.get("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, "")).terminate((Player)event.getWhoClicked());
-                        player.closeInventory();
+                        final SubGUI SubGUI;
+                        (SubGUI = new SubGUI(SubPlugin)).openLoader(player, event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.get("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, ""), "openServerWindow");
                         new BukkitRunnable() {
                             @Override
                             public void run() {
@@ -119,6 +120,7 @@ public class SubGUIListener implements Listener {
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
+                                SubGUI.stopLoader = true;
                                 SubAPI.getSubServer(event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.get("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, "")).Running = false;
                                 new SubGUI(player, 0, event.getClickedInventory().getName().replace(ChatColor.DARK_GREEN + SubPlugin.lang.get("Lang.GUI.Server-Admin-Title") + ChatColor.YELLOW, ""), SubPlugin);
                             }

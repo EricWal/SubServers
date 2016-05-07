@@ -1,6 +1,6 @@
 name: 'SubServersClient'
 main: 'net.ME1312.SubServer.Launcher'
-version: '1.8.9b'
+version: '1.9.2a'
 authors: [ME1312]
 website: 'https://www.spigotmc.org/resources/subservers.11264/'
 commands:

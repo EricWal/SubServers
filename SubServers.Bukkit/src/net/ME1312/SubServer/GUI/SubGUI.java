@@ -372,7 +372,7 @@ public class SubGUI implements Listener {
 		}
 	}
 	
-	protected static boolean stopLoader = false;
+	protected boolean stopLoader = false;
 	@SuppressWarnings("deprecation")
 	private static ItemStack invBlock = new ItemStack(168, 1, (short) 1);
 	
