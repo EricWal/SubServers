@@ -1,5 +1,6 @@
 package net.ME1312.SubServer;
 
+import net.ME1312.SubServer.Executable.SubProxy;
 import net.ME1312.SubServer.Executable.SubServer;
 import net.ME1312.SubServer.Libraries.Config.ConfigFile;
 import net.ME1312.SubServer.Libraries.Version.Version;
@@ -93,6 +94,10 @@ public class SubAPI {
         List<SubServer> Server = new ArrayList<SubServer>();
         Server.addAll(SubPlugin.Servers.values());
         return Server;
+    }
+
+    public static SubProxy getProxy() {
+        return SubPlugin.Proxy;
     }
 
     public static SubServer getSubServer(int PID) {

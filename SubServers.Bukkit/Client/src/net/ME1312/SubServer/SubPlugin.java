@@ -1,5 +1,6 @@
 package net.ME1312.SubServer;
 
+import net.ME1312.SubServer.Executable.SubProxy;
 import net.ME1312.SubServer.Executable.SubServer;
 import net.ME1312.SubServer.GUI.SubGUIListener;
 import net.ME1312.SubServer.Libraries.Config.ConfigFile;
@@ -28,6 +29,7 @@ public class SubPlugin {
     public HashMap<Integer, SubServer> Servers = new HashMap<Integer, SubServer>();
     public HashMap<String, Integer> PIDs = new HashMap<String, Integer>();
     public List<String> SubServers = new ArrayList<String>();
+    public SubProxy Proxy;
     public JavaPlugin Plugin;
 
     public String lprefix;
@@ -82,6 +84,7 @@ public class SubPlugin {
         }
 
         config = confmanager.getNewConfig("config.yml");
+        Proxy = new SubProxy(true, this);
 
         /**
          * SQL Sync

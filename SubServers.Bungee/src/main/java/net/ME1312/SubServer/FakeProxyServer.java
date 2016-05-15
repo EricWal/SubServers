@@ -45,7 +45,7 @@ public class FakeProxyServer extends BungeeCord {
         PluginDescription Plugin = new PluginDescription();
         Plugin.setName("SubServers");
         Plugin.setAuthor("ME1312");
-        Plugin.setVersion("1.9.2d");
+        Plugin.setVersion("1.9.2e");
         this.Plugin = Plugin;
 
         EnablePlugin();

@@ -5,10 +5,7 @@ import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import net.ME1312.SubServer.Events.Libraries.EventType;
 import net.ME1312.SubServer.SubAPI;
@@ -40,7 +37,7 @@ public class SubServer implements Serializable {
     private boolean AutoRestart;
     private List<BukkitTask> tasks = new ArrayList<BukkitTask>();
 	private Process Process;
-	private String StdIn;
+	private List<String> StdIn = new LinkedList<String>();
 	private SubServer Server = this;
 	
 	/** 
@@ -149,19 +146,22 @@ public class SubServer implements Serializable {
 								@Override
 								public void run() {
 									do {
-										/**
-										 * StdIn Functions
-										 */
-										if (StdIn != null) {
-											  try {
-												cmd.write(StdIn);
-												cmd.newLine();
-												cmd.flush();
-											  } catch (IOException e) {
-													e.printStackTrace();
-											  }
-								              StdIn = null;
-										}
+                                        /**
+                                         * StdIn Functions
+                                         */
+                                        if (!StdIn.isEmpty()) {
+                                            for (String StdIn : Server.StdIn) {
+                                                try {
+                                                    cmd.write(StdIn);
+                                                    cmd.newLine();
+                                                    cmd.flush();
+                                                    Thread.sleep(100);
+                                                } catch (IOException | InterruptedException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                            StdIn.clear();
+                                        }
                                         SubPlugin.sync(2);
 									} while (read.isAlive() == true);
 								};
@@ -171,26 +171,20 @@ public class SubServer implements Serializable {
                                     @Override
                                     public void run() {
                                         try {
-                                            try {
-                                                for (Iterator<String> keys = SubPlugin.lang.getConfigurationSection("Lang").getKeys(false).iterator(); keys.hasNext(); ) {
-                                                    String key = keys.next();
-                                                    for (Iterator<String> str = SubPlugin.lang.getConfigurationSection("Lang." + key).getKeys(false).iterator(); str.hasNext(); ) {
-                                                        String item = str.next();
-                                                        SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang." + key + "." + item + " " + URLEncoder.encode(SubPlugin.lang.getRawString("Lang." + key + "." + item), "UTF-8"));
-                                                        Thread.sleep(100);
-                                                    }
+                                            for (Iterator<String> keys = SubPlugin.lang.getConfigurationSection("Lang").getKeys(false).iterator(); keys.hasNext(); ) {
+                                                String key = keys.next();
+                                                for (Iterator<String> str = SubPlugin.lang.getConfigurationSection("Lang." + key).getKeys(false).iterator(); str.hasNext(); ) {
+                                                    String item = str.next();
+                                                    SubAPI.getSubServer(0).sendCommandSilently("subconf@proxy lang Lang." + key + "." + item + " " + URLEncoder.encode(SubPlugin.lang.getRawString("Lang." + key + "." + item), "UTF-8"));
                                                 }
-                                            } catch (UnsupportedEncodingException | InterruptedException e2) {
+                                            }
+                                            } catch (UnsupportedEncodingException e2) {
                                                 e2.printStackTrace();
                                             }
                                             for (Iterator<String> str = SubPlugin.SubServers.iterator(); str.hasNext(); ) {
                                                 String item = str.next();
                                                 sendCommandSilently("subconf@proxy addserver " + item + " " + SubPlugin.config.getString("Settings.Server-IP") + " " + SubAPI.getSubServer(item).Port + " " + SubAPI.getSubServer(item).SharedChat);
-                                                Thread.sleep(100);
                                             }
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
                                     }
 
                                     ;
@@ -255,16 +249,19 @@ public class SubServer implements Serializable {
 										/**
 										 * StdIn Functions
 										 */
-										if (StdIn != null) {
-										  try {
-											cmd.write(StdIn);
-											cmd.newLine();
-							              	cmd.flush();
-										  } catch (IOException e) {
-												e.printStackTrace();
-											}
-							              StdIn = null;
-										}
+                                        if (!StdIn.isEmpty()) {
+                                            for (String StdIn : Server.StdIn) {
+                                                try {
+                                                    cmd.write(StdIn);
+                                                    cmd.newLine();
+                                                    cmd.flush();
+                                                    Thread.sleep(100);
+                                                } catch (IOException | InterruptedException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                            StdIn.clear();
+                                        }
                                         SubPlugin.sync(2);
 									} while (read.isAlive() == true);
 								};
@@ -372,7 +369,7 @@ public class SubServer implements Serializable {
 	public boolean sendCommand(String cmd) {
 		try {
 			if (SubAPI.executeEvent(EventType.SubRunCommandEvent, this, null, cmd)) {
-				StdIn = cmd;
+				StdIn.add(cmd);
 				return true;
 			} else {
 				return false;
@@ -391,7 +388,7 @@ public class SubServer implements Serializable {
 	public boolean sendCommand(OfflinePlayer sender, String cmd) {
 		try {
 			if (SubAPI.executeEvent(EventType.SubRunCommandEvent, this, sender, cmd)) {
-				StdIn = cmd;
+				StdIn.add(cmd);
 				return true;
 			} else {
 				return false;
@@ -407,7 +404,7 @@ public class SubServer implements Serializable {
 	 * @param cmd The Command to send
 	 */
 	public void sendCommandSilently(String cmd) {
-		StdIn = cmd;
+		StdIn.add(cmd);
 	}
 	
 	/**
@@ -417,9 +414,9 @@ public class SubServer implements Serializable {
 		try {
 			if (SubAPI.executeEvent(EventType.SubStopEvent, this, null)) {
 				if (Name.equalsIgnoreCase("~Proxy")) {
-					StdIn = "end";
+					StdIn.add("end");
 				} else {
-					StdIn = "stop";
+					StdIn.add("stop");
 				}
 
                 if (AutoRestart) {
@@ -455,9 +452,9 @@ public class SubServer implements Serializable {
 		try {
 			if (SubAPI.executeEvent(EventType.SubStopEvent, this, sender)) {
 				if (Name.equalsIgnoreCase("~Proxy")) {
-					StdIn = "end";
+					StdIn.add("end");
 				} else {
-					StdIn = "stop";
+					StdIn.add("stop");
 				}
 
                 if (AutoRestart) {
@@ -599,7 +596,6 @@ public class SubServer implements Serializable {
             return false;
         }
     }
-
     /**
      * Gets the name of the SubServer
      *
@@ -698,4 +694,5 @@ public class SubServer implements Serializable {
     public void setAutoRestart(boolean value) {
         AutoRestart = value;
     }
+
 }

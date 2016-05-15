@@ -51,6 +51,4 @@ public class SubProxy extends SubServer {
             }
         } else if (isRunning()) sendCommandSilently("go " + server + " " + player.getName());
     }
-
-
 }
