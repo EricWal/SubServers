@@ -207,7 +207,7 @@ public class SubServer implements Serializable {
 						 */
 						Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Debug.Server-Logging-End").replace("$Server$", "Proxy"));
 						Process = null;
-						StdIn = null;
+						StdIn.clear();
                         if (AutoRestart) {
                             try {
                                 Thread.sleep(2500);
@@ -283,7 +283,7 @@ public class SubServer implements Serializable {
 						 */
 						Bukkit.getLogger().info(SubPlugin.lprefix + SubPlugin.lang.getString("Lang.Debug.Server-Logging-End").replace("$Server$", Name));
 						Process = null;
-						StdIn = null;
+						StdIn.clear();
 
                         if (SubPlugin.sql != null) {
                             try {
